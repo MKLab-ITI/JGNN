@@ -28,6 +28,6 @@ public class LinkPrediction {
 				continue;
 			gcn.addEdge(nodeIds.get(interaction.getKey()), nodeIds.get(interaction.getValue()));
 		}
-		gcn.trainRelational(new Adam(0.01));
+		gcn.trainRelational(new Adam(0.01), 50);
 	}
 }
