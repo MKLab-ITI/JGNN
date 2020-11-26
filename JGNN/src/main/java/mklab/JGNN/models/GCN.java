@@ -88,7 +88,7 @@ public class GCN extends Model {
 	}
 
 	public void trainRelational(Optimizer optimizer, int epochs) {
-		trainRelational(optimizer, epochs);
+		trainRelational(optimizer, epochs, 0);
 	}
 	
 	public void trainRelational(Optimizer optimizer, int epochs, double testSet) {
