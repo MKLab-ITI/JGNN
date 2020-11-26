@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import mklab.JGNN.core.operations.Model;
+import mklab.JGNN.core.operations.ModelBuilder;
 import mklab.JGNN.core.primitives.Matrix;
 import mklab.JGNN.core.primitives.Optimizer;
 import mklab.JGNN.core.primitives.Tensor;
