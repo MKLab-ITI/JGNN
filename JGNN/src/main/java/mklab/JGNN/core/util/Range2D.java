@@ -19,17 +19,18 @@ public class Range2D implements Iterator<Entry<Long,Long>> {
 	    this.max2 = max2;
 	  }
 	  public boolean hasNext() {
-	    return (nextValue+1 < max && nextValue2+1 < max2) || (nextValue+1 == max && nextValue2 < max2);
+	    return nextValue<max && nextValue2 < max2;
 	  }
 	  public Entry<Long,Long> next() {
 	    if (!hasNext()) 
 	      throw new NoSuchElementException();
+	    Entry<Long,Long> ret = new AbstractMap.SimpleEntry<Long,Long>(Long.valueOf(nextValue), Long.valueOf(nextValue2));
 	    nextValue++;
 	    if(nextValue==max) {
 	    	nextValue = min;
 	    	nextValue2++;
 	    }
-	    return new AbstractMap.SimpleEntry<Long,Long>(Long.valueOf(nextValue), Long.valueOf(nextValue2));
+	    return ret;
 	  }
 	  public void remove() {
 	    throw new UnsupportedOperationException();

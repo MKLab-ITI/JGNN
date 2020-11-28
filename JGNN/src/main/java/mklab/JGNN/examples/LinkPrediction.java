@@ -1,9 +1,10 @@
 package mklab.JGNN.examples;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-import mklab.JGNN.core.primitives.optimizers.Adam;
+import mklab.JGNN.core.optimizers.Adam;
 import mklab.JGNN.models.GCN;
 
 public class LinkPrediction {
@@ -22,12 +23,12 @@ public class LinkPrediction {
 			if(nodeIds.size()>20000)
 				break;
 		}
-		GCN gcn = new GCN(nodeIds.size());
+		GCN gcn = new GCN(Arrays.asList(nodeIds.size(), 32, 32, 32));
 		for(Entry<String, String> interaction : dataset.getInteractions()) {
 			if(nodeIds.get(interaction.getKey())==null || nodeIds.get(interaction.getValue())==null)
 				continue;
 			gcn.addEdge(nodeIds.get(interaction.getKey()), nodeIds.get(interaction.getValue()));
 		}
-		gcn.trainRelational(new Adam(0.01), 50);
+		gcn.trainRelational(new Adam(0.01), 50, 0.2);
 	}
 }

@@ -1,27 +1,30 @@
 package mklab.JGNN;
 
-import junit.framework.Assert;
-import mklab.JGNN.core.operations.Model;
-import mklab.JGNN.core.operations.ModelBuilder;
-import mklab.JGNN.core.operations.NNOperation;
-import mklab.JGNN.core.operations.NN.Add;
-import mklab.JGNN.core.operations.NN.Constant;
-import mklab.JGNN.core.operations.NN.Gather;
-import mklab.JGNN.core.operations.NN.MatMul;
-import mklab.JGNN.core.operations.NN.Multiply;
-import mklab.JGNN.core.operations.NN.Parameter;
-import mklab.JGNN.core.operations.NN.Sum;
-import mklab.JGNN.core.operations.NN.Variable;
-import mklab.JGNN.core.primitives.Matrix;
-import mklab.JGNN.core.primitives.Optimizer;
-import mklab.JGNN.core.primitives.Tensor;
-import mklab.JGNN.core.primitives.matrix.DenseMatrix;
-import mklab.JGNN.core.primitives.matrix.SparseMatrix;
-import mklab.JGNN.core.primitives.optimizers.Adam;
+import mklab.JGNN.core.Matrix;
+import mklab.JGNN.core.Model;
+import mklab.JGNN.core.ModelBuilder;
+import mklab.JGNN.core.NNOperation;
+import mklab.JGNN.core.Optimizer;
+import mklab.JGNN.core.Tensor;
+import mklab.JGNN.core.inputs.Constant;
+import mklab.JGNN.core.inputs.Parameter;
+import mklab.JGNN.core.inputs.Variable;
+import mklab.JGNN.core.matrix.DenseMatrix;
+import mklab.JGNN.core.matrix.SparseMatrix;
+import mklab.JGNN.core.operations.Add;
+import mklab.JGNN.core.operations.Gather;
+import mklab.JGNN.core.operations.MatMul;
+import mklab.JGNN.core.operations.Multiply;
+import mklab.JGNN.core.operations.Sum;
+import mklab.JGNN.core.optimizers.Adam;
 
 import java.util.Arrays;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 public class NNOperationTest {
+	@Test
 	public void shouldTrainTowardsDirectObjective() {
 		Optimizer optimizer = new Adam(1);
 		
@@ -40,6 +43,7 @@ public class NNOperationTest {
 		Assert.assertEquals(7., model.predict(Arrays.asList(Tensor.fromDouble(6))).get(0).toDouble(), 0.1);
 	}
 	
+	@Test
 	public void shouldTrainTowardsLoss() {
 		Optimizer optimizer = new Adam(1);
 		
@@ -71,6 +75,7 @@ public class NNOperationTest {
 		Assert.assertEquals(7., model.predict(Arrays.asList(Tensor.fromDouble(6))).get(0).toDouble(), 0.001);
 	}
 	
+	@Test
 	public void shouldCovolveGraph() {
 		int n = 5;
 		int dims = 3;
@@ -95,6 +100,7 @@ public class NNOperationTest {
 		Assert.assertEquals(1, model.predict(Arrays.asList(Tensor.fromDouble(0), Tensor.fromDouble(1))).get(0).size());
 	}
 	
+	@Test
 	public void builderShouldCreateModel() {
 		Matrix W = new SparseMatrix(5, 5);
 		W.put(1, 1, 1);

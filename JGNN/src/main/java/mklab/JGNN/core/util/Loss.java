@@ -1,6 +1,6 @@
 package mklab.JGNN.core.util;
 
-import mklab.JGNN.core.primitives.Tensor;
+import mklab.JGNN.core.Tensor;
 
 /**
  * Provides computation and (partial) derivation of popular activation functions

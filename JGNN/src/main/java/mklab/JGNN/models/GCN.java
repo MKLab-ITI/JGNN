@@ -4,43 +4,45 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 
-import mklab.JGNN.core.operations.Model;
-import mklab.JGNN.core.operations.ModelBuilder;
-import mklab.JGNN.core.primitives.Matrix;
-import mklab.JGNN.core.primitives.Optimizer;
-import mklab.JGNN.core.primitives.Tensor;
-import mklab.JGNN.core.primitives.matrix.DenseMatrix;
-import mklab.JGNN.core.primitives.matrix.SparseMatrix;
-import mklab.JGNN.core.primitives.tensor.DenseTensor;
+import mklab.JGNN.core.Matrix;
+import mklab.JGNN.core.Model;
+import mklab.JGNN.core.ModelBuilder;
+import mklab.JGNN.core.Optimizer;
+import mklab.JGNN.core.Tensor;
+import mklab.JGNN.core.matrix.DenseMatrix;
+import mklab.JGNN.core.matrix.SparseMatrix;
+import mklab.JGNN.core.tensor.AccessSubtensor;
+import mklab.JGNN.core.tensor.DenseTensor;
 import mklab.JGNN.core.util.Sort;
 
 public class GCN extends Model {
 	private Matrix W;
 	private ModelBuilder builder;
 	
-	public GCN(int numNodes) {
-		W = new SparseMatrix(numNodes, numNodes);
-		int dims = 32;
+	public GCN(List<Integer> layerDims) {
+		W = new SparseMatrix(layerDims.get(0), layerDims.get(0));
 		builder = new ModelBuilder(this)
-				.var("u")
-				.var("v")
-				.constant("W", W)
-				.param("H0", new DenseMatrix(numNodes, dims).setToRandom().setToNormalized())
-				.param("DistMult", new DenseTensor(dims).setToRandom().setToNormalized())
-				//.param("B1", new DenseTensor(dims))
-				.param("W1", new DenseMatrix(dims, dims).setToRandom().setToNormalized())
-				.operation("H1 = W * H0 * W1")
-				.operation("sim = sigmoid( sum(H1[u].H1[v].DistMult) )")
-				.out("sim")
-				//.assertForwardValidity(Arrays.asList(3, 3))
-				.assertBackwardValidity();
+			.var("u")
+			.var("v")
+			.constant("W", W)
+			.param("H0", new DenseMatrix(layerDims.get(0), layerDims.get(1)).setToRandom().setToNormalized());
+		for(int layer=1;layer<layerDims.size()-1;layer++) {
+			builder
+				.param("W1"+layer, new DenseMatrix(layerDims.get(layer), layerDims.get(layer+1)).setToRandom().setToNormalized())
+				.param("W2"+layer, new DenseMatrix(layerDims.get(layer), layerDims.get(layer+1)).setToRandom().setToNormalized())
+				.operation("Hnext = tanh(W * Hprev* W1next + Hprev* W2next)".replace("next", ""+layer).replace("prev", ""+(layer-1)));
+		}
+		builder
+			.param("DistMult", new DenseTensor(layerDims.get(layerDims.size()-1)).setToRandom().setToNormalized())
+			.operation("sim = sigmoid( sum(Hlast[u].Hlast[v].DistMult) )".replace("last", ""+(layerDims.size()-2)))
+			.out("sim")
+			.assertForwardValidity(Arrays.asList(3, 3))
+			.assertBackwardValidity();
 	}
 	
 	public void addEdge(int i, int j) {
 		if(W.get(i, j)!=0)
 			return;
-		//W.put(i, i, 1);
-		//W.put(j, j, 1);
 		W.put(i, j, 1);
 		//W.put(j, i, 1);
 	}
@@ -51,7 +53,7 @@ public class GCN extends Model {
 				.get(0);//first of the three tensor elements
 	}
 	
-	protected void fillTrainingData(Tensor uList, Tensor vList, Tensor labels) {
+	protected void fillTrainingData(Matrix W, Tensor uList, Tensor vList, Tensor labels) {
 		int pos = 0;
 		for(Entry<Long, Long> edge : W.getNonZeroEntries()) {
 			int u = (int)(long)edge.getKey();
@@ -92,13 +94,12 @@ public class GCN extends Model {
 	}
 	
 	public void trainRelational(Optimizer optimizer, int epochs, double testSet) {
-		boolean details = (testSet==0);
+		boolean details = (testSet!=0);
 		if(details) {
 			builder.print();
 			System.out.println("Number of nodes: "+W.getRows());
 			System.out.println("Number of edges: "+W.getNumNonZeroElements());
 		}
-		optimizer.reset();
 		for(int epoch=0;epoch<epochs;epoch++) {
 			if(details)
 				System.out.print("Epoch "+epoch);
@@ -106,23 +107,23 @@ public class GCN extends Model {
 			Tensor labels = new DenseTensor(numEdges);
 			Tensor uList = new DenseTensor(numEdges);
 			Tensor vList = new DenseTensor(numEdges);
-			fillTrainingData(uList, vList, labels);
+			fillTrainingData(W, uList, vList, labels);
 			// training
 			long numTraining = (long)(numEdges * (1-testSet));
 			List<Tensor> outputs = trainSample(optimizer,
-												Arrays.asList(uList.subtensor(0, numTraining), 
-															  vList.subtensor(0, numTraining)),
-												Arrays.asList(labels.subtensor(0, numTraining)));
+												Arrays.asList(new AccessSubtensor(uList, 0, numTraining), 
+															  new AccessSubtensor(vList, 0, numTraining)),
+												Arrays.asList(new AccessSubtensor(labels, 0, numTraining)));
 			if(details) {
 				Tensor trainingPredictions = outputs.get(0);
-				outputs = predict(Arrays.asList(uList.subtensor(numTraining, numEdges), 
-						  						vList.subtensor(numTraining, numEdges)));
+				outputs = predict(Arrays.asList(new AccessSubtensor(uList, numTraining), 
+												new AccessSubtensor(vList, numTraining)));
 				Tensor testPredictions = outputs.get(0);
 				System.out.println(
 							" | training AUC "
-							+auc(trainingPredictions, labels.subtensor(0, numTraining))
+							+auc(trainingPredictions, new AccessSubtensor(labels, 0, numTraining))
 							+" | test AUC "
-							+auc(testPredictions, labels.subtensor(numTraining, numEdges))
+							+auc(testPredictions, new AccessSubtensor(labels, numTraining))
 							);
 			}
 		}

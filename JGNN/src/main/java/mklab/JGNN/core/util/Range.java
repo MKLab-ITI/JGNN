@@ -11,13 +11,14 @@ public class Range implements Iterator<Long> {
 	    this.max = max;
 	  }
 	  public boolean hasNext() {
-	    return nextValue < max-1;
+	    return nextValue < max;
 	  }
 	  public Long next() {
 	    if (!hasNext()) 
 	      throw new NoSuchElementException();
+	    Long ret = Long.valueOf(nextValue);
 	    nextValue++;
-	    return Long.valueOf(nextValue);
+	    return ret;
 	  }
 	  public void remove() {
 	    throw new UnsupportedOperationException();
