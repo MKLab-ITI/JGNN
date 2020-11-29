@@ -24,12 +24,19 @@ import mklab.JGNN.core.operations.Repeat;
 import mklab.JGNN.core.operations.Sum;
 import mklab.JGNN.core.tensor.DenseTensor;
 
+/**
+ * This class and subclasses can be used to create {@link Model} instances 
+ * by providing textual rather than creating programming descriptions of {@link NNOperations}.
+ * 
+ * @author Emmanouil Krasanakis
+ */
 public class ModelBuilder {
 	private String routing = "";
-	private Model model = new Model();
+	private Model model = null;
 	private HashMap<String, NNOperation> components = new HashMap<String, NNOperation>();
 	private int tmpVariableIdentifier = 0;
 	public ModelBuilder() {
+		this(new Model());
 	}
 	public ModelBuilder(Model model) {
 		this.model = model;
@@ -95,11 +102,10 @@ public class ModelBuilder {
 					operation(line);
 			return this;
 		}
-		//System.out.println(desc);
 		
 		desc = desc.trim();
 		desc = desc.replace("=", " = ");
-		desc = desc.replace(".", " . ");
+		desc = desc.replace("@", " @ ");
 		desc = desc.replace("+", " + ");
 		desc = desc.replace("*", " * ");
 		desc = desc.replace("[", " [ ");
@@ -110,9 +116,9 @@ public class ModelBuilder {
 		if(!desc.contains("MINUS_ONE")) {
 			if(desc.contains("-") && !components.containsKey("MINUS_ONE"))
 				param("MINUS_ONE", Tensor.fromDouble(-1));
-			desc = desc.replace("-", " + MINUS_ONE . ");
-			desc = desc.replaceAll("\\s\\=\\s+\\+\\s+MINUS\\_ONE", " = MINUS_ONE");
+			desc = desc.replace("-", " + MINUS_ONE * ");
 		}
+		desc = desc.replaceAll("\\s\\=\\s+\\+\\s+MINUS\\_ONE", " = MINUS_ONE");
 		desc = desc.replaceAll("\\s+", " ");
 		
 		boolean madeChanges = true;
@@ -169,7 +175,7 @@ public class ModelBuilder {
 			if(level!=0)
 				throw new RuntimeException("Imbalanced parenthesis in operation: "+desc);
 			desc = newDesc;
-			String[] operators = {" + ", " . ", " * "};
+			String[] operators = {" + ", " * ", " @ "};
 			for(String operator : operators) {
 				if(madeChanges)
 					break;
@@ -231,7 +237,14 @@ public class ModelBuilder {
 		String arg1 = null;
 		assertValidName(name);
 		
+		//System.out.println(desc);
+		
 		NNOperation component;
+		if(splt.length==3) {
+			double val = Double.parseDouble(splt[2]);
+			constant(name, Tensor.fromDouble(val));
+			return this;
+		}
 		if(splt[3].equals("+")) {
 			component = new Add();
 			arg0 = splt[2];
@@ -281,12 +294,12 @@ public class ModelBuilder {
 			arg0 = splt[3];
 			arg1 = splt[4];
 		}
-		else if(splt[3].equals(".")) {
+		else if(splt[3].equals("*")) {
 			component = new Multiply();
 			arg0 = splt[2];
 			arg1 = splt[4];
 		}
-		else if(splt[3].equals("*")) {
+		else if(splt[3].equals("@")) {
 			component = new MatMul();
 			arg0 = splt[2];
 			arg1 = splt[4];

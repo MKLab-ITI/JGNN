@@ -65,7 +65,7 @@ public class Model {
 	
 	public List<Tensor> trainSample(Optimizer optimizer, List<Tensor> inputs, List<Tensor> desiredOutputs, List<Tensor> weights) {
 		if(inputs.size() != this.inputs.size())
-			throw new RuntimeException("Incompatible input size");
+			throw new RuntimeException("Incompatible number of inputs: "+inputs.size()+" given but "+this.inputs.size()+" expected");
 		if(desiredOutputs.size() != this.outputs.size())
 			throw new RuntimeException("Incompatible output size");
 		ArrayList<Tensor> outputs = predict(inputs);
@@ -80,7 +80,7 @@ public class Model {
 	
 	public double trainSample(Optimizer optimizer, List<Tensor> inputs) {
 		if(inputs.size() != this.inputs.size())
-			throw new RuntimeException("Incompatible input size");
+			throw new RuntimeException("Incompatible number of inputs: "+inputs.size()+" but "+this.inputs.size()+" expected");
 		ArrayList<Tensor> outputs = predict(inputs);
 		double loss = 0;
 		for(int i=0;i<outputs.size();i++) {

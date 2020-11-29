@@ -1,5 +1,6 @@
 package mklab.JGNN.core;
 
+import java.util.HashMap;
 import java.util.Iterator;
 
 import mklab.JGNN.core.matrix.DenseMatrix;
@@ -8,6 +9,12 @@ import mklab.JGNN.core.util.Range;
 
 import java.util.Map.Entry;
 
+/**
+ * This class provides a native java implementation of Matrix functionalities.
+ * Matrices inherit tensor functionalities.
+ * 
+ * @author Emmanouil Krasanakis
+ */
 public abstract class Matrix extends Tensor {
 	private long rows;
 	private long cols;
@@ -160,6 +167,24 @@ public abstract class Matrix extends Tensor {
 			ones.put(row, col, 1.);
 		}
 		return ones;
+	}
+	
+	public Matrix setToLaplacian() {
+		HashMap<Long, Double> outDegrees = new HashMap<Long, Double>();
+		HashMap<Long, Double> inDegrees = new HashMap<Long, Double>();
+		for(Entry<Long,Long> element : getNonZeroEntries()) {
+			long row = element.getKey();
+			long col = element.getValue();
+			double value = get(row, col);
+			outDegrees.put(row, outDegrees.getOrDefault(row, 0.)+value);
+			inDegrees.put(col, inDegrees.getOrDefault(col, 0.)+value);
+		}
+		for(Entry<Long,Long> element : getNonZeroEntries()) {
+			long row = element.getKey();
+			long col = element.getValue();
+			put(row, col, get(row, col)/Math.sqrt(outDegrees.get(row)/inDegrees.get(col)));
+		}
+		return this;
 	}
 	
 	@Override

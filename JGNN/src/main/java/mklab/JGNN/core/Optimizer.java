@@ -2,7 +2,8 @@ package mklab.JGNN.core;
 
 /**
  * Provides an interface for training tensors. Has a {@link #reset()} method that starts potential training memory from scratch.
- * Has an {@link #update(Tensor, Tensor)} method that, given a current value and a gradient Tensor adjusts the tensor's value.
+ * Has an {@link #update(Tensor, Tensor)} method that, given a current Tensor 
+ * and a gradient operates on the former and adjusts its value.
  * 
  * @author Emmanouil Krasanakis
  */

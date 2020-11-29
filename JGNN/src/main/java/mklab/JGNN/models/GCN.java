@@ -4,38 +4,33 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 
+import mklab.JGNN.builders.GCNBuilder;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.Model;
-import mklab.JGNN.core.ModelBuilder;
 import mklab.JGNN.core.Optimizer;
 import mklab.JGNN.core.Tensor;
-import mklab.JGNN.core.matrix.DenseMatrix;
 import mklab.JGNN.core.matrix.SparseMatrix;
 import mklab.JGNN.core.tensor.AccessSubtensor;
 import mklab.JGNN.core.tensor.DenseTensor;
 import mklab.JGNN.core.util.Sort;
 
+/**
+ * Uses a {@Link GCNBuilder} to construct a Graph Convolutional Network
+ * for unsupervised link prediction.
+ * 
+ * @author Emmanouil Krasanakis
+ */
 public class GCN extends Model {
 	private Matrix W;
-	private ModelBuilder builder;
+	private GCNBuilder builder;
 	
 	public GCN(List<Integer> layerDims) {
 		W = new SparseMatrix(layerDims.get(0), layerDims.get(0));
-		builder = new ModelBuilder(this)
-			.var("u")
-			.var("v")
-			.constant("W", W)
-			.param("H0", new DenseMatrix(layerDims.get(0), layerDims.get(1)).setToRandom().setToNormalized());
-		for(int layer=1;layer<layerDims.size()-1;layer++) {
-			builder
-				.param("W1"+layer, new DenseMatrix(layerDims.get(layer), layerDims.get(layer+1)).setToRandom().setToNormalized())
-				.param("W2"+layer, new DenseMatrix(layerDims.get(layer), layerDims.get(layer+1)).setToRandom().setToNormalized())
-				.operation("Hnext = tanh(W * Hprev* W1next + Hprev* W2next)".replace("next", ""+layer).replace("prev", ""+(layer-1)));
-		}
+		builder = new GCNBuilder(this, W, layerDims.get(1));
+		for(int i=2;i<layerDims.size();i++)
+			builder.aggregateAndTransform("tanh", layerDims.get(i));
 		builder
-			.param("DistMult", new DenseTensor(layerDims.get(layerDims.size()-1)).setToRandom().setToNormalized())
-			.operation("sim = sigmoid( sum(Hlast[u].Hlast[v].DistMult) )".replace("last", ""+(layerDims.size()-2)))
-			.out("sim")
+			.similarity("distmult")
 			.assertForwardValidity(Arrays.asList(3, 3))
 			.assertBackwardValidity();
 	}
@@ -53,7 +48,7 @@ public class GCN extends Model {
 				.get(0);//first of the three tensor elements
 	}
 	
-	protected void fillTrainingData(Matrix W, Tensor uList, Tensor vList, Tensor labels) {
+	protected void fillTrainingData(Tensor uList, Tensor vList, Tensor labels) {
 		int pos = 0;
 		for(Entry<Long, Long> edge : W.getNonZeroEntries()) {
 			int u = (int)(long)edge.getKey();
@@ -94,6 +89,7 @@ public class GCN extends Model {
 	}
 	
 	public void trainRelational(Optimizer optimizer, int epochs, double testSet) {
+		W.setToLaplacian();
 		boolean details = (testSet!=0);
 		if(details) {
 			builder.print();
@@ -107,7 +103,7 @@ public class GCN extends Model {
 			Tensor labels = new DenseTensor(numEdges);
 			Tensor uList = new DenseTensor(numEdges);
 			Tensor vList = new DenseTensor(numEdges);
-			fillTrainingData(W, uList, vList, labels);
+			fillTrainingData(uList, vList, labels);
 			// training
 			long numTraining = (long)(numEdges * (1-testSet));
 			List<Tensor> outputs = trainSample(optimizer,

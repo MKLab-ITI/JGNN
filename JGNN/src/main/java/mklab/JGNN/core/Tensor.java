@@ -147,7 +147,7 @@ public abstract class Tensor implements Iterable<Long> {
 		return this;
 	}
 	@SuppressWarnings("unused")
-	public final long getNumNonZeroElements() {
+	public long getNumNonZeroElements() {
 		long ret = 0;
 		for(long pos : getNonZeroElements())
 			ret += 1;

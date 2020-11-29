@@ -20,7 +20,7 @@ public class LinkPrediction {
 				nodeIds.put(u, nodeIds.size());
 			if(!nodeIds.containsKey(v))
 				nodeIds.put(v, nodeIds.size());
-			if(nodeIds.size()>20000)
+			if(nodeIds.size()>5000)
 				break;
 		}
 		GCN gcn = new GCN(Arrays.asList(nodeIds.size(), 32, 32, 32));
