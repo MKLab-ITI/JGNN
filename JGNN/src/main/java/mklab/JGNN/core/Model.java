@@ -67,7 +67,7 @@ public class Model {
 		if(inputs.size() != this.inputs.size())
 			throw new RuntimeException("Incompatible number of inputs: "+inputs.size()+" given but "+this.inputs.size()+" expected");
 		if(desiredOutputs.size() != this.outputs.size())
-			throw new RuntimeException("Incompatible output size");
+			throw new RuntimeException("Incompatible number of outputs: "+desiredOutputs.size()+" given but "+this.outputs.size()+" expected");
 		ArrayList<Tensor> outputs = predict(inputs);
 		for(int i=0;i<outputs.size();i++) {
 			Tensor diff = outputs.get(i).zeroCopy();

@@ -15,8 +15,8 @@ import mklab.JGNN.core.operations.Add;
 import mklab.JGNN.core.operations.Gather;
 import mklab.JGNN.core.operations.MatMul;
 import mklab.JGNN.core.operations.Multiply;
-import mklab.JGNN.core.operations.Sum;
 import mklab.JGNN.core.optimizers.Adam;
+import mklab.JGNN.core.pooling.Sum;
 
 import java.util.Arrays;
 

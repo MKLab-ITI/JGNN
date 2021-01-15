@@ -8,6 +8,8 @@ import mklab.JGNN.core.Tensor;
 public class Log extends NNOperation {
 	@Override
 	protected Tensor forward(List<Tensor> inputs) {
+		if(inputs.size()!=1)
+			throw new IllegalArgumentException();
 		Tensor ret = inputs.get(0).zeroCopy();
 		for(long i : inputs.get(0).getNonZeroElements())
 			ret.put(i, Math.log(inputs.get(0).get(i)+1.E-12));

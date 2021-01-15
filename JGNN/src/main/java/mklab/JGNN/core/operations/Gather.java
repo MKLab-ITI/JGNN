@@ -10,6 +10,8 @@ import mklab.JGNN.core.matrix.DenseMatrix;
 public class Gather extends NNOperation {
 	@Override
 	protected Tensor forward(List<Tensor> inputs) {
+		if(inputs.size()!=2)
+			throw new IllegalArgumentException();
 		Tensor index = inputs.get(0);
 		Matrix H = (Matrix) inputs.get(1);
 		Matrix ret = new DenseMatrix(index.size(), H.getCols());

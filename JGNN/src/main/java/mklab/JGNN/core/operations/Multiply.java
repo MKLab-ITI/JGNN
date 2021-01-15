@@ -7,10 +7,13 @@ import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.NNOperation;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.ColumnRepetition;
+import mklab.JGNN.core.pooling.SumT;
 
 public class Multiply extends NNOperation {
 	@Override
 	protected Tensor forward(List<Tensor> inputs) {
+		if(inputs.size()!=2)
+			throw new IllegalArgumentException();
 		Tensor input0 = inputs.get(0);
 		Tensor input1 = inputs.get(1);
 		if(input0.size()==1)

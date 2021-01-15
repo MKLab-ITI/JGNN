@@ -1,8 +1,5 @@
 package mklab.JGNN;
 
-import org.junit.Assert;
-import org.junit.Test;
-
 public class LSTMTest {
 	/*@Test
 	public void LSTMShouldLearnTimeSeries() {

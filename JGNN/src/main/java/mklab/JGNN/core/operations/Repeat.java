@@ -11,6 +11,8 @@ import mklab.JGNN.core.matrix.ColumnRepetition;
 public class Repeat extends NNOperation {
 	@Override
 	protected Tensor forward(List<Tensor> inputs) {
+		if(inputs.size()!=2)
+			throw new IllegalArgumentException();
 		int repetitions = (int)inputs.get(1).toDouble();
 		return new ColumnRepetition(repetitions, inputs.get(0));
 	}

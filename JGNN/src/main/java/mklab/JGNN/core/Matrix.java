@@ -1,17 +1,20 @@
 package mklab.JGNN.core;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
 
 import mklab.JGNN.core.matrix.DenseMatrix;
+import mklab.JGNN.core.matrix.SparseMatrix;
 import mklab.JGNN.core.tensor.DenseTensor;
-import mklab.JGNN.core.util.Range;
+import mklab.JGNN.core.tensor.SparseTensor;
 
 import java.util.Map.Entry;
 
 /**
- * This class provides a native java implementation of Matrix functionalities.
- * Matrices inherit tensor functionalities.
+ * This class provides an abstract implementation of Matrix functionalities.
+ * Matrices inherit {@link Tensor} functionalities, such as addition, 
+ * element-by-element multiplication, randomizing them and producing zero copies.
  * 
  * @author Emmanouil Krasanakis
  */
@@ -56,6 +59,14 @@ public abstract class Matrix extends Tensor {
 		return this;
 	}
 	
+	/**
+	 * Creates a transposed copy of the matrix.
+	 * Note: Contrary to typical tensor operations, in-place transposition is not supported.
+	 * However, {@link #matmul(Matrix, boolean, boolean)} can be used to transpose matrices
+	 * before multiplication.
+	 * @return A transposed copy of the matrix.
+	 */
+	
 	public final Matrix transposed() {
 		Matrix ret = zeroCopy(getCols(), getRows());
 		for(Entry<Long, Long> element : getNonZeroEntries())
@@ -79,9 +90,16 @@ public abstract class Matrix extends Tensor {
 		return ret;
 	}
 	
+	/**
+	 * Performs the matrix multiplication of <code>this*with</code> and the recipient.
+	 * 
+	 * @param with The matrix to multiply with.
+	 * @return A matrix that stores the outcome of the multiplication.
+	 * @see #matmul(Matrix)
+	 */
 	public final Matrix matmul(Matrix with) {
 		if(cols!=with.getRows())
-			throw new IllegalArgumentException("Mismatched matrix sizes");
+			throw new IllegalArgumentException("Mismatched matrix sizes between "+describe()+" and "+with.describe());
 		Matrix ret = with.zeroCopy(getRows(), with.getCols());
 		for(Entry<Long, Long> element : getNonZeroEntries()) {
 			long row = element.getKey();
@@ -91,8 +109,21 @@ public abstract class Matrix extends Tensor {
 		}
 		return ret;
 	}
-	
 
+	/**
+	 * Can be used to perform fast computation of the matrix multiplications <code>this*with</code>,
+	 * <code>this.transposed()*with</code>, <code>this*with.transposed()</code>, 
+	 * <code>this.transposed()*with.transposed</code> while avoiding the overhead of calling
+	 * {@link #transposed()}. In this first of those cases, this operation
+	 * becomes equivalent to {@link #matmul(Matrix)}.
+	 * 
+	 * @param with The matrix to multiply with.
+	 * @param transposeSelf Whether <code>this</code> matrix should be transposed before multiplication.
+	 * @param transposeWith Whether the multiplied <code>with</code> matrix should be transposed before multiplication.
+	 * @return A matrix that stores the outcome of the multiplication.
+	 * @see #matmul(Matrix)
+	 * @see #transposed()
+	 */
 	public final Matrix matmul(Matrix with, boolean transposeSelf, boolean transposeWith) {
 		if((transposeSelf?rows:cols)!=(transposeWith?with.getCols():with.getRows()))
 			throw new IllegalArgumentException("Mismatched matrix sizes");
@@ -158,7 +189,7 @@ public abstract class Matrix extends Tensor {
 	public String describe() {
 		return getClass().getSimpleName()+" ("+rows+","+cols+")";
 	}
-
+	
 	public Matrix onesMask() {
 		Matrix ones = zeroCopy(getRows(), getCols());
 		for(Entry<Long, Long> element : getNonZeroEntries()) {
@@ -182,7 +213,9 @@ public abstract class Matrix extends Tensor {
 		for(Entry<Long,Long> element : getNonZeroEntries()) {
 			long row = element.getKey();
 			long col = element.getValue();
-			put(row, col, get(row, col)/Math.sqrt(outDegrees.get(row)/inDegrees.get(col)));
+			double div = Math.sqrt(outDegrees.get(row)*inDegrees.get(col));
+			if(div!=0)
+				put(row, col, get(row, col)/div);
 		}
 		return this;
 	}
@@ -202,71 +235,23 @@ public abstract class Matrix extends Tensor {
 		return res.toString();
 	}
 	
-	public static class MatrixCol extends Tensor {
-		private Matrix matrix;
-		private long col;
-		public MatrixCol(Matrix matrix, long col) {
-			super(matrix.getRows());
-			this.matrix = matrix;
-			this.col = col;
-		}
-		@Override
-		protected void allocate(long size) {
-		}
-		@Override
-		public Tensor put(long pos, double value) {
-			matrix.put(pos, col, value);
-			return this;
-		}
-		@Override
-		public double get(long pos) {
-			return matrix.get(pos, col);
-		}
-		@Override
-		public Tensor zeroCopy() {
-			throw new RuntimeException("MatrixCol is used to access matrix elements only (consider using it as a second argument)");
-		}
-		@Override
-		public Iterator<Long> traverseNonZeroElements() {
-			return new Range(0, size());
-		}
-		
+	public final static Matrix fromSparseColumns(List<Tensor> tensors) {
+		Matrix ret = new SparseMatrix(tensors.get(0).size(), tensors.size());
+		for(int col=0;col<tensors.size();col++) 
+			for(long row : tensors.get(col).getNonZeroElements())
+				ret.put(row, col, tensors.get(col).get(row));
+		return ret;
 	}
 	
-	/*public static class Vector extends Matrix {
-		private Tensor tensor;
-		public Vector(Tensor tensor) {
-			super(tensor.size(), 1);
-			this.tensor = tensor;
+	public final List<Tensor> toSparseColumns() {
+		List<Tensor> ret = new ArrayList<Tensor>();
+		for(long col=0;col<getCols();col++)
+			ret.add(new SparseTensor(getRows()));
+		for(Entry<Long, Long> entry : getNonZeroEntries()) {
+			long row = entry.getKey();
+			long col = entry.getValue();
+			ret.get((int)col).put(row, get(row, col));
 		}
-		@Override
-		public Matrix zeroCopy(long rows, long cols) {
-			return new DenseMatrix(rows, cols);
-		}
-		@Override
-		protected void allocate(long size) {
-		}
-		@Override
-		public Tensor put(long pos, double value) {
-			tensor.put(pos, value);
-			return this;
-		}
-		@Override
-		public double get(long pos) {
-			return tensor.get(pos);
-		}
-		@Override
-		protected Iterator<Long> traverseNonZeroElements() {
-			return tensor.traverseNonZeroElements();
-		}
-		@Override
-		public Iterable<Entry<Long, Long>> getNonZeroEntries() {
-			return new Iterable<Entry<Long, Long>>() {
-				@Override
-				public Iterator<Entry<Long, Long>> iterator() {
-					return new DenseMatrix.Range2D(0, getRows(), 0, getCols());
-				}
-			};
-		}
-	}*/
+		return ret;
+	}
 }

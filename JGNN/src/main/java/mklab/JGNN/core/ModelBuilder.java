@@ -15,13 +15,15 @@ import mklab.JGNN.core.inputs.Parameter;
 import mklab.JGNN.core.inputs.Variable;
 import mklab.JGNN.core.operations.Add;
 import mklab.JGNN.core.operations.Complement;
+import mklab.JGNN.core.operations.Concat;
 import mklab.JGNN.core.operations.Gather;
 import mklab.JGNN.core.operations.LRelu;
 import mklab.JGNN.core.operations.Log;
 import mklab.JGNN.core.operations.MatMul;
 import mklab.JGNN.core.operations.Multiply;
 import mklab.JGNN.core.operations.Repeat;
-import mklab.JGNN.core.operations.Sum;
+import mklab.JGNN.core.pooling.SoftMax;
+import mklab.JGNN.core.pooling.Sum;
 import mklab.JGNN.core.tensor.DenseTensor;
 
 /**
@@ -47,8 +49,8 @@ public class ModelBuilder {
 	protected void assertValidName(String name) {
 		if(name==null || name.isEmpty())
 			throw new RuntimeException("Invalid component name");
-		if(components.containsKey(name))
-			throw new RuntimeException("Variable name "+name+" already in use by another model component");
+		if(components.containsKey(name)) 
+			throw new RuntimeException("Component name "+name+" already in use by another model component");
 	}
 	protected void assertExists(String name) {
 		if(!components.containsKey(name))
@@ -95,6 +97,9 @@ public class ModelBuilder {
 	}
 	
 	public ModelBuilder operation(String desc) {
+		
+		//System.out.println(desc);
+		
 		String[] lines = desc.split("\\;|\\\n");
 		if(lines.length>1) {
 			for(String line : lines)
@@ -175,7 +180,7 @@ public class ModelBuilder {
 			if(level!=0)
 				throw new RuntimeException("Imbalanced parenthesis in operation: "+desc);
 			desc = newDesc;
-			String[] operators = {" + ", " * ", " @ "};
+			String[] operators = {" + ", " * ", " @ ", " | "};
 			for(String operator : operators) {
 				if(madeChanges)
 					break;
@@ -237,8 +242,6 @@ public class ModelBuilder {
 		String arg1 = null;
 		assertValidName(name);
 		
-		//System.out.println(desc);
-		
 		NNOperation component;
 		if(splt.length==3) {
 			double val = Double.parseDouble(splt[2]);
@@ -257,6 +260,10 @@ public class ModelBuilder {
 		}
 		else if(splt[2].equals("sum")) {
 			component = new Sum();
+			arg0 = splt[3];
+		}
+		else if(splt[2].equals("max")) {
+			component = new SoftMax();
 			arg0 = splt[3];
 		}
 		else if(splt[2].equals("relu")) {
@@ -292,6 +299,11 @@ public class ModelBuilder {
 		else if(splt[2].equals("repeat")) {
 			component = new Repeat();
 			arg0 = splt[3];
+			arg1 = splt[4];
+		}
+		else if(splt[3].equals("|")) {
+			component = new Concat();
+			arg0 = splt[2];
 			arg1 = splt[4];
 		}
 		else if(splt[3].equals("*")) {

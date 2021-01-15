@@ -7,16 +7,19 @@ import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.NNOperation;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.ColumnRepetition;
+import mklab.JGNN.core.pooling.SumT;
 
 public class Add extends NNOperation {
 	@Override
 	protected Tensor forward(List<Tensor> inputs) {
+		if(inputs.size()!=2)
+			throw new IllegalArgumentException();
 		Tensor input0 = inputs.get(0);
 		Tensor input1 = inputs.get(1);
 		if(input0.size()==1)
 			return input1.add(input0.toDouble());
 		if(input1.size()==1)
-			return input0.add(input0.toDouble());
+			return input0.add(input1.toDouble());
 		if(input0 instanceof Matrix && !(input1 instanceof Matrix)) 
 			input1 = new ColumnRepetition(((Matrix)input0).getRows(), input1);
 		Tensor product = input0.copy();

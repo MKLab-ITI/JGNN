@@ -31,7 +31,7 @@ public class Adam implements Optimizer {
 	 * Initializes an NDAdam instance of an {@link Adam} optimizer with the default parameters recommended by the papers.
 	 */
 	public Adam() {
-		this(true, 0.001);
+		this(false, 0.001);
 	}
 	/**
 	 * Initializes an NDAdam instance of an {@link Adam} optimizer with the default parameters recommended by the papers
@@ -39,7 +39,7 @@ public class Adam implements Optimizer {
 	 * @param learningRate The learning rate.
 	 */
 	public Adam(double learningRate) {
-		this(true, learningRate, 0.9, 0.999);
+		this(false, learningRate, 0.9, 0.999);
 	}
 	/**
 	 * Initializes an {@link Adam} optimizer with the default parameters recommended by the papers
@@ -74,6 +74,7 @@ public class Adam implements Optimizer {
 				m.put(value, value.zeroCopy());
 			if(!v.containsKey(value))
 				v.put(value, value.zeroCopy());
+			//Tensor val = value.copy().setToNormalized();
 			if(NDmode)
 				gradient = gradient.subtract(value.multiply(gradient.dot(value)));
 			

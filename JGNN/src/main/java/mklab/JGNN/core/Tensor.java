@@ -164,8 +164,10 @@ public abstract class Tensor implements Iterable<Long> {
 	 */
 	public abstract Iterator<Long> traverseNonZeroElements();
 	/**
-	 * Creates a {@link #zeroCopy()} and transfers to it element values.
+	 * Creates a {@link #zeroCopy()} and transfers to it all potentially non-zero element values.
 	 * @return a copy of the Tensor with the same size and contents
+	 * @see #zeroCopy()
+	 * @see #getNonZeroElements()
 	 */
 	public final Tensor copy() {
 		Tensor res = zeroCopy();
@@ -437,6 +439,13 @@ public abstract class Tensor implements Iterable<Long> {
 	public static Tensor fromDouble(double value) {
 		Tensor ret = new DenseTensor(1);
 		ret.put(0, value);
+		return ret;
+	}
+	
+	public static Tensor fromRange(long start, long end) {
+		Tensor ret = new DenseTensor(end-start);
+		for(long pos=0;pos<end-start;pos++)
+			ret.put(pos, start+pos);
 		return ret;
 	}
 	

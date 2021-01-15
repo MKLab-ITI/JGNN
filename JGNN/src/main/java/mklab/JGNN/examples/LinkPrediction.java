@@ -1,34 +1,33 @@
 package mklab.JGNN.examples;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
 import mklab.JGNN.core.optimizers.Adam;
-import mklab.JGNN.models.GCN;
+import mklab.JGNN.core.optimizers.Regularization;
+import mklab.JGNN.core.tensor.RepeatTensor;
+import mklab.JGNN.datasets.Dataset;
+import mklab.JGNN.datasets.Datasets;
+import mklab.JGNN.models.IdConverter;
+import mklab.JGNN.models.relational.RelationalGCN;
 
 public class LinkPrediction {
 
 	public static void main(String[] args) throws Exception {
-		Dataset dataset = new Datasets.FRIENDS();
-		
-		HashMap<String, Integer> nodeIds = new HashMap<String, Integer>();
+		Dataset dataset = new Datasets.CiteSeer();
+		IdConverter nodeIds = new IdConverter();
+		HashMap<Integer, String> nodeLabels = new HashMap<Integer, String>();
 		for(Entry<String, String> interaction : dataset.getInteractions()) {
 			String u = interaction.getKey();
 			String v = interaction.getValue();
-			if(!nodeIds.containsKey(u))
-				nodeIds.put(u, nodeIds.size());
-			if(!nodeIds.containsKey(v))
-				nodeIds.put(v, nodeIds.size());
-			if(nodeIds.size()>5000)
-				break;
+			nodeLabels.put(nodeIds.getOrCreateId(u), dataset.getLabel(u));
+			nodeLabels.put(nodeIds.getOrCreateId(v), dataset.getLabel(v));
 		}
-		GCN gcn = new GCN(Arrays.asList(nodeIds.size(), 32, 32, 32));
-		for(Entry<String, String> interaction : dataset.getInteractions()) {
-			if(nodeIds.get(interaction.getKey())==null || nodeIds.get(interaction.getValue())==null)
-				continue;
-			gcn.addEdge(nodeIds.get(interaction.getKey()), nodeIds.get(interaction.getValue()));
-		}
-		gcn.trainRelational(new Adam(0.01), 50, 0.2);
+		RelationalGCN gcn = new RelationalGCN(RelationalGCN.trueres_linear,
+											  nodeIds.size(),//oneHot(nodeLabels), 
+											  new RepeatTensor(32, 3));
+		for(Entry<String, String> interaction : dataset.getInteractions()) 
+			gcn.addEdge(nodeIds.getId(interaction.getKey()), nodeIds.getId(interaction.getValue()));
+		gcn.trainRelational(new Regularization(new Adam(0.001), 5.E-4), 200, 0.2);
 	}
 }

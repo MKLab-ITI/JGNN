@@ -9,6 +9,8 @@ import mklab.JGNN.core.Tensor;
 public class MatMul extends NNOperation {
 	@Override
 	protected Tensor forward(List<Tensor> inputs) {
+		if(inputs.size()!=2)
+			throw new IllegalArgumentException();
 		Matrix W = (Matrix) inputs.get(0);
 		Matrix H = (Matrix) inputs.get(1);
 		return W.matmul(H);

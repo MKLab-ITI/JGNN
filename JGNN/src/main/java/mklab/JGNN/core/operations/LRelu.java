@@ -8,6 +8,8 @@ import mklab.JGNN.core.Tensor;
 public class LRelu extends NNOperation {
 	@Override
 	protected Tensor forward(List<Tensor> inputs) {
+		if(inputs.size()!=1)
+			throw new IllegalArgumentException();
 		Tensor x = inputs.get(0);
 		Tensor ret = x.zeroCopy();
 		double mult = inputs.get(1).toDouble();
