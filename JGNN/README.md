@@ -18,4 +18,4 @@ For quick installation of the latest working version of the library, you can inc
 
 
 ## Examples
-Under construction. Look at the package mklab.JGNN.examples for working examples. For this first draft version, only relational GNNs work corrctly.
+Under construction. Look at the package mklab.JGNN.examples for working examples. For this first draft version, only relational GNNs work correctly.
