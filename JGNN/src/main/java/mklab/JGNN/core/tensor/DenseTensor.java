@@ -5,6 +5,11 @@ import java.util.Iterator;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.util.Range;
 
+/**
+ * This class provides a dense {@link Tensor} that wraps an array of doubles.
+ * 
+ * @author Emmanouil Krasanakis
+ */
 public class DenseTensor extends Tensor {
 	private double[] values;
 	

@@ -10,7 +10,7 @@ public class Datasets {
 			if(!(new File(folderName)).exists())
 				downloadSource(folderName, "cora", "https://data.deepai.org/Cora.zip");
 			initStatic(folderName+"/Cora/edges.csv", ",", 0, 1);
-			initNodeLabels(folderName+"/group-edges.csv", ",", 0, 1);
+			initNodeLabels(folderName+"/Cora/group-edges.csv", ",", 0, 1);
 		}
 	}
 	

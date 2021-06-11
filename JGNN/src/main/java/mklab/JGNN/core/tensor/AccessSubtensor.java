@@ -5,6 +5,16 @@ import java.util.Iterator;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.util.Range;
 
+/**
+ * This class wraps a base {@link Tensor} by traversing only its elements in a specified range (from begin, up to end-1).
+ * Although in principle it does not require a specific type of base tensor, it is created with optimized
+ * {@link DenseTensor} operations in mind. That is, it implements {@link #traverseNonZeroElements()} as a {@link Range}.
+ * This class's {@link #zeroCopy()} is marked as unimplemented by throwing an exception, which will also make dependent
+ * operations fail. However, it makes sense that members of this class are only used to access (or modify) the subtensor.
+ * 
+ * @author Emmanouil Krasanakis
+ */
+
 public class AccessSubtensor extends Tensor {
 	private Tensor baseTensor;
 	private long begin;

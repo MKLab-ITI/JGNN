@@ -6,6 +6,18 @@ import java.util.Iterator;
 
 import mklab.JGNN.core.Tensor;
 
+/**
+ * This class provides a sparse {@link Tensor} with many zero elements.
+ * Critically, it implements a {@link #traverseNonZeroElements()} method
+ * that provides the positions of only non-zero elements to speed up computations
+ * when it is added to 
+ * 
+ * Speed ups are expected mostly for operations between sparse tensors,
+ * when sparse tensors are added or subtracted TO tense ones and when
+ * sparse tensors are multiplied WITH dense ones.
+ * 
+ * @author Emmanouil Krasanakis
+ */
 public class SparseTensor extends Tensor {
 	private HashMap<Long, Double> values;
 	private ArrayList<Long> keySet;

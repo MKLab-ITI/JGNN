@@ -30,13 +30,10 @@ public class Multiply extends NNOperation {
 		Tensor input1 = inputs.get(1);
 		if(input0.size()==1) {
 			if(inputId==0) {
-				double val = 0;
-				for(long pos : error.getNonZeroElements())
-					val += error.get(pos);
-				return Tensor.fromDouble(val);
+				return Tensor.fromDouble(error.dot(input1));
 			}
 			if(inputId==1 && input0.toDouble()!=0) 
-				return input1.multiply(1.0/input0.toDouble());
+				return error.multiply(input0.toDouble());
 			if(inputId==1)
 				return null;//this is the case where input0 is zero
 		}

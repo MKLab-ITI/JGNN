@@ -72,6 +72,10 @@ public abstract class NNOperation {
 		return data().tapeError;
 	}
 	
+	public final Tensor getPrediction() {
+		return data().lastOutput;
+	}
+	
 	public final Tensor runPrediction() {
 		ThreadData data = data();
 		if(data.lastOutput!=null)
@@ -100,7 +104,7 @@ public abstract class NNOperation {
 			return;
 		if(error==null)
 			return;
-		//System.out.println("Packpropagating... "+describe()+" Derivative "+data.tapeError.describe());
+		//System.out.println("Packpropagating... "+describe()+" Derivative "+data.tapeError+" prev out "+data.lastOutput);
 		ArrayList<Tensor> lastInputs = new ArrayList<Tensor>();
 		for(NNOperation input : inputs)
 			lastInputs.add(input.data().lastOutput);

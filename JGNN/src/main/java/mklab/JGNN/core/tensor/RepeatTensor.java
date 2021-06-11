@@ -5,6 +5,13 @@ import java.util.Iterator;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.util.Range;
 
+/**
+ * This class provides {@link Tensor} whose elements are all equal.
+ * Due to uncertain usage, its {@link #put(long, double)} operation is unsupported and throws a corresponding exception.
+ * Otherwise, instances of this class behave similarly to {@link DenseTensor} but permanently allocate only O(1) memory.
+ * 
+ * @author Emmanouil Krasanakis
+ */
 public class RepeatTensor extends Tensor {
 	private double value;
 	public RepeatTensor(double value, long length) {

@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.SparseMatrix;
+import mklab.JGNN.core.tensor.AccessSubtensor;
 import mklab.JGNN.core.tensor.DenseTensor;
 import mklab.JGNN.models.TrainingData;
 
@@ -73,7 +74,7 @@ public class RelationalData implements TrainingData {
 					throw new RuntimeException("Sampling method not implemented yet "+samplingType);
 				retries -= 1;
 				if(retries==0)
-					throw new RuntimeException("Randomly sampling 100 nodes did not yield valid negative ones");
+					throw new RuntimeException("Randomly sampling 1000 time did not yield valid negative samples. Consider changing sampling strategy.");
 			}
 			uList.put(pos, negu);
 			vList.put(pos, negv);

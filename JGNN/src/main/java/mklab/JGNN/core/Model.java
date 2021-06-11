@@ -1,6 +1,7 @@
 package mklab.JGNN.core;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import mklab.JGNN.core.inputs.Variable;
@@ -26,6 +27,10 @@ public class Model {
 	}
 	public ArrayList<NNOperation> getOutputs() {
 		return outputs;
+	}
+	
+	public ArrayList<Tensor> predict(Tensor... inputs) {
+		return this.predict(Arrays.asList(inputs));
 	}
 	
 	public ArrayList<Tensor> predict(List<Tensor> inputs) {
@@ -88,7 +93,7 @@ public class Model {
 			for(long pos : diff.getNonZeroElements())
 				loss += Math.abs(diff.get(pos));
 			for(long pos : diff.getNonZeroElements()) 
-				diff.put(pos, -outputs.get(i).get(pos));
+				diff.put(pos, outputs.get(i).get(pos));
 			this.outputs.get(i).forceBackpropagate(optimizer, diff);
 		}
 		return loss; 

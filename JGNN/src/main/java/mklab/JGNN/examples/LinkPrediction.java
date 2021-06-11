@@ -25,7 +25,7 @@ public class LinkPrediction {
 		}
 		RelationalGCN gcn = new RelationalGCN(RelationalGCN.trueres_linear,
 											  nodeIds.size(),//oneHot(nodeLabels), 
-											  new RepeatTensor(32, 3));
+											  new RepeatTensor(16, 2));
 		for(Entry<String, String> interaction : dataset.getInteractions()) 
 			gcn.addEdge(nodeIds.getId(interaction.getKey()), nodeIds.getId(interaction.getValue()));
 		gcn.trainRelational(new Regularization(new Adam(0.001), 5.E-4), 200, 0.2);

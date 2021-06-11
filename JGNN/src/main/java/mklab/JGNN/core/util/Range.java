@@ -3,6 +3,12 @@ package mklab.JGNN.core.util;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+/**
+ * This class implements an iterator that traverses a range (similar to Python's range(min, max) method).
+ * It is often used by {@link mklab.core.Tensor} to traverse through all element positions.
+ * 
+ * @author Emmanouil Krasanakis
+ */
 public class Range implements Iterator<Long> {
 	  private long nextValue;
 	  private final long max;

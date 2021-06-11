@@ -87,8 +87,7 @@ public class RelationalGCN extends Model {
 		for(int epoch=0;epoch<epochs;epoch++) {
 			if(testMatrix!=null)
 				System.out.print("Epoch "+epoch);
-			RelationalData trainingData = new RelationalData((SparseMatrix) W,
-						RelationalData.NegativeSamplingType.PERMUTATION);
+			RelationalData trainingData = new RelationalData((SparseMatrix) W, RelationalData.NegativeSamplingType.PERMUTATION);
 			trainSample(optimizer, trainingData.getInputs(), trainingData.getOutputs());
 			if(testMatrix!=null)  {
 				RelationalData testData = new RelationalData((SparseMatrix) testMatrix, W, 

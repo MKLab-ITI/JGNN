@@ -96,6 +96,16 @@ public class ModelBuilder {
 		return components.get(name);
 	}
 	
+	public ModelBuilder runModel(Tensor... inputs) {
+		model.predict(inputs);
+		return this;
+	}
+	
+	public ModelBuilder runModel(ArrayList<Tensor> inputs) {
+		model.predict(inputs);
+		return this;
+	}
+	
 	public ModelBuilder operation(String desc) {
 		
 		//System.out.println(desc);
@@ -120,7 +130,7 @@ public class ModelBuilder {
 		desc = desc.replace(",", " , ");
 		if(!desc.contains("MINUS_ONE")) {
 			if(desc.contains("-") && !components.containsKey("MINUS_ONE"))
-				param("MINUS_ONE", Tensor.fromDouble(-1));
+				constant("MINUS_ONE", Tensor.fromDouble(-1));
 			desc = desc.replace("-", " + MINUS_ONE * ");
 		}
 		desc = desc.replaceAll("\\s\\=\\s+\\+\\s+MINUS\\_ONE", " = MINUS_ONE");

@@ -160,6 +160,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * For example, {@link mklab.JGNN.core.tensor.DenseTensor} traverses all
 	 * of its elements this way, whereas {@link mklab.JGNN.core.tensor.SparseTensor}
 	 * indeed traverses only non-zero elements.
+	 * 
 	 * @return An iterator that traverses positions within the tensor.
 	 */
 	public abstract Iterator<Long> traverseNonZeroElements();
@@ -362,6 +363,44 @@ public abstract class Tensor implements Iterable<Long> {
 		return Math.sqrt(res);
 	}
 	/**
+	 * @return The sum of tensor elements
+	 */
+	public final double sum() {
+		double res = 0;
+		for(long i : getNonZeroElements())
+			res += get(i);
+		return res;
+	}
+	/**
+	 * Computes the maximum tensor element. If the tensor has zero {@link #size()}, 
+	 * this returns <code>Double.NEGATIVE_INFINITY</code>.
+	 * @return The maximum tensor element
+	 */
+	public final double max() {
+		double res = Double.NEGATIVE_INFINITY;
+		for(long i : getNonZeroElements()) {
+			double value = get(i);
+			if(value>res)
+				res = value;
+		}
+		return res;
+	}
+
+	/**
+	 * Computes the minimum tensor element. If the tensor has zero {@link #size()}, 
+	 * this returns <code>Double.POSITIVE_INFINITY</code>.
+	 * @return The minimum tensor element
+	 */
+	public final double min() {
+		double res = Double.POSITIVE_INFINITY;
+		for(long i : getNonZeroElements()) {
+			double value = get(i);
+			if(value<res)
+				res = value;
+		}
+		return res;
+	}
+	/**
 	 * A string serialization of the tensor that can be used by the constructor {@link #Tensor(String)} to create an identical copy.
 	 * @return A serialization of the tensor.
 	 */
@@ -387,12 +426,37 @@ public abstract class Tensor implements Iterable<Long> {
 		return res;
 	}
 	/**
-	 * L2-normalizes the tensor's elements.
+	 * @return A copy of the tensor on which division with the sum has been performed
+	 * (if the tensor contains no negative elements, this is equivalent to L1 normalization)
+	 * @see #setToProbability()
+	 */
+	public final Tensor toProbability() {
+		double norm = norm();
+		Tensor res = zeroCopy();
+		if(norm!=0)
+			for(long i : getNonZeroElements())
+				res.put(i, get(i)/norm);
+		return res;
+	}
+	/**
+	 * L2-normalizes the tensor's elements. Does nothing if the {@link #norm()} is zero.
 	 * @return <code>this</code> Tensor instance.
 	 * @see #normalized()
 	 */
 	public final Tensor setToNormalized() {
 		double norm = norm();
+		if(norm!=0)
+			for(long i : getNonZeroElements())
+				put(i, get(i)/norm);
+		return this;
+	}
+	/**
+	 * Divides the tensor's elements with their sum. Does nothing if the {@link #sum()} is zero.
+	 * @return <code>this</code> Tensor instance.
+	 * @see #toProbability()
+	 */
+	public final Tensor setToProbability() {
+		double norm = sum();
 		if(norm!=0)
 			for(long i : getNonZeroElements())
 				put(i, get(i)/norm);
@@ -435,13 +499,23 @@ public abstract class Tensor implements Iterable<Long> {
 			values[(int)i] = get(i);
 		return values;
 	}
-	
+	/**
+	 * 
+	 * @param value
+	 * @return a Tensor holding 
+	 */
 	public static Tensor fromDouble(double value) {
 		Tensor ret = new DenseTensor(1);
 		ret.put(0, value);
 		return ret;
 	}
 	
+	/**
+	 * Creates a tensor holding the desired range [start, start+1, ..., end-1]
+	 * @param start The start of the range.
+	 * @param end The end of the range.
+	 * @return A {@link DenseTensor} with size end-start
+	 */
 	public static Tensor fromRange(long start, long end) {
 		Tensor ret = new DenseTensor(end-start);
 		for(long pos=0;pos<end-start;pos++)
@@ -449,10 +523,19 @@ public abstract class Tensor implements Iterable<Long> {
 		return ret;
 	}
 	
+	/**
+	 * Converts a tensor of {@link #size()}==1 to double. Throws an exception otherwise.
+	 * @return A double.
+	 * @throws RuntimeException If the tensor is not of size 1.
+	 */
 	public double toDouble() {
 		assertSize(1);
 		return get(0);
 	}
+	/**
+	 * Describes the type, size and other characteristics of the tensor.
+	 * @return A String description.
+	 */
 	public String describe() {
 		return "Tensor ("+size()+")";
 	}
