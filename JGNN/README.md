@@ -27,6 +27,6 @@ Under construction
  
 **Primitives.** A collection of vector and matrix primitives support low-level arithmetic operations, in-place version of the same operations and both sparse and dense memory structures. The can also support applications outside the scope of the library. For details on primitives please visit [this link](docs/Primitives.md)
 
-**Models and builders.** Parameter learning tasks can be automated by defining pipelines. To this end, builder tools can be used to create models from symbolic String definitions. For more details, please visit [this link](docs/Models.md).
+**Models and builders.** Parameter learning tasks can be automated by defining symbolic pipelines. To this end, builder tools can be used to create models from String expressions. For details please visit [this link](docs/Models.md).
 
 **Datasets.** A collection of publically available datasets that can be automatically downloaded and imported from respective external sources to facilitate benchmarking tasks.
