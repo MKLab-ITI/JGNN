@@ -1,12 +1,13 @@
 # Models and builders
 
-## Table of contents
+## Table of Contents
 
 1. [JGNN Expressions](#jgnn-expressions)
 2. [JGNN Models](#jgnn-models)
-3. [Learning Parameters](#learning-parameters)
-4. [Symbolic model definition](#symbolic-model-definition)
-5. [Symbolic model learning](#symbolic-model-learning)
+3. [Symbolic Model Definition](#symbolic-model-definition)
+4. [Learning Parameters](#learning-parameters)
+5. [Neural Network Examples](#neural-network-examples)
+6. [Multithread Batch Learning](#multithread-batch-learning)
 
 ## JGNN Expressions
 
@@ -71,10 +72,6 @@ Obtaining the last value of intermediate (i.e. non-ouput) operations *after* the
 	System.out.println(add.getPrediction());
 ```
 
-## Learning parameters
-
-Under construction
-
 
 ## Symbolic model definition
 
@@ -91,7 +88,7 @@ ModelBuilder modelBuilder = new ModelBuilder()
 System.out.println(modelBuilder.getModel().predict(Tensor.fromDouble(2)));
 ```
 
-## Symbolic model learning
+## Learning parameters
 
 ```java
 ModelBuilder modelBuilder = new ModelBuilder()
@@ -110,3 +107,8 @@ for(int i=0;i<200;i++)
 //run the wrapped model and obtain an internal variable prediction
 System.out.println(modelBuilder.runModel(Tensor.fromDouble(2), Tensor.fromDouble(0)).get("yhat").getPrediction());
 ```
+
+## Neural Network Examples
+
+
+## Multithread Batch Learning
