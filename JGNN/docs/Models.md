@@ -16,6 +16,7 @@ can be added to inputs of other operations through the `addInput(NNOperation)` m
 of operations are variables, constants and parameters, whose differences will be discussed later.
 
 :bulb: The hustle of learning to write expressions is removed with [Symbolic model definition](#symbolic-model-definition).
+You can safely skip to that segment to learn how to write machine learning models without tedious definitions of intermediate steps.
 
 |Operator| Constructor | Number of inputs  |
 | --- | --- | --- |
