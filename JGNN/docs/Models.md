@@ -17,13 +17,14 @@ of operations are variables, constants and parameters, whose differences will be
 
 :bulb: The hustle of learning to write expressions is removed with [Symbolic model definition](#symbolic-model-definition).
 
-|Operator| Constructor | Number of arguments  |
+|Operator| Constructor | Number of inputs  |
 | --- | --- | --- |
 | + | mklab.JGNN.core.operations.Add()      | 2 |
 | * | mklab.JGNN.core.operations.Multiply() | 2 |
 | @ | mklab.JGNN.core.operations.MatMul()   | 2 |
 | 1-x | mklab.JGNN.core.operations.Complement()   | 1 |
-| leaky rectifier linear unit | mklab.JGNN.core.operations.LRelu() | 2 (the second argument should be the parameter) |
+| relu | mklab.JGNN.core.operations.LRelu() | 1 |
+| lrelu | mklab.JGNN.core.operations.LRelu() | 2 (the second input should be the negative slope) |
 | log | mklab.JGNN.core.operations.Log() | 1 |
 | variable | mklab.JGNN.core.operations.Variable() | 0 |
 | constant | mklab.JGNN.core.operations.Constant(tensor) | 0 |
