@@ -1,9 +1,6 @@
 package mklab.JGNN.examples;
 
-import java.awt.Component;
-
 import mklab.JGNN.core.Model;
-import mklab.JGNN.core.ModelBuilder;
 import mklab.JGNN.core.NNOperation;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.inputs.Constant;
@@ -12,7 +9,7 @@ import mklab.JGNN.core.operations.Add;
 import mklab.JGNN.core.operations.Log;
 import mklab.JGNN.core.operations.Multiply;
 
-public class CustomDefinition {
+public class ModelCustomDefinition {
 
 	public static void main(String[] args) {
 		Variable x = new Variable();

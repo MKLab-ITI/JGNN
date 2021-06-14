@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Stack;
 
+import mklab.JGNN.core.activations.LRelu;
 import mklab.JGNN.core.activations.PRelu;
 import mklab.JGNN.core.activations.Relu;
 import mklab.JGNN.core.activations.Sigmoid;
@@ -17,7 +18,6 @@ import mklab.JGNN.core.operations.Add;
 import mklab.JGNN.core.operations.Complement;
 import mklab.JGNN.core.operations.Concat;
 import mklab.JGNN.core.operations.Gather;
-import mklab.JGNN.core.operations.LRelu;
 import mklab.JGNN.core.operations.Log;
 import mklab.JGNN.core.operations.MatMul;
 import mklab.JGNN.core.operations.Multiply;

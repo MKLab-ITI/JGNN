@@ -2,16 +2,11 @@ package mklab.JGNN.examples;
 
 import java.util.Arrays;
 
-import mklab.JGNN.core.Model;
 import mklab.JGNN.core.ModelBuilder;
-import mklab.JGNN.core.Optimizer;
 import mklab.JGNN.core.Tensor;
-import mklab.JGNN.core.inputs.Variable;
 import mklab.JGNN.core.matrix.DenseMatrix;
 import mklab.JGNN.core.optimizers.Adam;
 import mklab.JGNN.core.optimizers.BatchOptimizer;
-import mklab.JGNN.core.optimizers.Regularization;
-import mklab.JGNN.core.tensor.DenseTensor;
 
 public class SimpleNetwork {
 

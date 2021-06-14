@@ -7,6 +7,11 @@ import mklab.JGNN.core.NNOperation;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.DenseMatrix;
 
+/**
+ * Implements a {@link NNOperation} that performs the equivalent of TensorFlow's gather operation.
+ * 
+ * @author Emmanouil Krasanakis
+ */
 public class Gather extends NNOperation {
 	@Override
 	protected Tensor forward(List<Tensor> inputs) {

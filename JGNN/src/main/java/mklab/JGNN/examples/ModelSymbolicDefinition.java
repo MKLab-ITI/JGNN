@@ -3,7 +3,7 @@ package mklab.JGNN.examples;
 import mklab.JGNN.core.ModelBuilder;
 import mklab.JGNN.core.Tensor;
 
-public class SymbolicDefinition {
+public class ModelSymbolicDefinition {
 
 	public static void main(String[] args) {
 		ModelBuilder modelBuilder = new ModelBuilder()

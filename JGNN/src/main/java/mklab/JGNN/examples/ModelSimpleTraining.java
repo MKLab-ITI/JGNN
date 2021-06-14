@@ -11,7 +11,7 @@ import mklab.JGNN.core.matrix.DenseMatrix;
 import mklab.JGNN.core.optimizers.Adam;
 import mklab.JGNN.core.tensor.DenseTensor;
 
-public class SimpleTraining {
+public class ModelSimpleTraining {
 
 	public static void main(String[] args) throws Exception {
 		ModelBuilder modelBuilder = new ModelBuilder()

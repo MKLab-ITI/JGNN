@@ -8,6 +8,11 @@ import mklab.JGNN.core.NNOperation;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.DenseMatrix;
 
+/**
+ * Implements a {@link NNOperation} that concatenates its two matrix inputs.
+ * 
+ * @author Emmanouil Krasanakis
+ */
 public class Concat extends NNOperation {
 	@Override
 	protected Tensor forward(List<Tensor> inputs) {

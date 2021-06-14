@@ -1,10 +1,18 @@
-package mklab.JGNN.core.operations;
+package mklab.JGNN.core.activations;
 
 import java.util.List;
 
 import mklab.JGNN.core.NNOperation;
 import mklab.JGNN.core.Tensor;
 
+/**
+ * Implements a {@link NNOperation} that performs a leaky relu operation, where the first argument is a tensor on which
+ * it is applied and the second one should be a tensor wrapping a double value (consider initializing this with as a 
+ * {@link mklab.JGNN.core.operations.Constant} holding a tensor generated with {@link Tensor#fromDouble(double)}) where
+ * the wrapped value indicates the negative region's slope. If the negative slope is zero, leaky relu is reduced to {@link Relu}.
+ * 
+ * @author Emmanouil Krasanakis
+ */
 public class LRelu extends NNOperation {
 	@Override
 	protected Tensor forward(List<Tensor> inputs) {

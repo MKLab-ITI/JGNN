@@ -9,6 +9,11 @@ import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.ColumnRepetition;
 import mklab.JGNN.core.pooling.SumT;
 
+/**
+ * Implements a {@link NNOperation} that adds its two inputs.
+ * 
+ * @author Emmanouil Krasanakis
+ */
 public class Add extends NNOperation {
 	@Override
 	protected Tensor forward(List<Tensor> inputs) {

@@ -1,9 +1,27 @@
 package mklab.JGNN.core;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * This class defines an abstract neural network operation with forward and backpropagation capabilities.
+ * Defined operations create execution trees based on input dependencies, which can then be run by
+ * {@link Model} instances to make predictions. Creating the execution tree can be done by using
+ * the {@link #addInput(NNOperation)} method. The correct number of inputs should be added to each operation.
+ * Compliance to this rule needs to be checked by individual operations during forward passes.
+ * <br/>
+ * Operations are thread-safe in the sense that they store gradients for backward passes on different
+ * objects across different threads. This, way models can perform learning passes which are all synchronized
+ * when eventually backpropagation feeds {@link Parameter} updates to an {@link Optimizer}.
+ * <br/>
+ * The internal state of operations can be obtained with {@link #getPrediction()} to obtain their last
+ * {@link Tensor} output (this output is depends on the thread calling the operation) and {@link #getLastTapeError()}
+ * to obtain the last gradient obtained through backpropagation.
+ *  
+ * @author Emmanouil Krasanakis
+ */
 public abstract class NNOperation {
 	private ArrayList<NNOperation> inputs = new ArrayList<NNOperation>();
 	private ArrayList<NNOperation> outputs = new ArrayList<NNOperation>();
@@ -123,6 +141,28 @@ public abstract class NNOperation {
 		for(int i=0;i<inputs.size();i++)
 			inputs.get(i).backpropagate(optimizer, partial(i, lastInputs, data.lastOutput, error));
 		trainParameters(optimizer, error);
+	}
+
+	/** 
+	 * Performs a forward pass in the operation <b>without inducing any kind of learning or storing the outcome</b>.
+	 * This is just a way to replicate the operation at the tensor level and does not affect or is affected by
+	 * any dependent inputs {@link #addInput}.
+	 * @param inputs A list of input tensors needed by the operation.
+	 * @return A Tensor with the operation's outcome.
+	 */
+	public final Tensor run(List<Tensor> inputs) {
+		return forward(inputs);
+	}
+
+	/** 
+	 * Performs a forward pass in the operation <b>without inducing any kind of learning or storing the outcome</b>.
+	 * This is just a way to replicate the operation at the tensor level and does not affect or is affected by
+	 * any dependent inputs {@link #addInput}.
+	 * @param inputs A list of input tensors needed by the operation.
+	 * @return A Tensor with the operation's outcome.
+	 */
+	public final Tensor run(Tensor... inputs) {
+		return forward(Arrays.asList(inputs));
 	}
 	
 	protected void trainParameters(Optimizer optimizer, Tensor error) {

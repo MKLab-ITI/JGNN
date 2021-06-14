@@ -17,7 +17,7 @@ can be added to inputs of other operations through the `addInput(NNOperation)` m
 of operations are variables, constants and parameters, whose differences will be discussed later.
 
 :bulb: The hustle of learning to write expressions is removed with [Symbolic model definition](#symbolic-model-definition).
-You can safely skip to that segment to learn how to write machine learning models without tedious definitions of intermediate steps.
+You can safely skip to that segment to learn how to write machine learning models without the tedious definitions of intermediate steps explained here.
 
 |Operator| Constructor | Number of inputs  |
 | --- | --- | --- |
@@ -25,12 +25,15 @@ You can safely skip to that segment to learn how to write machine learning model
 | * | mklab.JGNN.core.operations.Multiply() | 2 |
 | @ | mklab.JGNN.core.operations.MatMul()   | 2 |
 | 1-x | mklab.JGNN.core.operations.Complement()   | 1 |
-| relu | mklab.JGNN.core.operations.LRelu() | 1 |
-| lrelu | mklab.JGNN.core.operations.LRelu() | 2 (the second input should be the negative slope) |
 | log | mklab.JGNN.core.operations.Log() | 1 |
 | variable | mklab.JGNN.core.operations.Variable() | 0 |
 | constant | mklab.JGNN.core.operations.Constant(tensor) | 0 |
 | parameter | mklab.JGNN.core.operations.Parameter(tensor) | 0 |
+| relu | mklab.JGNN.core.activations.Relu() | 1 |
+| relu | mklab.JGNN.core.activations.Tanh() | 1 |
+| relu | mklab.JGNN.core.activations.Sigmoid() | 1 |
+| lrelu | mklab.JGNN.core.activations.LRelu() | 2 |
+| lrelu | mklab.JGNN.core.activations.PRelu() | 2 |
 
 :Warn: In principle, the `addInput` should be called a number of times equal to the number of operator arguments for each operator.
 It is defined for the sake of convenience, for example to initialize operators at different parts of the code than the one linking them.
@@ -90,6 +93,21 @@ System.out.println(modelBuilder.getModel().predict(Tensor.fromDouble(2)));
 
 ## Learning parameters
 
+Examples up to this point were limited to using constant and variable data. However, machine learning
+tasks typically introduce the notion of *parameters* as constants whose values can be learned to optimize
+learning objectives, such as making model output values as close as possible to desired ones.
+
+Parameter operations can be instantiated with the constructor `new mklab.JGGN.core.Parameter(Tensor initialValue)`,
+where their initial values or provided. Model builder parameters need to be defined before they are used
+by operations and can be symbolically defined with the method
+`ModelBuilder ModelBuilder.param(String name, Tensor initialValue)`.
+
+Approximating ideal parameter values for a model requires three steps: a) selecting an optimization scheme responsible for
+updating parameters based on backpropagated errors, b) selecting a loss function quantifying how much model outputs deviate
+from optimal ones and c) repeatedly calling one of the model's overloaded `Model.trainSample` methods for a number of epochs. 
+For the sake of simplicity, consider a single sample before we discuss how to handle multiple ones.
+
+
 ```java
 ModelBuilder modelBuilder = new ModelBuilder()
 		.var("x") // first argument
@@ -103,10 +121,15 @@ ModelBuilder modelBuilder = new ModelBuilder()
 Optimizer optimizer = new Adam(0.1);
 // when no output is passed to training, the output is considered to be an error
 for(int i=0;i<200;i++)
-	modelBuilder.getModel().trainSample(optimizer, Arrays.asList(new DenseTensor(1,2,3,4,5), new DenseTensor(3, 5, 7, 9, 11)));
+	modelBuilder.getModel().trainSample(optimizer, Arrays.asList(new DenseTensor(1,2,3,4,5), new DenseTensor(3,5,7,9,11)));
 //run the wrapped model and obtain an internal variable prediction
 System.out.println(modelBuilder.runModel(Tensor.fromDouble(2), Tensor.fromDouble(0)).get("yhat").getPrediction());
 ```
+
+:bulb: Examples with multiple features should either be organized into sparce matrices or be fed one-by-one to learners
+through a [batch-learning](#multithread-batch-learning) scheme. Specifically for graph neural networks, computation
+speed benefits tremendously from organizing all node features into one matrix and simultaneously passing this through
+graph convolutional layers.
 
 ## Neural Network Examples
 
