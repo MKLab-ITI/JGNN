@@ -9,6 +9,11 @@ import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.ColumnRepetition;
 import mklab.JGNN.core.pooling.SumT;
 
+/**
+ * Implements a {@link NNOperation} that multiplies its two inputs element-by-element.
+ * 
+ * @author Emmanouil Krasanakis
+ */
 public class Multiply extends NNOperation {
 	@Override
 	protected Tensor forward(List<Tensor> inputs) {

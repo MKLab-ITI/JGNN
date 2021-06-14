@@ -6,6 +6,12 @@ import mklab.JGNN.core.NNOperation;
 import mklab.JGNN.core.Optimizer;
 import mklab.JGNN.core.Tensor;
 
+/**
+ * Implements a {@link NNOperation} that holds and returns a parameter tensor.
+ * This value *is tuned by learning*.
+ * 
+ * @author Emmanouil Krasanakis
+ */
 public class Parameter extends NNOperation {
 	protected Tensor tensor;
 	public Parameter(Tensor tensor) {

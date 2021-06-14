@@ -8,6 +8,12 @@ import mklab.JGNN.core.NNOperation;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.ColumnRepetition;
 
+/**
+ * Implements a {@link NNOperation} that converts its first argument to a {@link ColumnRepetition} matrix
+ * with a number of columns equal to the second argument.
+ * 
+ * @author Emmanouil Krasanakis
+ */
 public class Repeat extends NNOperation {
 	@Override
 	protected Tensor forward(List<Tensor> inputs) {

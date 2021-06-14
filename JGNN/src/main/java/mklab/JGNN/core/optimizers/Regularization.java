@@ -6,6 +6,7 @@ import mklab.JGNN.core.Tensor;
 /**
  * Wraps an {@link Optimizer} by applying the derivative of L2 loss
  * on every tensor during {@link Optimizer#update(Tensor, Tensor)}.
+ * 
  * @author Emmanouil Krasanakis
  */
 public class Regularization implements Optimizer {

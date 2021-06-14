@@ -6,6 +6,11 @@ import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.NNOperation;
 import mklab.JGNN.core.Tensor;
 
+/**
+ * Implements a {@link NNOperation} that multiplies its two matrix inputs.
+ * 
+ * @author Emmanouil Krasanakis
+ */
 public class MatMul extends NNOperation {
 	@Override
 	protected Tensor forward(List<Tensor> inputs) {

@@ -6,6 +6,11 @@ import mklab.JGNN.core.NNOperation;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.util.Loss;
 
+/**
+ * Implements a {@link NNOperation} that performs a sigmoid transformation of its single input.
+ * 
+ * @author Emmanouil Krasanakis
+ */
 public class Sigmoid extends NNOperation {
 	@Override
 	protected Tensor forward(List<Tensor> inputs) {

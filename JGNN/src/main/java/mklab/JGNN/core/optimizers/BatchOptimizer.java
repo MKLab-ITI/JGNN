@@ -10,8 +10,9 @@ import mklab.JGNN.core.Tensor;
  * Wraps an {@link Optimizer} by accumulating derivatives and calling
  * {@link Optimizer#update(Tensor, Tensor)} with the average derivative
  * after a fixed number of accumulations. Accumulation restarts after
- * update. Provides a method {@link #updateAll()}  to update all accumulated 
- * derivatives.
+ * update. Provides a method {@link #updateAll()} to update all accumulated 
+ * derivatives, for example in case the constructor {@link #BatchOptimizer(Optimizer)}
+ * is used without inputting a fixed number of derivative updates.
  * 
  * @author Emmanouil Krasanakis
  */

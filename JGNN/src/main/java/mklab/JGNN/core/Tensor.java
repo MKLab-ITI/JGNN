@@ -431,7 +431,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @see #setToProbability()
 	 */
 	public final Tensor toProbability() {
-		double norm = norm();
+		double norm = sum();
 		Tensor res = zeroCopy();
 		if(norm!=0)
 			for(long i : getNonZeroElements())
