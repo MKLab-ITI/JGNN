@@ -96,4 +96,5 @@ Operation | Type | Comments
 `Matrix laplacian()` | in-place arithmetic | The symmetrically normalized Laplacian.
 `Matrix setToLaplacian()` | in-place arithmetic | The symmetrically normalized Laplacian.
 `Matrix put(long row, long col, double value)` | element access | NaN values throw exceptions. Is in-place.
+`Iterable<Entry<Long, Long>> getNonZeroEntries()` | element access | Similar to getNonZeroElements() but iterates through (row, col) pairs.
 

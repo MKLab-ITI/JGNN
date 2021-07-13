@@ -8,6 +8,13 @@ import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.tensor.DenseTensor;
 import mklab.JGNN.core.util.Range2D;
 
+/**
+ * Implements a dense {@link Matrix} where all elements are stored in memory.
+ * For matrices with more than MAXINT number of elements or many zeros use the {@link SparseMatrix}
+ * structure.
+ * 
+ * @author Emmanouil Krasanakis
+ */
 public class DenseMatrix extends Matrix {
 	private Tensor tensor;
 	public DenseMatrix(long rows, long cols) {

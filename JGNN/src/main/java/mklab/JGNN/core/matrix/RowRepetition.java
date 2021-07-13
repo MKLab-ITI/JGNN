@@ -8,6 +8,14 @@ import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.util.Range2D;
 
+/**
+ * Can be used to define a matrix whose rlws are all a copy of a {@link Tensor}.
+ * To avoid potential confusion, setting element values (and all supported operations) throws
+ * an exception.
+ * 
+ * @author Emmanouil Krasanakis
+ * @see ColumnRepetition
+ */
 public class RowRepetition extends Matrix {
 	protected Tensor row;
 	public RowRepetition(Tensor row, long times) {

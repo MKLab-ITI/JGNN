@@ -9,6 +9,12 @@ import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.tensor.SparseTensor;
 
+/**
+ * A sparse {@link Matrix} that allocates memory only for non-zero elements. Operations
+ * that involve all matrix elements are slower compared to a {@link DenseMatrix}.
+ * 
+ * @author Emmanouil Krasanakis
+ */
 public class SparseMatrix extends Matrix {
 	private Tensor tensor;
 	public SparseMatrix(long rows, long cols) {

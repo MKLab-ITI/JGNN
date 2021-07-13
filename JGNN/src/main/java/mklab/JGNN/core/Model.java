@@ -8,6 +8,13 @@ import mklab.JGNN.core.inputs.Variable;
 import mklab.JGNN.core.tensor.RepeatTensor;
 import mklab.JGNN.core.util.Loss;
 
+/**
+ * This class is a way to organize {@link NNOperation} trees into trainable machine
+ * learning models. Critically, only model inputs and outputs need to be defined. It also
+ * provides a way to perform training by calling gradient operations in the correct order.
+ * 
+ * @author Emmanouil Krasanakis
+ */
 public class Model {
 	private ArrayList<Variable> inputs = new ArrayList<Variable>();
 	private ArrayList<NNOperation> outputs = new ArrayList<NNOperation>();

@@ -258,4 +258,17 @@ public abstract class Matrix extends Tensor {
 		}
 		return ret;
 	}
+	
+	/**
+	 * Converts a given value to a JGNN-compatible 1x1 matrix.
+	 * @param value A given value.
+	 * @return a Matrix holding the given value
+	 * @see Tensor#fromDouble(double)
+	 * @see Tensor#toDouble()
+	 */
+	public static Matrix fromDouble(double value) {
+		Matrix ret = new DenseMatrix(1, 1);
+		ret.put(0, 0, value);
+		return ret;
+	}
 }

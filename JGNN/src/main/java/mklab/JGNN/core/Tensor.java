@@ -499,10 +499,13 @@ public abstract class Tensor implements Iterable<Long> {
 			values[(int)i] = get(i);
 		return values;
 	}
+	
 	/**
-	 * 
-	 * @param value
-	 * @return a Tensor holding 
+	 * Converts a given value to a JGNN-compatible dense tensor.
+	 * @param value A given value.
+	 * @return a Tensor holding the given value
+	 * @see #toDouble()
+	 * @see Matrix#fromDouble(double)
 	 */
 	public static Tensor fromDouble(double value) {
 		Tensor ret = new DenseTensor(1);
@@ -527,6 +530,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * Converts a tensor of {@link #size()}==1 to double. Throws an exception otherwise.
 	 * @return A double.
 	 * @throws RuntimeException If the tensor is not of size 1.
+	 * @see Tensor #fromDouble(double)
 	 */
 	public double toDouble() {
 		assertSize(1);

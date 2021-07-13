@@ -6,6 +6,11 @@ import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.util.Range;
 
+/**
+ * Can be used to access a row of a {@link Matrix} as if it were a dense {@link Tensor}.
+ * 
+ * @author Emmanouil Krasanakis
+ */
 public class AccessRow extends Tensor {
 	private Matrix matrix;
 	private long row;

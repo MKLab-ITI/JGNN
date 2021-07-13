@@ -4,6 +4,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+/**
+ * This class provides a thread manager that automatically schedules threaded runables
+ * so that the total number of threads running at a given time does not exceed the number
+ * of available processors.
+ * 
+ * @author Emmanouil Krasanakis
+ */
 public class ThreadPool {
 	private HashMap<Thread, Integer> threadIds = new HashMap<Thread, Integer>();
 	private HashSet<Integer> usedIds = new HashSet<Integer>();

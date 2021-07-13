@@ -49,7 +49,6 @@ For example, the expression *y=log(2x+1)* can be constructed with the following 
 	NNOperation mult = new Multiply().addInput(x).addInput(c2);
 	NNOperation add = new Add().addInput(mult).addInput(c1);
 	NNOperation y = new Log().addInput(add);
-}
 ```
 
 ## JGNN Models

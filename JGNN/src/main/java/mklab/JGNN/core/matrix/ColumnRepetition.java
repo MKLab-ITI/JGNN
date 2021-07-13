@@ -8,11 +8,22 @@ import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.util.Range2D;
 
+/**
+ * Can be used to define a matrix whose columns are all a copy of a {@link Tensor}.
+ * To avoid potential confusion, setting element values (and all supported operations) throws
+ * an exception.
+ * 
+ * @author Emmanouil Krasanakis
+ * @see RowRepetition
+ */
 public class ColumnRepetition extends Matrix {
 	protected Tensor column;
 	public ColumnRepetition(long times, Tensor column) {
 		super(times, column.size());
 		this.column = column;
+	}
+	public Tensor getColumn() {
+		return column;
 	}
 	@Override
 	public Matrix zeroCopy(long rows, long cols) {
@@ -23,7 +34,7 @@ public class ColumnRepetition extends Matrix {
 	}
 	@Override
 	public Tensor put(long pos, double value) {
-		throw new RuntimeException("ColumnRepetion does not support method puts");
+		throw new RuntimeException("ColumnRepetion does not support changing base column values. Consider using getColumn().put(...)");
 	}
 	@Override
 	public double get(long pos) {

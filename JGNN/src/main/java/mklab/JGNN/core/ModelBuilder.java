@@ -28,7 +28,8 @@ import mklab.JGNN.core.tensor.DenseTensor;
 
 /**
  * This class and subclasses can be used to create {@link Model} instances 
- * by providing textual rather than creating programming descriptions of {@link NNOperations}.
+ * by automatically creating and managing {@link NNOperations} based on
+ * textual descriptions.
  * 
  * @author Emmanouil Krasanakis
  */
