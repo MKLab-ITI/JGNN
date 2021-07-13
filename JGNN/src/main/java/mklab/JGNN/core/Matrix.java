@@ -200,6 +200,10 @@ public abstract class Matrix extends Tensor {
 		return ones;
 	}
 	
+	public Matrix laplacian() {
+		return ((Matrix)copy()).setToLaplacian();
+	}
+	
 	public Matrix setToLaplacian() {
 		HashMap<Long, Double> outDegrees = new HashMap<Long, Double>();
 		HashMap<Long, Double> inDegrees = new HashMap<Long, Double>();
