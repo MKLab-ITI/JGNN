@@ -26,14 +26,14 @@ Under construction
 ## Tutorials
  
 #### Primitives
-[link](docs/Primitives.md) A collection of vector and matrix primitives support
+[link](tutorials/Primitives.md) A collection of vector and matrix primitives support
 low-level arithmetic operations, in-place version of the same operations and
 both sparse and dense memory structures. The can also support applications
 outside the scope of the library. This tutorial covers the use of machine learning
 primitives.
 
 #### Models and builders
-[link](docs/Models.md) Learning tasks can be automated by defining symbolic
+[link](tutorials/Models.md) Learning tasks can be automated by defining symbolic
 pipelines. This tutorial covers tools that can be used to create trainable
 machine learning models, including builders that can build those tools from 
 simple String expressions.

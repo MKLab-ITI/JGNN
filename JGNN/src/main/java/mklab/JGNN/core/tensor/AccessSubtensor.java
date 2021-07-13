@@ -6,7 +6,7 @@ import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.util.Range;
 
 /**
- * This class wraps a base {@link Tensor} by traversing only its elements in a specified range (from begin, up to end-1).
+ * Wraps a base {@link Tensor} by traversing only its elements in a specified range (from begin, up to end-1).
  * Although in principle it does not require a specific type of base tensor, it is created with optimized
  * {@link DenseTensor} operations in mind. That is, it implements {@link #traverseNonZeroElements()} as a {@link Range}.
  * This class's {@link #zeroCopy()} is marked as unimplemented by throwing an exception, which will also make dependent
