@@ -5,8 +5,8 @@ import java.util.Arrays;
 import mklab.JGNN.core.ModelBuilder;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.DenseMatrix;
-import mklab.JGNN.core.optimizers.Adam;
-import mklab.JGNN.core.optimizers.BatchOptimizer;
+import mklab.JGNN.nn.optimizers.Adam;
+import mklab.JGNN.nn.optimizers.BatchOptimizer;
 
 public class SimpleNetwork {
 

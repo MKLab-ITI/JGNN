@@ -24,7 +24,7 @@ public class DenseTensor extends Tensor {
 	/**
 	 * Constructor that reconstructs a serialized Tensor (i.e. the outcome of {@link #toString()})
 	 * @param expr A serialized tensor
-	 * @throws IllegalArgumentException
+	 * @throws IllegalArgumentException If the serialization is null or empty.
 	 */
 	public DenseTensor(String expr) {
 		if(expr==null || expr.isEmpty())

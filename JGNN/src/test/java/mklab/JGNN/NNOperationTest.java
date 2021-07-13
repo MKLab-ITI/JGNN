@@ -6,17 +6,17 @@ import mklab.JGNN.core.ModelBuilder;
 import mklab.JGNN.core.NNOperation;
 import mklab.JGNN.core.Optimizer;
 import mklab.JGNN.core.Tensor;
-import mklab.JGNN.core.inputs.Constant;
-import mklab.JGNN.core.inputs.Parameter;
-import mklab.JGNN.core.inputs.Variable;
 import mklab.JGNN.core.matrix.DenseMatrix;
 import mklab.JGNN.core.matrix.SparseMatrix;
-import mklab.JGNN.core.operations.Add;
-import mklab.JGNN.core.operations.Gather;
-import mklab.JGNN.core.operations.MatMul;
-import mklab.JGNN.core.operations.Multiply;
-import mklab.JGNN.core.optimizers.Adam;
-import mklab.JGNN.core.pooling.Sum;
+import mklab.JGNN.nn.inputs.Constant;
+import mklab.JGNN.nn.inputs.Parameter;
+import mklab.JGNN.nn.inputs.Variable;
+import mklab.JGNN.nn.operations.Add;
+import mklab.JGNN.nn.operations.Gather;
+import mklab.JGNN.nn.operations.MatMul;
+import mklab.JGNN.nn.operations.Multiply;
+import mklab.JGNN.nn.optimizers.Adam;
+import mklab.JGNN.nn.pooling.Sum;
 
 import java.util.Arrays;
 

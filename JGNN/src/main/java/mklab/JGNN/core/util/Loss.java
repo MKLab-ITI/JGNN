@@ -30,7 +30,7 @@ public interface Loss {
 	}
 	
 	/**
-	 * The relu activation x if x > 0, 0 otherwise
+	 * The relu activation x if x &gt; 0, 0 otherwise
 	 * @param x  The activation of the relu function.
 	 * @return The relu value.
 	 * @see #relu(Tensor)
@@ -77,7 +77,7 @@ public interface Loss {
 	 * @param output The output of a prediction task. Should lie in the range [0,1]
 	 * @param label The desired label of the prediction task. Should assume binary values 0 or 1
 	 * @return The cross entropy value.
-	 * @throws IllegalArgumentException
+	 * @throws IllegalArgumentException If outputs out of the range [0,1] or labels are non-binary.
 	 */
 	public static double crossEntropy(double output, double label) {
 		if(label!=0 && label!=1)
@@ -94,7 +94,7 @@ public interface Loss {
 	 * @param output The output of a prediction task. Should lie in the range [0,1]
 	 * @param label The desired label of the prediction task. Should assume binary values 0 or 1
 	 * @return The cross entropy derivative's value.
-	 * @throws IllegalArgumentException
+	 * @throws IllegalArgumentException If outputs out of the range [0,1] or labels are non-binary.
 	 */
 	public static double crossEntropyDerivative(double output, double label) {
 		if(label!=0 && label!=1)
@@ -111,7 +111,7 @@ public interface Loss {
 	 * @param x The activation of the sigmoid function.
 	 * @param label The desired label of the prediction task. Should assume binary values 0 or 1
 	 * @return The cross entropy partial derivative with respect to the activation passed to an intermediate sigmoid transformation.
-	 * @throws IllegalArgumentException
+	 * @throws IllegalArgumentException If labels are non-binary.
 	 */
 	public static double crossEntropySigmoidDerivative(double x, double label) {
 		if(label!=0 && label!=1)

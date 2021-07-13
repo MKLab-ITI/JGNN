@@ -6,10 +6,10 @@ import mklab.JGNN.core.Model;
 import mklab.JGNN.core.ModelBuilder;
 import mklab.JGNN.core.Optimizer;
 import mklab.JGNN.core.Tensor;
-import mklab.JGNN.core.inputs.Variable;
 import mklab.JGNN.core.matrix.DenseMatrix;
-import mklab.JGNN.core.optimizers.Adam;
 import mklab.JGNN.core.tensor.DenseTensor;
+import mklab.JGNN.nn.inputs.Variable;
+import mklab.JGNN.nn.optimizers.Adam;
 
 public class ModelSimpleTraining {
 

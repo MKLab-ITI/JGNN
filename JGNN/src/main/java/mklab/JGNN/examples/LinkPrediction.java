@@ -3,13 +3,13 @@ package mklab.JGNN.examples;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-import mklab.JGNN.core.optimizers.Adam;
-import mklab.JGNN.core.optimizers.Regularization;
 import mklab.JGNN.core.tensor.RepeatTensor;
-import mklab.JGNN.datasets.Dataset;
-import mklab.JGNN.datasets.Datasets;
-import mklab.JGNN.models.IdConverter;
+import mklab.JGNN.data.IdConverter;
+import mklab.JGNN.data.datasets.Dataset;
+import mklab.JGNN.data.datasets.Datasets;
 import mklab.JGNN.models.relational.RelationalGCN;
+import mklab.JGNN.nn.optimizers.Adam;
+import mklab.JGNN.nn.optimizers.Regularization;
 
 public class LinkPrediction {
 

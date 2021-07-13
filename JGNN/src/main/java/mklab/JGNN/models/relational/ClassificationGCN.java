@@ -10,12 +10,12 @@ import mklab.JGNN.core.Optimizer;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.SparseMatrix;
 import mklab.JGNN.core.tensor.DenseTensor;
-import mklab.JGNN.models.measures.AUC;
-import mklab.JGNN.models.measures.Accuracy;
-import mklab.JGNN.models.measures.Precision;
+import mklab.JGNN.measures.AUC;
+import mklab.JGNN.measures.Accuracy;
+import mklab.JGNN.measures.Precision;
 
 /**
- * Uses a {@Link GCNBuilder} to construct a Graph Convolutional Network
+ * Uses a {@link GCNBuilder} to construct a Graph Convolutional Network
  * for unsupervised link prediction.
  * 
  * @author Emmanouil Krasanakis

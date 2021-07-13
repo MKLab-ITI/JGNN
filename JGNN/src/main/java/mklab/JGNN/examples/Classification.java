@@ -6,14 +6,14 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import mklab.JGNN.core.Tensor;
-import mklab.JGNN.core.optimizers.Adam;
-import mklab.JGNN.core.optimizers.Regularization;
 import mklab.JGNN.core.tensor.AccessSubtensor;
 import mklab.JGNN.core.tensor.RepeatTensor;
-import mklab.JGNN.datasets.Dataset;
-import mklab.JGNN.datasets.Datasets;
-import mklab.JGNN.models.IdConverter;
+import mklab.JGNN.data.IdConverter;
+import mklab.JGNN.data.datasets.Dataset;
+import mklab.JGNN.data.datasets.Datasets;
 import mklab.JGNN.models.relational.ClassificationGCN;
+import mklab.JGNN.nn.optimizers.Adam;
+import mklab.JGNN.nn.optimizers.Regularization;
 
 public class Classification {
 

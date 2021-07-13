@@ -21,19 +21,19 @@ You can safely skip to that segment to learn how to write machine learning model
 
 |Operator| Constructor | Number of inputs  |
 | --- | --- | --- |
-| + | mklab.JGNN.core.operations.Add()      | 2 |
-| * | mklab.JGNN.core.operations.Multiply() | 2 |
-| @ | mklab.JGNN.core.operations.MatMul()   | 2 |
-| 1-x | mklab.JGNN.core.operations.Complement()   | 1 |
-| log | mklab.JGNN.core.operations.Log() | 1 |
-| variable | mklab.JGNN.core.operations.Variable() | 0 |
-| constant | mklab.JGNN.core.operations.Constant(tensor) | 0 |
-| parameter | mklab.JGNN.core.operations.Parameter(tensor) | 0 |
-| relu | mklab.JGNN.core.activations.Relu() | 1 |
-| relu | mklab.JGNN.core.activations.Tanh() | 1 |
-| relu | mklab.JGNN.core.activations.Sigmoid() | 1 |
-| lrelu | mklab.JGNN.core.activations.LRelu() | 2 |
-| lrelu | mklab.JGNN.core.activations.PRelu() | 2 |
+| + | mklab.JGNN.nn.operations.Add()      | 2 |
+| * | mklab.JGNN.nn.operations.Multiply() | 2 |
+| @ | mklab.JGNN.nn.operations.MatMul()   | 2 |
+| 1-x | mklab.JGNN.nn.operations.Complement()   | 1 |
+| log | mklab.JGNN.nn.operations.Log() | 1 |
+| variable | mklab.JGNN.nn.operations.Variable() | 0 |
+| constant | mklab.JGNN.nn.operations.Constant(tensor) | 0 |
+| parameter | mklab.JGNN.nn.operations.Parameter(tensor) | 0 |
+| relu | mklab.JGNN.nn.activations.Relu() | 1 |
+| relu | mklab.JGNN.nn.activations.Tanh() | 1 |
+| relu | mklab.JGNN.nn.activations.Sigmoid() | 1 |
+| lrelu | mklab.JGNN.nn.activations.LRelu() | 2 |
+| lrelu | mklab.JGNN.nn.activations.PRelu() | 2 |
 
 :Warn: In principle, the `addInput` should be called a number of times equal to the number of operator arguments for each operator.
 It is defined for the sake of convenience, for example to initialize operators at different parts of the code than the one linking them.
@@ -96,7 +96,7 @@ Examples up to this point were limited to using constant and variable data. Howe
 tasks typically introduce the notion of *parameters* as constants whose values can be learned to optimize
 learning objectives, such as making model output values as close as possible to desired ones.
 
-Parameter operations can be instantiated with the constructor `new mklab.JGGN.core.Parameter(Tensor initialValue)`,
+Parameter operations can be instantiated with the constructor `new mklab.JGGN.nn.Parameter(Tensor initialValue)`,
 where their initial values or provided. Model builder parameters need to be defined before they are used
 by operations and can be symbolically defined with the method
 `ModelBuilder ModelBuilder.param(String name, Tensor initialValue)`.

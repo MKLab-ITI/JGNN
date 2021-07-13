@@ -1,7 +1,7 @@
 package mklab.JGNN.examples;
 
 import mklab.JGNN.core.Tensor;
-import mklab.JGNN.core.operations.Add;
+import mklab.JGNN.nn.operations.Add;
 
 public class Operations {
 

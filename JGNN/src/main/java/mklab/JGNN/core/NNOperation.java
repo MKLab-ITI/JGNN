@@ -11,11 +11,11 @@ import java.util.List;
  * {@link Model} instances to make predictions. Creating the execution tree can be done by using
  * the {@link #addInput(NNOperation)} method. The correct number of inputs should be added to each operation.
  * Compliance to this rule needs to be checked by individual operations during forward passes.
- * <br/>
+ * <br>
  * Operations are thread-safe in the sense that they store gradients for backward passes on different
  * objects across different threads. This, way models can perform learning passes which are all synchronized
- * when eventually backpropagation feeds {@link Parameter} updates to an {@link Optimizer}.
- * <br/>
+ * when eventually backpropagation feeds {@link mklab.JGNN.nn.inputs.Parameter} updates to an {@link Optimizer}.
+ * <br>
  * The internal state of operations can be obtained with {@link #getPrediction()} to obtain their last
  * {@link Tensor} output (this output is depends on the thread calling the operation) and {@link #getLastTapeError()}
  * to obtain the last gradient obtained through backpropagation.

@@ -3,11 +3,11 @@ package mklab.JGNN.examples;
 import mklab.JGNN.core.Model;
 import mklab.JGNN.core.NNOperation;
 import mklab.JGNN.core.Tensor;
-import mklab.JGNN.core.inputs.Constant;
-import mklab.JGNN.core.inputs.Variable;
-import mklab.JGNN.core.operations.Add;
-import mklab.JGNN.core.operations.Log;
-import mklab.JGNN.core.operations.Multiply;
+import mklab.JGNN.nn.inputs.Constant;
+import mklab.JGNN.nn.inputs.Variable;
+import mklab.JGNN.nn.operations.Add;
+import mklab.JGNN.nn.operations.Log;
+import mklab.JGNN.nn.operations.Multiply;
 
 public class ModelCustomDefinition {
 

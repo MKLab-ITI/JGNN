@@ -5,7 +5,7 @@ import java.util.NoSuchElementException;
 
 /**
  * This class implements an iterator that traverses a range (similar to Python's range(min, max) method).
- * It is often used by {@link mklab.core.Tensor} to traverse through all element positions.
+ * It is often used by {@link mklab.JGNN.core.Tensor} to traverse through all element positions.
  * 
  * @author Emmanouil Krasanakis
  */

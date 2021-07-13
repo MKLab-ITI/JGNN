@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import mklab.JGNN.core.inputs.Variable;
 import mklab.JGNN.core.tensor.RepeatTensor;
 import mklab.JGNN.core.util.Loss;
+import mklab.JGNN.nn.inputs.Variable;
 
 /**
  * This class is a way to organize {@link NNOperation} trees into trainable machine

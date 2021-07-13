@@ -83,7 +83,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * Add a value to a tensor element.
 	 * @param pos The position of the tensor element
 	 * @param value The value to assign
-	 * @see #put(int, double)
+	 * @see #put(long, double)
 	 */
 	public final void putAdd(long pos, double value) {
 		put(pos, get(pos)+value);
@@ -188,7 +188,7 @@ public abstract class Tensor implements Iterable<Long> {
 		return res;
 	}
 	/**
-	 * @param tensor The value to add to each element
+	 * @param value The value to add to each element
 	 * @return a new Tensor that stores the outcome of addition
 	 */
 	public final Tensor add(double value) {
@@ -211,7 +211,7 @@ public abstract class Tensor implements Iterable<Long> {
 	}
 	/**
 	 * Performs in-memory addition to the Tensor, storing the result in itself.
-	 * @param tensor The value to add to each tensor element.
+	 * @param value The value to add to each tensor element.
 	 * @return <code>this</code> Tensor instance.
 	 */
 	public final Tensor selfAdd(double value) {
@@ -385,7 +385,6 @@ public abstract class Tensor implements Iterable<Long> {
 		}
 		return res;
 	}
-
 	/**
 	 * Computes the minimum tensor element. If the tensor has zero {@link #size()}, 
 	 * this returns <code>Double.POSITIVE_INFINITY</code>.
@@ -499,7 +498,6 @@ public abstract class Tensor implements Iterable<Long> {
 			values[(int)i] = get(i);
 		return values;
 	}
-	
 	/**
 	 * Converts a given value to a JGNN-compatible dense tensor.
 	 * @param value A given value.
@@ -512,7 +510,6 @@ public abstract class Tensor implements Iterable<Long> {
 		ret.put(0, value);
 		return ret;
 	}
-	
 	/**
 	 * Creates a tensor holding the desired range [start, start+1, ..., end-1]
 	 * @param start The start of the range.
@@ -525,7 +522,6 @@ public abstract class Tensor implements Iterable<Long> {
 			ret.put(pos, start+pos);
 		return ret;
 	}
-	
 	/**
 	 * Converts a tensor of {@link #size()}==1 to double. Throws an exception otherwise.
 	 * @return A double.

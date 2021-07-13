@@ -9,7 +9,7 @@ import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.SparseMatrix;
 import mklab.JGNN.core.tensor.AccessSubtensor;
 import mklab.JGNN.core.tensor.DenseTensor;
-import mklab.JGNN.models.TrainingData;
+import mklab.JGNN.data.TrainingData;
 
 public class RelationalData implements TrainingData {
 	private Tensor edgeSrc;

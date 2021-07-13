@@ -6,29 +6,29 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Stack;
 
-import mklab.JGNN.core.activations.LRelu;
-import mklab.JGNN.core.activations.PRelu;
-import mklab.JGNN.core.activations.Relu;
-import mklab.JGNN.core.activations.Sigmoid;
-import mklab.JGNN.core.activations.Tanh;
-import mklab.JGNN.core.inputs.Constant;
-import mklab.JGNN.core.inputs.Parameter;
-import mklab.JGNN.core.inputs.Variable;
-import mklab.JGNN.core.operations.Add;
-import mklab.JGNN.core.operations.Complement;
-import mklab.JGNN.core.operations.Concat;
-import mklab.JGNN.core.operations.Gather;
-import mklab.JGNN.core.operations.Log;
-import mklab.JGNN.core.operations.MatMul;
-import mklab.JGNN.core.operations.Multiply;
-import mklab.JGNN.core.operations.Repeat;
-import mklab.JGNN.core.pooling.SoftMax;
-import mklab.JGNN.core.pooling.Sum;
 import mklab.JGNN.core.tensor.DenseTensor;
+import mklab.JGNN.nn.activations.LRelu;
+import mklab.JGNN.nn.activations.PRelu;
+import mklab.JGNN.nn.activations.Relu;
+import mklab.JGNN.nn.activations.Sigmoid;
+import mklab.JGNN.nn.activations.Tanh;
+import mklab.JGNN.nn.inputs.Constant;
+import mklab.JGNN.nn.inputs.Parameter;
+import mklab.JGNN.nn.inputs.Variable;
+import mklab.JGNN.nn.operations.Add;
+import mklab.JGNN.nn.operations.Complement;
+import mklab.JGNN.nn.operations.Concat;
+import mklab.JGNN.nn.operations.Gather;
+import mklab.JGNN.nn.operations.Log;
+import mklab.JGNN.nn.operations.MatMul;
+import mklab.JGNN.nn.operations.Multiply;
+import mklab.JGNN.nn.operations.Repeat;
+import mklab.JGNN.nn.pooling.SoftMax;
+import mklab.JGNN.nn.pooling.Sum;
 
 /**
  * This class and subclasses can be used to create {@link Model} instances 
- * by automatically creating and managing {@link NNOperations} based on
+ * by automatically creating and managing {@link NNOperation} instances based on
  * textual descriptions.
  * 
  * @author Emmanouil Krasanakis
