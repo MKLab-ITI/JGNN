@@ -7,9 +7,13 @@ import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.util.Range;
 
 /**
- * Can be used to access a column of a {@link Matrix} as if it were a dense {@link Tensor}.
+ * Accesses a column of a {@link Matrix} as if it were a dense {@link Tensor}.
+ * Prefer using {@link mklab.JGNN.core.Martix#getCol(long)}, which wraps usage
+ * of this class. Instances of this class share elements with the matrix which
+ * they access and do <i>not</i> allocate new memory.
  * 
  * @author Emmanouil Krasanakis
+ * @see AccessRow
  */
 public class AccessCol extends Tensor {
 	private Matrix matrix;
@@ -18,6 +22,7 @@ public class AccessCol extends Tensor {
 	public AccessCol(Matrix matrix, long col) {
 		super(matrix.getRows());
 		this.matrix = matrix;
+		this.col = col;
 	}
 	
 	@Override

@@ -5,7 +5,13 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Map.Entry;
 
-public class Range2D implements Iterator<Entry<Long,Long>> {
+/**
+ * Implements an iterator that traverses a two-dimentional range (min, max) x (min2, max2).
+ * It is often used by {@link mklab.JGNN.core.Matrix} instances to traverse through all element positions.
+ * 
+ * @author Emmanouil Krasanakis
+ */
+public class Range2D implements Iterator<Entry<Long,Long>>, Iterable<Entry<Long,Long>> {
 	  private long nextValue;
 	  private long nextValue2;
 	  private final long min;
@@ -18,9 +24,11 @@ public class Range2D implements Iterator<Entry<Long,Long>> {
 	    this.max = max;
 	    this.max2 = max2;
 	  }
+	  @Override
 	  public boolean hasNext() {
 	    return nextValue<max && nextValue2 < max2;
 	  }
+	  @Override
 	  public Entry<Long,Long> next() {
 	    if (!hasNext()) 
 	      throw new NoSuchElementException();
@@ -32,7 +40,12 @@ public class Range2D implements Iterator<Entry<Long,Long>> {
 	    }
 	    return ret;
 	  }
+      @Override
 	  public void remove() {
 	    throw new UnsupportedOperationException();
 	  }
+	@Override
+	public Iterator<Entry<Long, Long>> iterator() {
+		return this;
+	}
 }

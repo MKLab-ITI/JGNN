@@ -2,6 +2,10 @@ package mklab.JGNN.core.distribution;
 
 import mklab.JGNN.core.Distribution;
 
+/**
+ * Implements a Uniform {@link Distribution} of given bounds.
+ * @author Emmanouil Krasanakis
+ */
 public class Uniform implements Distribution {
 	private double from;
 	private double to;

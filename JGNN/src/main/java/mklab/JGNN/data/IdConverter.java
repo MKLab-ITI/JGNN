@@ -8,9 +8,15 @@ import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.SparseMatrix;
 import mklab.JGNN.core.tensor.DenseTensor;
+import mklab.JGNN.nn.operations.Concat;
 
+/**
+ * Converts back-and-forth between objects and unique ids and automates one-hot encoding.
+ * @author Emmanouil Krasanakis
+ */
 public class IdConverter {
 	protected HashMap<Object, Integer> ids = new HashMap<Object, Integer>();
+	protected HashMap<Integer, Object> inverse = new HashMap<Integer, Object>();
 	public IdConverter() {
 	}
 	public IdConverter(ArrayList<?> objects) {
@@ -19,9 +25,14 @@ public class IdConverter {
 	}
 	public int getOrCreateId(Object object) {
 		Integer ret = ids.get(object);
-		if(ret==null)
+		if(ret==null) {
 			ids.put(object, ret = ids.size());
+			inverse.put(ret, object);
+		}
 		return ret;
+	}
+	public Object get(int id) {
+		return inverse.get(id);
 	}
 	public int getId(Object object) {
 		return ids.get(object);
@@ -32,7 +43,17 @@ public class IdConverter {
 	public boolean contains(Object object) {
 		return ids.containsKey(object);
 	}
-
+	public ArrayList<Integer> getIds() {
+		return new ArrayList<Integer>(ids.values());
+	}
+	public Matrix oneHot(ArrayList<HashMap<Integer, String>> nodeFeatures) {
+		Matrix features = null;
+		for(HashMap<Integer, String> feature : nodeFeatures) {
+			Matrix onehot = oneHot(feature);
+			features = features==null?onehot:(Matrix)new Concat().run(features, onehot);
+		}
+		return features;
+	}
 	public Matrix oneHot(HashMap<Integer, String> nodeLabels) {
 		IdConverter encoder = new IdConverter();
 		for(String label : nodeLabels.values())

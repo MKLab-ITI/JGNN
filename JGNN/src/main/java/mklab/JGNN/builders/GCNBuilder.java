@@ -9,7 +9,7 @@ import mklab.JGNN.core.matrix.DenseMatrix;
 import mklab.JGNN.core.tensor.DenseTensor;
 
 /**
- * 
+ * This class automates GNN generation. 
  * @author Emmanouil Krasanakis
  */
 public class GCNBuilder extends ModelBuilder {

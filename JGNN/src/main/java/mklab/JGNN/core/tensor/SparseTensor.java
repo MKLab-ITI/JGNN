@@ -56,8 +56,6 @@ public class SparseTensor extends Tensor {
 	}
 	@Override
 	public synchronized Iterator<Long> traverseNonZeroElements() {
-		if(keySet==null)
-			keySet = new ArrayList<Long>(values.keySet());
-		return keySet.iterator();
+		return values.keySet().iterator();
 	}
 }

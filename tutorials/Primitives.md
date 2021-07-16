@@ -39,7 +39,7 @@ Operation | Type | Comments
 `Tensor selfAdd(Tensor)` | in-place arithmetic
 `Tensor selfSubtract(Tensor)` | in-place arithmetic
 `Tensor setMultiply(Tensor)` | in-place arithmetic
-`Tensor selfMultiply(double double)` | in-place arithmetic
+`Tensor selfMultiply(double)` | in-place arithmetic
 `Tensor setToRandom()` | in-place arithmetic | element selected from uniform distribution in the range [0,1]
 `Tensor setToOnes()` | in-place arithmetic
 `Tensor setToNormalized()` | in-place arithmetic  | Division with L2 norm (if non-zero).
@@ -49,6 +49,8 @@ Operation | Type | Comments
 `double sum()` | summary statistics
 `double max()` | summary statistics
 `double min()` | summary statistics
+`long argmax()` | summary statistics
+`long argmin()` | summary statistics
 `double toDouble()` | summary statistics | Converts tensor with exactly one element to a double (throws exception if more elements).
 `Tensor set(long position, double value)` | element access | NaN values throw exceptions. Is in-place.
 `double get(long position)` | element access
@@ -88,10 +90,13 @@ need to be typecast back into a matrix (e.g. for all in-place operations).
 Operation | Type | Comments
 --- | --- | ---
 `Matrix onesMask()` | arithmetic | Copy of a matrix with elements set to one.
-`Matrix transposed()` | arithmetic | There is no method for in-place transposition. But a version of matrix multiplication supports transposition-aware arguments.
+`Matrix transposed()` | arithmetic | There is no method for in-place transposition.
+`Matrix asTransposed()` | arithmetic | Shares data with the original.
+`Tensor getRow(long)` | arithmetic | Shares data with the original.
+`Tensor getCol(long)` | arithmetic | Shares data with the original.
 `Tensor transform(Tensor x)` | arithmetic | Outputs a dense tensor that holds the linear transformation of the given tensor (using it as a column vector) by multiplying it with the matrix.
 `Matrix matmul(Matrix with)` | arithmetic | Outputs the matrix multiplication **this \* with**. There is no in-place matrix multiplication.
-`Matrix matmul(Matrix with, boolean transposeSelf, transposeWith)` | arithmetic | Does not perform memory allocation to compute transpositions.
+`Matrix matmul(Matrix with, boolean transposeSelf, boolean transposeWith)` | arithmetic | Does not perform memory allocation to compute transpositions.
 `Matrix external(Tensor horizontal, Tensor vertical)` | static method | External product of two tensors. Is a dense matrix.
 `Matrix laplacian()` | in-place arithmetic | The symmetrically normalized Laplacian.
 `Matrix setToLaplacian()` | in-place arithmetic | The symmetrically normalized Laplacian.

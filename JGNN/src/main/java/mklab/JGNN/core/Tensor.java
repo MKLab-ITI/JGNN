@@ -2,6 +2,8 @@ package mklab.JGNN.core;
 
 import java.util.Iterator;
 
+import mklab.JGNN.core.matrix.ColumnRepetition;
+import mklab.JGNN.core.matrix.RowRepetition;
 import mklab.JGNN.core.tensor.DenseTensor;
 
 /**
@@ -182,7 +184,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 */
 	public final Tensor add(Tensor tensor) {
 		assertMatching(tensor);
-		Tensor res = zeroCopy();
+		Tensor res = copy();
 		for(long i : tensor.getNonZeroElements())
 			res.put(i, get(i)+tensor.get(i));
 		return res;
@@ -226,7 +228,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 */
 	public final Tensor subtract(Tensor tensor) {
 		assertMatching(tensor);
-		Tensor res = zeroCopy();
+		Tensor res = copy();
 		for(long i : tensor.getNonZeroElements())
 			res.put(i, get(i)-tensor.get(i));
 		return res;
@@ -239,7 +241,7 @@ public abstract class Tensor implements Iterable<Long> {
 	public final Tensor selfSubtract(Tensor tensor) {
 		assertMatching(tensor);
 		Tensor res = this;
-		for(long i : tensor.getNonZeroElements())
+		for(long i : tensor.getNonZeroElements()) 
 			res.put(i, get(i)-tensor.get(i));
 		return res;
 	}
@@ -288,6 +290,7 @@ public abstract class Tensor implements Iterable<Long> {
 		return res;
 	}
 	/**
+	 * Computes the square root of tensor elements.
 	 * @return A new Tensor that stores the outcome of finding the absolute square root of each element.
 	 */
 	public final Tensor sqrt() {
@@ -297,13 +300,33 @@ public abstract class Tensor implements Iterable<Long> {
 		return res;
 	}
 	/**
-	 * Performs in-memory the square root of the absolute of each element.
+	 * Performs in-memory set of each element to the square root of its absolute value.
 	 * @return <code>this</code> Tensor instance.
 	 */
 	public final Tensor selfSqrt() {
 		Tensor res = this;
 		for(long i : getNonZeroElements())
 			res.put(i, Math.sqrt(Math.abs(get(i))));
+		return res;
+	}
+	/**
+	 * Computes the absolute value of tensor elements.
+	 * @return A new Tensor that stores the outcome of finding the absolute value of each element.
+	 */
+	public final Tensor abs() {
+		Tensor res = zeroCopy();
+		for(long i : getNonZeroElements())
+			res.put(i, Math.abs(get(i)));
+		return res;
+	}
+	/**
+	 * Performs in-memory set of each element to its absolute value.
+	 * @return <code>this</code> Tensor instance.
+	 */
+	public final Tensor selfAbs() {
+		Tensor res = this;
+		for(long i : getNonZeroElements())
+			res.put(i, Math.abs(get(i)));
 		return res;
 	}
 	/**
@@ -375,10 +398,12 @@ public abstract class Tensor implements Iterable<Long> {
 	 * Computes the maximum tensor element. If the tensor has zero {@link #size()}, 
 	 * this returns <code>Double.NEGATIVE_INFINITY</code>.
 	 * @return The maximum tensor element
+	 * @see #argmax()
+	 * @see #min()
 	 */
 	public final double max() {
 		double res = Double.NEGATIVE_INFINITY;
-		for(long i : getNonZeroElements()) {
+		for(long i=0;i<size;i++) {
 			double value = get(i);
 			if(value>res)
 				res = value;
@@ -386,18 +411,58 @@ public abstract class Tensor implements Iterable<Long> {
 		return res;
 	}
 	/**
+	 * Computes the position of the maximum tensor element. If the tensor has zero {@link #size()}, 
+	 * this returns <code>-1</code>.
+	 * @return The position of the maximum tensor element
+	 * @see #max()
+	 * @see #argmin()
+	 */
+	public final long argmax() {
+		double res = Double.NEGATIVE_INFINITY;
+		long pos = -1;
+		for(long i=0;i<size;i++) {
+			double value = get(i);
+			if(value>res) {
+				res = value;
+				pos = i;
+			}
+		}
+		return pos;
+	}
+	/**
 	 * Computes the minimum tensor element. If the tensor has zero {@link #size()}, 
 	 * this returns <code>Double.POSITIVE_INFINITY</code>.
 	 * @return The minimum tensor element
+	 * @see #argmin()
+	 * @see #max()
 	 */
 	public final double min() {
 		double res = Double.POSITIVE_INFINITY;
-		for(long i : getNonZeroElements()) {
+		for(long i=0;i<size;i++) {
 			double value = get(i);
 			if(value<res)
 				res = value;
 		}
 		return res;
+	}
+	/**
+	 * Computes the position of the minimum tensor element. If the tensor has zero {@link #size()}, 
+	 * this returns <code>-1</code>.
+	 * @return The position of the minimum tensor element
+	 * @see #min()
+	 * @see #argmax()
+	 */
+	public final long argmin() {
+		double res = Double.POSITIVE_INFINITY;
+		long pos = -1;
+		for(long i=0;i<size;i++) {
+			double value = get(i);
+			if(value<res) {
+				res = value;
+				pos = i;
+			}
+		}
+		return pos;
 	}
 	/**
 	 * A string serialization of the tensor that can be used by the constructor {@link #Tensor(String)} to create an identical copy.
@@ -531,6 +596,24 @@ public abstract class Tensor implements Iterable<Long> {
 	public double toDouble() {
 		assertSize(1);
 		return get(0);
+	}
+	/**
+	 * Accesses the tensor through a single-column matrix with the tensor as the only row.
+	 * Editing the returned matrix also edits the original tensor.
+	 * No new memory is allocated for tensor values.
+	 * @return A {@link RowRepetition} instance.
+	 */
+	public RowRepetition asColumn() {
+		return new RowRepetition(this, 1);
+	}
+	/**
+	 * Accesses the tensor through a single-row matrix with the tensor as the only column.
+	 * Editing the returned matrix also edits the original tensor.
+	 * No new memory is allocated for tensor values.
+	 * @return A {@link ColumnRepetition} instance.
+	 */
+	public ColumnRepetition asRow() {
+		return new ColumnRepetition(1, this);
 	}
 	/**
 	 * Describes the type, size and other characteristics of the tensor.

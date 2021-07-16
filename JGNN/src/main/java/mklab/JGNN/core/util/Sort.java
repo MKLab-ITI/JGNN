@@ -18,7 +18,6 @@ public class Sort {
 		return sortedIndexes(Alist);
 	}
 	
-	
     private static int partition(double A[], int indexes[], int low, int high) { 
         double pi = A[high];  
         int i = (low-1); // smaller element index   

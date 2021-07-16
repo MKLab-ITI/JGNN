@@ -14,11 +14,23 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 import mklab.JGNN.core.util.Sort;
+import mklab.JGNN.data.IdConverter;
 import net.lingala.zip4j.ZipFile;
 
+/**
+ * Provides automatic downloading and importing of well-known public datasets. 
+ * These can be used to test machine learning algorithms developed with JGNN.
+ * If you use the provided datasets for publication, please follow the links
+ * outputted by the library to the error console to find attribution requirements.
+ * 
+ * @author Emmanouil Krasanakis
+ */
 public class Dataset {
-	private ArrayList<Entry<String, String>> interactions = new  ArrayList<Entry<String, String>>();
-	private HashMap<Object, String> labels = new HashMap<Object, String>();
+	private IdConverter nodeIds = new IdConverter();
+	private HashMap<Integer, String> nodeLabels = new HashMap<Integer, String>();
+	private HashMap<Integer, ArrayList<String>> nodeFeatures = new HashMap<Integer, ArrayList<String>>();
+	private ArrayList<Entry<Integer, Integer>> interactions = new ArrayList<Entry<Integer, Integer>>();
+	private int numFeatures = 0;
 	
 	protected Dataset() {
 	}
@@ -27,8 +39,62 @@ public class Dataset {
 		initTemporal(path, delimiter, senderColumn, receiverColumn, timeColumn);
 	}
 	
-	public String getLabel(Object obj) {
-		return labels.get(obj);
+	public int getNumberOfFeatures() {
+		if(numFeatures==0)
+			throw new RuntimeException("Dataset "+toString()+" does not comprise node features");
+		return numFeatures;
+	}
+	
+	public IdConverter nodes() {
+		if(nodeIds.size()==0)
+			throw new RuntimeException("Dataset "+toString()+" does not comprise any nodes (this error should normally not appear)");
+		return nodeIds;
+	}
+
+	public HashMap<Integer, String> labels() {
+		return nodeLabels;
+	}
+	
+	public String getLabel(int node) {
+		if(nodeLabels.isEmpty())
+			throw new RuntimeException("Dataset "+toString()+" does not comprise node labels");
+		return nodeLabels.get(node);
+	}
+	
+	public ArrayList<String> getFeatures(int node) {
+		if(nodeFeatures.isEmpty())
+			throw new RuntimeException("Dataset "+toString()+" does not comprise node features");
+		return nodeFeatures.get(node);
+	}
+	
+	public ArrayList<HashMap<Integer, String>> features() {
+		ArrayList<HashMap<Integer, String>> ret = new ArrayList<HashMap<Integer, String>>();
+		for(int i=0;i<numFeatures;i++) {
+			HashMap<Integer, String> feature = new HashMap<Integer, String>();
+			for(Integer node : nodeIds.getIds())
+				feature.put(node, getFeatures(node).get(i));
+			ret.add(feature);
+		}
+		return ret;
+	}
+
+	protected static void downloadSourceFile(String path, String url) {
+		if(!(new File(path)).exists()) {
+			try {
+				(new File(path.substring(0, Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\')))+File.separator)).mkdirs();
+				System.out.println("Downloading: "+url);
+				ReadableByteChannel readableByteChannel = Channels.newChannel(new URL(url).openStream());
+				FileOutputStream fileOutputStream = new FileOutputStream(path);
+				FileChannel fileChannel = fileOutputStream.getChannel();
+				fileOutputStream.getChannel()
+				  .transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+				fileChannel.close();
+				fileOutputStream.close();
+			}
+			catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	protected static void downloadSource(String path, String name, String url) {
@@ -57,7 +123,7 @@ public class Dataset {
 		}
 	}
 	
-	protected void initStatic(String path, String delimiter, int senderColumn, int receiverColumn) {
+	protected void initStaticGraph(String path, String delimiter, int senderColumn, int receiverColumn) {
 		try {
 			BufferedReader edgeReader = new BufferedReader(new FileReader(new File(path)));
 			String line = null;
@@ -67,8 +133,7 @@ public class Dataset {
 				String[] splt = line.split(delimiter);
 				if(splt.length<2)
 					continue;
-
-				this.interactions.add(new AbstractMap.SimpleEntry<String, String>(splt[senderColumn], splt[receiverColumn]));
+				addInteraction(splt[senderColumn], splt[receiverColumn]);
 			}
 			edgeReader.close();
 		}
@@ -88,7 +153,12 @@ public class Dataset {
 				String[] splt = line.split(delimiter);
 				if(splt.length<2)
 					continue;
-				this.labels.put(splt[nodeColumn], splt[labelColumn]);
+				setLabel(nodeColumn==-1?"Node "+nodeIds.size():splt[nodeColumn], splt[labelColumn]);
+				ArrayList<String> features = new ArrayList<String>();
+				for(int i=0;i<splt.length;i++)
+					if(i!=nodeColumn && i!=labelColumn)
+						features.add(splt[i]);
+				setFeatures(nodeColumn==-1?"Node "+(nodeIds.size()-1):splt[nodeColumn], features);
 			}
 			labelReader.close();
 		}
@@ -96,7 +166,7 @@ public class Dataset {
 			e.printStackTrace();
 		}
 	}
-
+	
 	protected void initStaticLabeled(String path, String labelPath, String delimiter, int senderColumn, int receiverColumn, int labelColumn) {
 		try {
 			BufferedReader edgeReader = new BufferedReader(new FileReader(new File(path)));
@@ -111,9 +181,7 @@ public class Dataset {
 					continue;
 				//String[] spltLabel = line.split(labelLine);
 				
-				Entry<String, String> interaction = new AbstractMap.SimpleEntry<String, String>(splt[senderColumn], splt[receiverColumn]);
-				this.interactions.add(interaction);
-				this.labels.put(interaction, "0");//spltLabel[labelColumn]);
+				addInteraction(splt[senderColumn], splt[receiverColumn]);
 			}
 			//labelReader.close();
 			edgeReader.close();
@@ -146,7 +214,7 @@ public class Dataset {
 				String[] splt = interactions.get(i).split(" ");
 				String u = splt[0];
 				String v = splt[1];
-				this.interactions.add(new AbstractMap.SimpleEntry<String, String>(u, v));
+				addInteraction(u, v);
 			}
 		}
 		catch(Exception e) {
@@ -154,7 +222,24 @@ public class Dataset {
 		}
 	}
 	
-	public ArrayList<Entry<String, String>> getInteractions() {
+	protected void addInteraction(String u, String v) {
+		this.interactions.add(new AbstractMap.SimpleEntry<Integer, Integer>(nodeIds.getOrCreateId(u), nodeIds.getOrCreateId(v)));
+		
+	}
+	protected void setLabel(String u, String label) {
+		this.nodeLabels.put(nodeIds.getOrCreateId(u), label);
+	}
+	protected void setFeatures(String u, ArrayList<String> features) {
+		if(numFeatures==0)
+			numFeatures = features.size();
+		else if(numFeatures!=features.size())
+			throw new RuntimeException("Entry with "+features.size()+" features instread of "+numFeatures+" found in previous entry");
+		this.nodeFeatures.put(nodeIds.getOrCreateId(u), features);
+	}
+	
+	public ArrayList<Entry<Integer, Integer>> getInteractions() {
+		if(interactions.isEmpty())
+			throw new RuntimeException("Dataset "+toString()+" does not comprise interactions");
 		return interactions;
 	}
 	

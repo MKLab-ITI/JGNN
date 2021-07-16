@@ -59,11 +59,11 @@ public abstract class NNOperation {
 	}
 	protected NNOperation() {}
 
-	synchronized public ArrayList<NNOperation> getInputs() {
+	public ArrayList<NNOperation> getInputs() {
 		return inputs;
 	}
 	
-	synchronized public ArrayList<NNOperation> getOutputs() {
+	public ArrayList<NNOperation> getOutputs() {
 		return outputs;
 	}
 	
@@ -80,7 +80,7 @@ public abstract class NNOperation {
 			input.clearPrediction();
 	}
 
-	synchronized public NNOperation addInput(NNOperation inputComponent) {
+	public NNOperation addInput(NNOperation inputComponent) {
 		inputs.add(inputComponent);
 		inputComponent.outputs.add(this);
 		return this;
@@ -112,7 +112,7 @@ public abstract class NNOperation {
 	final void backpropagate(Optimizer optimizer, Tensor error) {
 		ThreadData data = data();
 		//if(error!=null)
-		//	System.out.println("Packpropagating... "+describe()+" Derivative "+error.describe());
+		//	System.out.println("Packpropagating... "+describe()+" Derivative "+error.describe()+" on thread "+ThreadPool.getCurrentThreadId());
 		if(error!=null) 
 			data.tapeError.selfAdd(error);
 		data.countTapeSources++;
@@ -130,6 +130,7 @@ public abstract class NNOperation {
 			if(!inputs.get(i).isConstant())
 				inputs.get(i).backpropagate(optimizer, partial(i, lastInputs, data.lastOutput, data.tapeError));
 		trainParameters(optimizer, data.tapeError);
+		//System.out.println("Finished backpropagation on "+describe()+" on thread "+ThreadPool.getCurrentThreadId());
 	}
 
 	final void forceBackpropagate(Optimizer optimizer, Tensor error) {

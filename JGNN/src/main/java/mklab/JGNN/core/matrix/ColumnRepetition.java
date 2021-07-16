@@ -9,7 +9,7 @@ import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.util.Range2D;
 
 /**
- * Can be used to define a matrix whose columns are all a copy of a {@link Tensor}.
+ * Defines a matrix whose columns are all a copy of a {@link Tensor}.
  * To avoid potential confusion, setting element values (and all supported operations) throws
  * an exception.
  * 

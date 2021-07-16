@@ -9,6 +9,13 @@ import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.tensor.SparseTensor;
 
+/**
+ * Defines a {@link SparseMatrix} that is constrained to by symmetric.
+ * Taking advantage of this contraint it consumes only half the memory.
+ * 
+ * @author Emmanouil Krasanakis
+ * @deprecated Under development.
+ */
 public class SparseSymmetric extends Matrix {
 	private Tensor tensor;
 	public SparseSymmetric(long rows, long cols) {

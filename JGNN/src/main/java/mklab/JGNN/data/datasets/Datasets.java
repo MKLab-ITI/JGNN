@@ -3,13 +3,50 @@ package mklab.JGNN.data.datasets;
 import java.io.File;
 
 public class Datasets {
+	
+	public static final class Adult extends Dataset {
+		public Adult() {
+			String path = "downloads/adult/adult.csv";
+			if(!(new File(path)).exists())
+				downloadSourceFile(path, "https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data");
+			initNodeLabels(path, ", ", -1, 14);
+			System.err.println("The Adult dataset is automatically downloaded from the link:"
+					+"\nhttps://archive.ics.uci.edu/ml/datasets/adult"
+					+"\nPlease follow attribution requirements stated there.");
+		}
+	}
+	
+
+	public static final class BreastCancer extends Dataset {
+		public BreastCancer() {
+			String path = "downloads/cancer/breast-cancer.data";
+			if(!(new File(path)).exists())
+				downloadSourceFile(path, "https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer/breast-cancer.data");
+			initNodeLabels(path, ",", -1, 0);
+			System.err.println("The Breast Cancer dataset is automatically downloaded from the link:"
+					+"\nhttps://archive.ics.uci.edu/ml/datasets/Breast+Cancer"
+					+"\nPlease follow attribution requirements stated there.");
+		}
+	}
+	
+	public static final class Lymphography extends Dataset {
+		public Lymphography() {
+			String path = "downloads/cancer/lymphography.data";
+			if(!(new File(path)).exists())
+				downloadSourceFile(path, "https://archive.ics.uci.edu/ml/machine-learning-databases/lymphography/lymphography.data");
+			initNodeLabels(path, ",", -1, 0);
+			System.err.println("The Lymphography dataset is automatically downloaded from the link:"
+					+"\nhttps://archive.ics.uci.edu/ml/datasets/Lymphography"
+					+"\nPlease follow attribution requirements stated there.");
+		}
+	}
 
 	public static final class Cora extends Dataset {
 		public Cora() {
 			String folderName = "downloads/cora";
 			if(!(new File(folderName)).exists())
 				downloadSource(folderName, "cora", "https://data.deepai.org/Cora.zip");
-			initStatic(folderName+"/Cora/edges.csv", ",", 0, 1);
+			initStaticGraph(folderName+"/Cora/edges.csv", ",", 0, 1);
 			initNodeLabels(folderName+"/Cora/group-edges.csv", ",", 0, 1);
 		}
 	}
@@ -20,7 +57,7 @@ public class Datasets {
 			String folderName = "downloads/coragraph";
 			if(!(new File(folderName)).exists())
 				downloadSource(folderName, "cora", "http://nrvis.com/download/data/labeled/cora.zip");
-			initStatic(folderName+"/cora.edges", ",", 0, 1);
+			initStaticGraph(folderName+"/cora.edges", ",", 0, 1);
 			initNodeLabels(folderName+"/cora.node_labels", ",", 0, 1);
 		}
 	}
@@ -30,7 +67,7 @@ public class Datasets {
 			String folderName = "downloads/citeseer";
 			if(!(new File(folderName)).exists())
 				downloadSource(folderName, "citeseer", "http://nrvis.com/download/data/labeled/citeseer.zip");
-			initStatic(folderName+"/citeseer.edges", ",", 0, 1);
+			initStaticGraph(folderName+"/citeseer.edges", ",", 0, 1);
 			initNodeLabels(folderName+"/citeseer.node_labels", ",", 0, 1);
 		}
 	}
@@ -40,7 +77,7 @@ public class Datasets {
 			String folderName = "downloads/pubmed";
 			if(!(new File(folderName)).exists())
 				downloadSource(folderName, "download", "http://nrvis.com/download/data/labeled/PubMed.zip");
-			initStatic(folderName+"/PubMed.edges", ",", 0, 1);
+			initStaticGraph(folderName+"/PubMed.edges", ",", 0, 1);
 			initNodeLabels(folderName+"/PubMed.node_labels", ",", 0, 1);
 		}
 	}
@@ -50,7 +87,7 @@ public class Datasets {
 			String folderName = "downloads/mutag";
 			if(!(new File(folderName)).exists())
 				downloadSource(folderName, "download", "http://nrvis.com/download/data/labeled/Mutag.zip");
-			initStatic(folderName+"/Mutag.edges", ",", 0, 1);
+			initStaticGraph(folderName+"/Mutag.edges", ",", 0, 1);
 			initNodeLabels(folderName+"/Mutag.node_labels", ",", 0, 1);
 		}
 	}

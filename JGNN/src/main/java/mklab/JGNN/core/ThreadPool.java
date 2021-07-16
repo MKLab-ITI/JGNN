@@ -47,7 +47,7 @@ public class ThreadPool {
 				usedIds.remove(threadId);
 			}
 		};
-		int threadId = -1;
+		int threadId = getUnusedId();
 		while(threadId==-1) {
 			waitForVacancy();
 			threadId = getUnusedId();

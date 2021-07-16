@@ -7,6 +7,7 @@ import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.NNOperation;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.DenseMatrix;
+import mklab.JGNN.core.matrix.SparseMatrix;
 
 /**
  * Implements a {@link NNOperation} that concatenates its two matrix inputs.
@@ -22,7 +23,9 @@ public class Concat extends NNOperation {
 		Matrix matrix1 = (Matrix)inputs.get(1);
 		if(matrix0.getRows()!=matrix1.getRows())
 			throw new IllegalArgumentException();
-		Matrix matrix = new DenseMatrix(matrix0.getRows(), matrix0.getCols()+matrix1.getCols());
+		Matrix matrix = (matrix0 instanceof SparseMatrix && matrix1 instanceof SparseMatrix)
+				?new SparseMatrix(matrix0.getRows(), matrix0.getCols()+matrix1.getCols())
+				:new DenseMatrix(matrix0.getRows(), matrix0.getCols()+matrix1.getCols());
 		for(Entry<Long, Long> entry : matrix0.getNonZeroEntries())
 			matrix.put(entry.getKey(), entry.getValue(), matrix0.get(entry.getKey(), entry.getValue()));
 		for(Entry<Long, Long> entry : matrix1.getNonZeroEntries())

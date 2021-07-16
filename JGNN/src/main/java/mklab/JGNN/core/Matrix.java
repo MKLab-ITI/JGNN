@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import mklab.JGNN.core.matrix.AccessRow;
+import mklab.JGNN.core.matrix.AccessCol;
 import mklab.JGNN.core.matrix.DenseMatrix;
 import mklab.JGNN.core.matrix.SparseMatrix;
+import mklab.JGNN.core.matrix.TransposedMatrix;
 import mklab.JGNN.core.tensor.DenseTensor;
 import mklab.JGNN.core.tensor.SparseTensor;
 
@@ -13,8 +16,10 @@ import java.util.Map.Entry;
 
 /**
  * This class provides an abstract implementation of Matrix functionalities.
- * Matrices inherit {@link Tensor} functionalities, such as addition, 
+ * Matrices inherit {@link Tensor} operations, such as addition, 
  * element-by-element multiplication, randomizing them and producing zero copies.
+ * Additionally, matrix multiplication, transposition and access operations are
+ * provided.
  * 
  * @author Emmanouil Krasanakis
  */
@@ -58,22 +63,29 @@ public abstract class Matrix extends Tensor {
 		put(row+col*rows, value);
 		return this;
 	}
-	
 	/**
 	 * Creates a transposed copy of the matrix.
 	 * Note: Contrary to typical tensor operations, in-place transposition is not supported.
-	 * However, {@link #matmul(Matrix, boolean, boolean)} can be used to transpose matrices
-	 * before multiplication.
+	 * However, related methods can help avoid explicit transposition without allocating more
+	 * memory.
 	 * @return A transposed copy of the matrix.
+	 * @see #matmul(Matrix)
+	 * @see #asTransposed()
 	 */
-	
 	public final Matrix transposed() {
 		Matrix ret = zeroCopy(getCols(), getRows());
 		for(Entry<Long, Long> element : getNonZeroEntries())
 			ret.put(element.getValue(), element.getKey(), get(element.getKey(), element.getValue()));
 		return ret;
 	}
-	
+	/**
+	 * Creates a transposed version of the matrix that accesses the same elements (thus, editing one
+	 * edits the other) without allocating additional memory.
+	 * @return A {@link TransposedMatrix}.
+	 */
+	public Matrix asTransposed() {
+		return new TransposedMatrix(this);
+	}
 	/**
 	 * Performs the linear algebra transformation A*x where A is this matrix and x a vector
 	 * @param x The one-dimensional tensor which is the vector being transformed.
@@ -89,7 +101,6 @@ public abstract class Matrix extends Tensor {
 		}
 		return ret;
 	}
-	
 	/**
 	 * Performs the matrix multiplication of <code>this*with</code> and the recipient.
 	 * 
@@ -222,6 +233,28 @@ public abstract class Matrix extends Tensor {
 				put(row, col, get(row, col)/div);
 		}
 		return this;
+	}
+	
+	/**
+	 * Retrieves the given row as a tensor. Editing the result
+	 * also edits the original matrix.
+	 * No new memory is allocated for matrix values.
+	 * @param row The given row.
+	 * @return A {@link AccessRow} instance of the corresponding row.
+	 */
+	public Tensor getRow(long row) {
+		return new AccessRow(this, row);
+	}
+
+	/**
+	 * Retrieves the given column as a tensor. Editing the result
+	 * also edits the original matrix.
+	 * No new memory is allocated for matrix values.
+	 * @param col The given column.
+	 * @return A {@link AccessCol} of the corresponding row.
+	 */
+	public Tensor getCol(long col) {
+		return new AccessCol(this, col);
 	}
 	
 	@Override

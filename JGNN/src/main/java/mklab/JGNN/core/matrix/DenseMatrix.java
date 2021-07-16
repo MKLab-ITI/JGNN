@@ -43,11 +43,6 @@ public class DenseMatrix extends Matrix {
 	}
 	@Override
 	public Iterable<Entry<Long, Long>> getNonZeroEntries() {
-		return new Iterable<Entry<Long, Long>>() {
-			@Override
-			public Iterator<Entry<Long, Long>> iterator() {
-				return new Range2D(0, getRows(), 0, getCols());
-			}
-		};
+		return new Range2D(0, getRows(), 0, getCols());
 	}
 }

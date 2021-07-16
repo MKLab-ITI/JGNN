@@ -9,7 +9,7 @@ import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.util.Range2D;
 
 /**
- * Can be used to define a matrix whose rlws are all a copy of a {@link Tensor}.
+ * Defines a matrix whose rows are all a copy of a {@link Tensor}.
  * To avoid potential confusion, setting element values (and all supported operations) throws
  * an exception.
  * 
@@ -24,7 +24,7 @@ public class RowRepetition extends Matrix {
 	}
 	@Override
 	public Matrix zeroCopy(long rows, long cols) {
-		return new DenseMatrix(getRows(), getCols());
+		return new DenseMatrix(rows, cols);
 	}
 	@Override
 	protected void allocate(long size) {
@@ -41,8 +41,8 @@ public class RowRepetition extends Matrix {
 	@Override
 	public Iterator<Long> traverseNonZeroElements() {
 		ArrayList<Long> nonZeros = new ArrayList<Long>();
-		for(long col=0;col<getRows();col++)
-			for(long rowPos : row.getNonZeroElements())
+		for(long col=0;col<getCols();col++)
+			for(long rowPos : row.getNonZeroElements()) 
 				nonZeros.add(rowPos+col*getRows());
 		return nonZeros.iterator();
 	}

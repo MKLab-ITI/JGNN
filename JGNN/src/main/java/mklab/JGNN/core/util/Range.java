@@ -4,21 +4,24 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- * This class implements an iterator that traverses a range (similar to Python's range(min, max) method).
- * It is often used by {@link mklab.JGNN.core.Tensor} to traverse through all element positions.
+ * Implements an iterator that traverses a range (similar to Python's range(min, max) method).
+ * It is often used by {@link mklab.JGNN.core.Tensor} derived classes to traverse through all 
+ * element positions in sequential order.
  * 
  * @author Emmanouil Krasanakis
  */
-public class Range implements Iterator<Long> {
+public class Range implements Iterator<Long>, Iterable<Long> {
 	  private long nextValue;
 	  private final long max;
 	  public Range(long min, long max) {
 	    this.nextValue = min;
 	    this.max = max;
 	  }
+	  @Override
 	  public boolean hasNext() {
 	    return nextValue < max;
 	  }
+	  @Override
 	  public Long next() {
 	    if (!hasNext()) 
 	      throw new NoSuchElementException();
@@ -26,7 +29,12 @@ public class Range implements Iterator<Long> {
 	    nextValue++;
 	    return ret;
 	  }
+	  @Override
 	  public void remove() {
 	    throw new UnsupportedOperationException();
 	  }
+	@Override
+	public Iterator<Long> iterator() {
+		return this;
+	}
 }

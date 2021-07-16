@@ -273,8 +273,16 @@ public class ModelBuilder {
 			component = new Sum();
 			arg0 = splt[3];
 		}
-		else if(splt[2].equals("max")) {
+		else if(splt[2].equals("max") || splt[2].equals("softmax")) {
 			component = new SoftMax();
+			arg0 = splt[3];
+		}
+		else if(splt[2].equals("maxrow") || splt[2].equals("softmaxrow")) {
+			component = new SoftMax(true);
+			arg0 = splt[3];
+		}
+		else if(splt[2].equals("maxcol") || splt[2].equals("softmaxcol")) {
+			component = new SoftMax(false);
 			arg0 = splt[3];
 		}
 		else if(splt[2].equals("relu")) {

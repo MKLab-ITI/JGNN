@@ -4,6 +4,10 @@ import java.util.Random;
 
 import mklab.JGNN.core.Distribution;
 
+/**
+ * Implements a Normal {@link Distribution} of given mean and standard deviation.
+ * @author Emmanouil Krasanakis
+ */
 public class Normal implements Distribution {
 	private double mean;
 	private double std;
