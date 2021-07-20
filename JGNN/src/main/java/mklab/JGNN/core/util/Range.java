@@ -30,11 +30,7 @@ public class Range implements Iterator<Long>, Iterable<Long> {
 	    return ret;
 	  }
 	  @Override
-	  public void remove() {
-	    throw new UnsupportedOperationException();
-	  }
-	@Override
-	public Iterator<Long> iterator() {
+	  public Iterator<Long> iterator() {
 		return this;
-	}
+	  }
 }

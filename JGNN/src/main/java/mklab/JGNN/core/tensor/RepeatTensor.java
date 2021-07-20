@@ -17,11 +17,11 @@ public class RepeatTensor extends Tensor {
 	public RepeatTensor(double value, long length) {
 		super(length);
 		this.value = value;
-	}
-	protected RepeatTensor() {
+		if(!Double.isFinite(value))
+			throw new IllegalArgumentException("Cannot accept non-finite (NaN or Infinity) tensor values");
 	}
 	public final synchronized Tensor put(long pos, double value) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException("Cannot edit a RepeatTensor: create a new one");
 	}
 	public final synchronized double get(long pos) {
 		if(pos<0 || pos>=size())
@@ -32,8 +32,8 @@ public class RepeatTensor extends Tensor {
 	protected void allocate(long size) {
 	}
 	@Override
-	public Tensor zeroCopy() {
-		return new RepeatTensor(value, size());
+	public Tensor zeroCopy(long size) {
+		throw new UnsupportedOperationException("Can not copy a RepeatTensor in any way: create a new one");
 	}
 	@Override
 	public Iterator<Long> traverseNonZeroElements() {

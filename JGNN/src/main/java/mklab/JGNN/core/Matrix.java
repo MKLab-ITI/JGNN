@@ -7,10 +7,8 @@ import java.util.List;
 import mklab.JGNN.core.matrix.AccessRow;
 import mklab.JGNN.core.matrix.AccessCol;
 import mklab.JGNN.core.matrix.DenseMatrix;
-import mklab.JGNN.core.matrix.SparseMatrix;
 import mklab.JGNN.core.matrix.TransposedMatrix;
 import mklab.JGNN.core.tensor.DenseTensor;
-import mklab.JGNN.core.tensor.SparseTensor;
 
 import java.util.Map.Entry;
 
@@ -27,38 +25,85 @@ public abstract class Matrix extends Tensor {
 	private long rows;
 	private long cols;
 	
-	public Matrix(long rows, long cols) {
-		super(rows*cols);
+	protected Matrix(long rows, long cols) {
+		init(rows*cols);
 		this.rows = rows;
 		this.cols = cols;
 	}
 	
+	/**
+	 * Retrieves an iterable that traverses (row, col) entry pairs
+	 * of non zero entries.
+	 * @return An Entry iterable.
+	 * @see #getNonZeroElements()
+	 */
 	public abstract Iterable<Entry<Long, Long>> getNonZeroEntries();
-	
-	protected Matrix() {
-	}
-	
+
+	/**
+	 * Creates a Matrix with the same class and dimensions and all element set to zero.
+	 * @return A Matrix with the same class and dimensions.
+	 * @see #zeroCopy(long, long)
+	 */
 	@Override
 	public final Matrix zeroCopy() {
 		return zeroCopy(rows, cols);
 	}
-	
+	/**
+	 * Creates a Matrix with the same class and dimensions and all element set to zero. This
+	 * checks that the copy has a total number of elements equal to the given size.
+	 * @param size The desired size of the matrix.
+	 * @return A Matrix with the same class and dimensions.
+	 * @throws RuntimeException If the desired 
+	 * @see #zeroCopy(long, long)
+	 */
+	@Override
+	public final Tensor zeroCopy(long size) {
+		if(size!=size())
+			throw new RuntimeException("Desired atrix size "+size+" can only be equal to rows "+rows+" * "+cols);
+		return zeroCopy(rows, cols);
+	}
+	/**
+	 * Creates a matrix of the same class and all element set to zero, but with
+	 * a given number of rows and columns.
+	 * @param row The number of rows of the matrix.
+	 * @param cols The number of columns of the matrix.
+	 * @return A Matrix of the same class.
+	 * @see #zeroCopy()
+	 */
 	public abstract Matrix zeroCopy(long rows, long cols);
-	
+	/**
+	 * Retrieves the number of rows of a matrix.
+	 * @return The number of rows.
+	 */
 	public final long getRows() {
 		return rows;
 	}
-	
+	/**
+	 * Retrieves the number of columns of a matrix.
+	 * @return The number of columns.
+	 */
 	public final long getCols() {
 		return cols;
 	}
-	
+	/**
+	 * Retrieves the values stored at matrix elements.
+	 * @param row The element's row.
+	 * @param col The element's column.
+	 * @return The value corresponding t element (row, col).
+	 */
 	public final double get(long row, long col) {
 		if(row<0 || col<0 || row>=rows || col>=cols)
 			throw new IllegalArgumentException("Element out of range ("+row+","+col+") for "+describe());
 		return get(row+col*rows);
 	}
-	
+
+	/**
+	 * Stores values at matrix elements.
+	 * @param row The element's row.
+	 * @param col The element's column.
+	 * @param value The value to store.
+	 * @return <code>this</code> Matrix instance.
+	 */
 	public final Matrix put(long row, long col, double value) {
 		put(row+col*rows, value);
 		return this;
@@ -210,11 +255,19 @@ public abstract class Matrix extends Tensor {
 		}
 		return ones;
 	}
-	
+	/**
+	 * Creates a copy of the Matrix that holds its normalized Laplacian transformation.
+	 * @return A new Matrix of the same dimensions.
+	 * @see #setToLaplacian()
+	 */
 	public Matrix laplacian() {
 		return ((Matrix)copy()).setToLaplacian();
 	}
-	
+	/**
+	 * Sets the Matrix to its normalized Laplacian transformation by appropriately adjusting its element values.
+	 * @return <code>this</code> Matrix instance.
+	 * @see #laplacian()
+	 */
 	public Matrix setToLaplacian() {
 		HashMap<Long, Double> outDegrees = new HashMap<Long, Double>();
 		HashMap<Long, Double> inDegrees = new HashMap<Long, Double>();
@@ -251,7 +304,8 @@ public abstract class Matrix extends Tensor {
 	 * also edits the original matrix.
 	 * No new memory is allocated for matrix values.
 	 * @param col The given column.
-	 * @return A {@link AccessCol} of the corresponding row.
+	 * @return A {@link AccessCol} of the corresponding column.
+	 * @see #accessColumns()
 	 */
 	public Tensor getCol(long col) {
 		return new AccessCol(this, col);
@@ -272,15 +326,42 @@ public abstract class Matrix extends Tensor {
 		return res.toString();
 	}
 	
-	public final static Matrix fromSparseColumns(List<Tensor> tensors) {
+	/*public final static Matrix fromColumns(List<Tensor> tensors) {
 		Matrix ret = new SparseMatrix(tensors.get(0).size(), tensors.size());
 		for(int col=0;col<tensors.size();col++) 
 			for(long row : tensors.get(col).getNonZeroElements())
 				ret.put(row, col, tensors.get(col).get(row));
 		return ret;
+	}*/
+	/**
+	 * Organizes matrix rows to a list of tensors that share entries.
+	 * This operation does not allocate memory for matrix elements and editing 
+	 * tensor elements edits the original matrix's elements.
+	 * @return A list of {@link AccessRow}.
+	 * @see #getCol(long)
+	 * @see #accessColumns()
+	 */
+	public final List<Tensor> accessRows() {
+		List<Tensor> ret = new ArrayList<Tensor>();
+		for(long row=0;row<getRows();row++)
+			ret.add(getRow(row));
+		return ret;
 	}
-	
-	public final List<Tensor> toSparseColumns() {
+	/**
+	 * Organizes matrix columns to a list of tensors that share entries.
+	 * This operation does not allocate memory for matrix elements and editing 
+	 * tensor elements edits the original matrix's elements.
+	 * @return A list of {@link AccessCol}.
+	 * @see #getCol(long)
+	 * @see #acceRows()
+	 */
+	public final List<Tensor> accessColumns() {
+		List<Tensor> ret = new ArrayList<Tensor>();
+		for(long col=0;col<getCols();col++)
+			ret.add(getCol(col));
+		return ret;
+	}
+	/*public final List<Tensor> toSparseColumns() {
 		List<Tensor> ret = new ArrayList<Tensor>();
 		for(long col=0;col<getCols();col++)
 			ret.add(new SparseTensor(getRows()));
@@ -290,7 +371,7 @@ public abstract class Matrix extends Tensor {
 			ret.get((int)col).put(row, get(row, col));
 		}
 		return ret;
-	}
+	}*/
 	
 	/**
 	 * Converts a given value to a JGNN-compatible 1x1 matrix.

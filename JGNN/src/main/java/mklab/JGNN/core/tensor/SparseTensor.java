@@ -1,6 +1,5 @@
 package mklab.JGNN.core.tensor;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -20,15 +19,14 @@ import mklab.JGNN.core.Tensor;
  */
 public class SparseTensor extends Tensor {
 	private HashMap<Long, Double> values;
-	private ArrayList<Long> keySet;
 	
 	public SparseTensor(long length) {
 		super(length);
 	}
-	protected SparseTensor() {
+	public SparseTensor() {
+		this(0);
 	}
 	public final synchronized Tensor put(long pos, double value) {
-		keySet = null;
 		if(!Double.isFinite(value))
 			throw new IllegalArgumentException("Cannot accept non-finite (NaN or Infinity) tensor values");
 		else if(pos<0 || pos>=size())
@@ -51,8 +49,8 @@ public class SparseTensor extends Tensor {
 		values = new HashMap<Long, Double>();
 	}
 	@Override
-	public Tensor zeroCopy() {
-		return new SparseTensor(size());
+	public Tensor zeroCopy(long size) {
+		return new SparseTensor(size);
 	}
 	@Override
 	public synchronized Iterator<Long> traverseNonZeroElements() {

@@ -10,7 +10,7 @@ import mklab.JGNN.core.Tensor;
  * <i>Kingma, Diederik P., and Jimmy Ba. "Adam: A method for stochastic optimization." arXiv preprint arXiv:1412.6980 (2014).
  * </i>
  * <br>
- * It also supports the NDAdam improvement introduced in the paper, which ports advantages of SGD to Adam:
+ * It also supports the NDAdam improvement, which ports advantages of SGD to Adam, as introduced in the paper:
  * <i>Zhang, Zijun. "Improved adam optimizer for deep neural networks." 2018 IEEE/ACM 26th International Symposium on Quality of Service (IWQoS). IEEE, 2018.
  * </i>
  * @author Emmanouil Krasanakis
@@ -51,6 +51,10 @@ public class Adam implements Optimizer {
 	public Adam(boolean NDmode, double learningRate) {
 		this(NDmode, learningRate, 0.9, 0.999);
 	}
+	/**
+	 * Initializes an NDAdam instance of an {@link Adam} optimizer with the default parameters with custom parameters.
+	 * @param learningRate The learning rate.
+	 */
 	public Adam(boolean NDmode, double learningRate, double b1, double b2) {
 		this(NDmode, learningRate, b1, b2, 1.E-8);
 	}

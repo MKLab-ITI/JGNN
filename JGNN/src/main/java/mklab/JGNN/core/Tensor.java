@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 import mklab.JGNN.core.matrix.ColumnRepetition;
 import mklab.JGNN.core.matrix.RowRepetition;
+import mklab.JGNN.core.tensor.AccessSubtensor;
 import mklab.JGNN.core.tensor.DenseTensor;
 
 /**
@@ -85,10 +86,12 @@ public abstract class Tensor implements Iterable<Long> {
 	 * Add a value to a tensor element.
 	 * @param pos The position of the tensor element
 	 * @param value The value to assign
+	 * @return <code>this</code> Tensor instance.
 	 * @see #put(long, double)
 	 */
-	public final void putAdd(long pos, double value) {
+	public final Tensor putAdd(long pos, double value) {
 		put(pos, get(pos)+value);
+		return this;
 	}
 	/**
 	 * @return The number of tensor elements
@@ -101,7 +104,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @param size The size the tensor should match
 	 * @throws RuntimeException if the tensor does not match the given size
 	 */
-	protected final void assertSize(long size) {
+	public final void assertSize(long size) {
 		if(size()!=size)
 			throw new RuntimeException("Different sizes: given "+size+" vs "+size());
 	}
@@ -112,7 +115,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * if it returns false.
 	 * @param other The other tensor to compare with.
 	 */
-	protected final void assertMatching(Tensor other) {
+	public final void assertMatching(Tensor other) {
 		if(!isMatching(other)) 
 			throw new RuntimeException("Non-compliant: "+describe()+" vs "+other.describe());
 	}
@@ -130,9 +133,21 @@ public abstract class Tensor implements Iterable<Long> {
 		return size==other.size();
 	}
 	/**
-	 * @return A tensor with the same size but zero elements
+	 * Creates a tensor of the same class with the same size and all element set to zero.
+	 * @return A tensor with the same size.
+	 * @see #zeroCopy(long)
 	 */
-	public abstract Tensor zeroCopy();
+	public Tensor zeroCopy() {
+		return zeroCopy(size());
+	}
+
+	/**
+	 * Creates a tensor of the same class with  a given size and all element set to zero.
+	 * @param size The size of the new tensor.
+	 * @return A new tensor.
+	 * @see #zeroCopy(long)
+	 */
+	public abstract Tensor zeroCopy(long size);
 	
 	@Override
 	public Iterator<Long> iterator() {
@@ -148,11 +163,11 @@ public abstract class Tensor implements Iterable<Long> {
 	public final Iterable<Long> getNonZeroElements() {
 		return this;
 	}
-	@SuppressWarnings("unused")
 	public long getNumNonZeroElements() {
 		long ret = 0;
 		for(long pos : getNonZeroElements())
-			ret += 1;
+			if(get(pos)!=0)
+				ret += 1;
 		return ret;
 	}
 	/**
@@ -395,6 +410,36 @@ public abstract class Tensor implements Iterable<Long> {
 		return res;
 	}
 	/**
+	 * Wraps a range of elements within a tensor
+	 * without allocating memory anew. Editing the returned
+	 * tensor also affects the original one and conversely.
+	 * The elements are accessed so that the starting position
+	 * is accessed at position 0 of the starting tensor.
+	 * @param from The starting position of the subtensor till its end.
+	 * @return An {@link AccessSubtensor}.
+	 * @see #accessSubtensor(long)
+	 */
+	public Tensor accessSubtensor(long from) {
+		return new AccessSubtensor(this, from);
+	}
+	/**
+	 * Wraps a range of elements within a tensor
+	 * without allocating memory anew. Editing the returned
+	 * tensor also affects the original one and conversely.
+	 * The elements are accessed so that the starting position
+	 * is accessed at position 0 of the starting tensor. Accessing
+	 * stops up to but not including the end poisition,
+	 * so that <code>accessSubtensor(0, size())</code> is
+	 * a see-through copy of the original tensor.
+	 * @param from The starting position of the subtensor.
+	 * @param to The end position of the subtensor that is <it>not</it> included.
+	 * @return An {@link AccessSubtensor}.
+	 * @see #accessSubtensor(long)
+	 */
+	public Tensor accessSubtensor(long from, long to) {
+		return new AccessSubtensor(this, from, to);
+	}
+	/**
 	 * Computes the maximum tensor element. If the tensor has zero {@link #size()}, 
 	 * this returns <code>Double.NEGATIVE_INFINITY</code>.
 	 * @return The maximum tensor element
@@ -576,7 +621,8 @@ public abstract class Tensor implements Iterable<Long> {
 		return ret;
 	}
 	/**
-	 * Creates a tensor holding the desired range [start, start+1, ..., end-1]
+	 * Creates a dense tensor holding the desired range [start, start+1, ..., end-1].
+	 * This allocates a new tensor.
 	 * @param start The start of the range.
 	 * @param end The end of the range.
 	 * @return A {@link DenseTensor} with size end-start

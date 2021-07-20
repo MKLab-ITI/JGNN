@@ -22,13 +22,13 @@ public class DenseTensor extends Tensor {
 		super(length);
 	}
 	/**
-	 * Constructor that reconstructs a serialized Tensor (i.e. the outcome of {@link #toString()})
+	 * Reconstructs a serialized Tensor (i.e. the outcome of {@link #toString()})
 	 * @param expr A serialized tensor
 	 * @throws IllegalArgumentException If the serialization is null or empty.
 	 */
 	public DenseTensor(String expr) {
-		if(expr==null || expr.isEmpty())
-			throw new IllegalArgumentException("Cannot create tensor from a null expression or empty string");
+		if(expr==null)
+			throw new IllegalArgumentException("Cannot create tensor from a null string");
 		if(expr.length()==0) {
 			init(0);
 			return;
@@ -38,7 +38,8 @@ public class DenseTensor extends Tensor {
 		for(int i=0;i<splt.length;i++)
 			put(i, Double.parseDouble(splt[i]));
 	}
-	protected DenseTensor() {
+	public DenseTensor() {
+		this(0);
 	}
 	public final synchronized Tensor put(long pos, double value) {
 		if(!Double.isFinite(value))
@@ -59,8 +60,8 @@ public class DenseTensor extends Tensor {
 		values = new double[(int)size];
 	}
 	@Override
-	public Tensor zeroCopy() {
-		return new DenseTensor(values.length);
+	public Tensor zeroCopy(long size) {
+		return new DenseTensor(size);
 	}
 	@Override
 	public Iterator<Long> traverseNonZeroElements() {

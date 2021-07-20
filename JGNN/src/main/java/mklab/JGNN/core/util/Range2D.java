@@ -6,7 +6,7 @@ import java.util.NoSuchElementException;
 import java.util.Map.Entry;
 
 /**
- * Implements an iterator that traverses a two-dimentional range (min, max) x (min2, max2).
+ * Implements an iterator that traverses a two-dimensional range (min, max) x (min2, max2).
  * It is often used by {@link mklab.JGNN.core.Matrix} instances to traverse through all element positions.
  * 
  * @author Emmanouil Krasanakis
@@ -26,7 +26,7 @@ public class Range2D implements Iterator<Entry<Long,Long>>, Iterable<Entry<Long,
 	  }
 	  @Override
 	  public boolean hasNext() {
-	    return nextValue<max && nextValue2 < max2;
+	    return nextValue < max && nextValue2 < max2;
 	  }
 	  @Override
 	  public Entry<Long,Long> next() {
@@ -40,12 +40,8 @@ public class Range2D implements Iterator<Entry<Long,Long>>, Iterable<Entry<Long,
 	    }
 	    return ret;
 	  }
-      @Override
-	  public void remove() {
-	    throw new UnsupportedOperationException();
+	  @Override
+	  public Iterator<Entry<Long, Long>> iterator() {
+	    return this;
 	  }
-	@Override
-	public Iterator<Entry<Long, Long>> iterator() {
-		return this;
-	}
 }

@@ -8,7 +8,7 @@ import mklab.JGNN.core.util.Range;
 
 /**
  * Accesses a row of a {@link Matrix} as if it were a dense {@link Tensor}.
- * Prefer using {@link mklab.JGNN.core.Martix#getRow(long)}, which wraps usage
+ * Prefer using {@link mklab.JGNN.core.Matrix#getRow(long)}, which wraps usage
  * of this class. Instances of this class share elements with the matrix which
  * they access and do <i>not</i> allocate new memory.
  * 
@@ -41,7 +41,7 @@ public class AccessRow extends Tensor {
 	}
 
 	@Override
-	public Tensor zeroCopy() {
+	public Tensor zeroCopy(long size) {
 		throw new UnsupportedOperationException();
 	}
 

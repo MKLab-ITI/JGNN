@@ -26,6 +26,12 @@ public class AccessSubtensor extends Tensor {
 		super(end-begin);
 		if(baseTensor==null)
 			throw new IllegalArgumentException("SubTensor cannot wrap a null base tensor");
+		if(begin>end)
+			throw new IllegalArgumentException("SubTensor cannot start after its end");
+		if(begin<0)
+			throw new IllegalArgumentException("SubTensor cannot start before zero");
+		if(end>baseTensor.size())
+			throw new IllegalArgumentException("SubTensor cannot have an end position "+end+" after base tensor size "+baseTensor.size());
 		this.baseTensor = baseTensor;
 		this.begin = begin;
 	}
@@ -48,8 +54,8 @@ public class AccessSubtensor extends Tensor {
 	}
 
 	@Override
-	public Tensor zeroCopy() {
-		return new AccessSubtensor(baseTensor.zeroCopy(), begin);
+	public Tensor zeroCopy(long size) {
+		return baseTensor.zeroCopy(size);
 	}
 
 	@Override

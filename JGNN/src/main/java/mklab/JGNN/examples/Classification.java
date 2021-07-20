@@ -1,7 +1,6 @@
 package mklab.JGNN.examples;
 
 import java.util.Arrays;
-import java.util.HashMap;
 
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.ModelBuilder;
@@ -37,7 +36,6 @@ public class Classification {
 		BatchOptimizer optimizer = new BatchOptimizer(new Regularization(new GradientDescent(0.1), 0.001));
 		for(int epoch=0;epoch<150;epoch++) {
 			System.out.print("Epoch "+epoch);
-
 			Tensor errors = 
 					modelBuilder.getModel().trainSampleDifference(optimizer, 
 					Arrays.asList(features), 
@@ -52,25 +50,6 @@ public class Classification {
 				Tensor output = modelBuilder.getModel().predict(nodeFeatures).get(0);
 				acc += (output.argmax()==nodeLabels.argmax()?1:0);
 			}
-			/*int prev = 0;
-			int i = 0;
-			for(Integer node : dataset.nodes().getIds()) {
-				if(i-prev>dataset.nodes().size()/40) {
-					System.out.print("=");
-					prev = i;
-				}
-				i++;
-				Matrix nodeFeatures = features.getRow(node).asColumn();
-				Matrix nodeLabels = labels.getRow(node).asColumn();
-				Tensor output = modelBuilder.getModel().trainSampleDifference(optimizer, 
-						Arrays.asList(nodeFeatures), 
-						Arrays.asList(nodeLabels)).get(0);
-				Tensor error = output.subtract(nodeLabels);
-				errors.selfAdd(error.norm());
-				acc.selfAdd(output.argmax()==nodeLabels.argmax()?1:0);
-				//System.out.println(output.toString()+" "+nodeLabels.toString());
-				//System.out.println(output.argmax()+" "+nodeLabels.argmax());
-			}*/
 			optimizer.updateAll();
 			System.out.print("\t error "+errors.abs().sum()/dataset.nodes().size());
 			System.out.println("\t accuracy "+acc/dataset.nodes().size());

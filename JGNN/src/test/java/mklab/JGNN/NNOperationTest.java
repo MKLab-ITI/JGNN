@@ -24,56 +24,60 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class NNOperationTest {
+
 	@Test
-	public void shouldTrainTowardsDirectObjective() {
-		Optimizer optimizer = new Adam(1);
-		
-		Variable x = new Variable();
-		NNOperation adder = (new Add())
-				.addInput(x)
-				.addInput(new Parameter(Tensor.fromDouble(0)));
-		Model model = (new Model())
-				.addInput(x)
-				.addOutput(adder);
-		for(int epoch=0;epoch<100;epoch++) {
-			model.trainSampleDifference(optimizer, Arrays.asList(Tensor.fromDouble(1)), Arrays.asList(Tensor.fromDouble(2)));
-			model.trainSampleDifference(optimizer, Arrays.asList(Tensor.fromDouble(2)), Arrays.asList(Tensor.fromDouble(3)));
-			model.trainSampleDifference(optimizer, Arrays.asList(Tensor.fromDouble(3)), Arrays.asList(Tensor.fromDouble(4)));
-		}
-		Assert.assertEquals(7., model.predict(Arrays.asList(Tensor.fromDouble(6))).get(0).toDouble(), 0.1);
+	public void shouldPerformAddition() {
+		Assert.assertEquals((new Add()).run(Tensor.fromDouble(1), Tensor.fromDouble(2)).toDouble(), 3, 0);
+	}
+	
+	
+	@Test
+	public void shouldCreateOperationTree() {
+		NNOperation add = new Add();
+		add.addInput(new Constant(Tensor.fromDouble(1)));
+		add.addInput(new Constant(Tensor.fromDouble(2)));
+		Assert.assertEquals(add.getInputs().size(), 2, 0);
+		Assert.assertEquals(add.getInputs().get(0).getInputs().size(), 0, 0);
+		Assert.assertEquals(add.getInputs().get(0).getOutputs().size(), 1, 0);
+		Assert.assertEquals(add.getInputs().get(0).getOutputs().get(0), add);
 	}
 	
 	@Test
-	public void shouldTrainTowardsLoss() {
-		Optimizer optimizer = new Adam(1);
-		
-		Variable x = new Variable();
-		NNOperation c = new Parameter(Tensor.fromDouble(0));
-		NNOperation adder = (new Add())
-				.addInput(x)
-				.addInput(c);
-		Model model = (new Model())
-				.addInput(x)
-				.addOutput(adder);
-		
-		Variable desiredOutput = new Variable();
-		NNOperation inverse = new Multiply().addInput(desiredOutput).addInput(new Constant(Tensor.fromDouble(-1)));
-		NNOperation diff = new Add()
-				.addInput(inverse)
-				.addInput(adder);
-		NNOperation sqr = new Multiply().addInput(diff).addInput(diff);
-		Model lossModel = (new Model())
-				.addInput(x)
-				.addInput(desiredOutput)
-				.addOutput(sqr);
-				
-		for(int epoch=0;epoch<100;epoch++) {
-			lossModel.trainSample(optimizer, Arrays.asList(Tensor.fromDouble(1), Tensor.fromDouble(2)));
-			lossModel.trainSample(optimizer, Arrays.asList(Tensor.fromDouble(2), Tensor.fromDouble(3)));
-			lossModel.trainSample(optimizer, Arrays.asList(Tensor.fromDouble(3), Tensor.fromDouble(4)));
-		}
-		Assert.assertEquals(7., model.predict(Arrays.asList(Tensor.fromDouble(6))).get(0).toDouble(), 0.001);
+	public void shouldNotRememberSimpleRun() {
+		NNOperation add = new Add();
+		add.run(Tensor.fromDouble(1), Tensor.fromDouble(2));
+		Assert.assertNull(add.getPrediction());
+		Assert.assertNull(add.getLastTapeError());
 	}
+
+	@Test
+	public void shouldRememberPrediction() {
+		NNOperation add = new Add();
+		add.addInput(new Constant(Tensor.fromDouble(1)));
+		add.addInput(new Constant(Tensor.fromDouble(2)));
+		add.runPrediction();
+		Assert.assertEquals(add.getPrediction().toDouble(), 3, 0);
+	}
+	
+	@Test
+	public void shouldParseInputUpdates() {
+		NNOperation add = new Add();
+		Constant constant;
+		add.addInput(new Constant(Tensor.fromDouble(1)));
+		add.addInput(constant = new Constant(Tensor.fromDouble(2)));
+		add.runPrediction();
+		Assert.assertEquals(add.getPrediction().toDouble(), 3, 0);
+		constant.setTo(Tensor.fromDouble(0));
+		add.clearPrediction();
+		add.runPrediction();
+		Assert.assertEquals(add.getPrediction().toDouble(), 1, 0);
+	}
+
+	@Test
+	public void shouldPerformMultiplication() {
+		Assert.assertEquals((new Add()).run(Tensor.fromDouble(1), Tensor.fromDouble(2)).toDouble(), 3, 0);
+	}
+	
 	
 	@Test
 	public void shouldCovolveGraph() {
@@ -98,27 +102,5 @@ public class NNOperationTest {
 			.addOutput(sim);
 		
 		Assert.assertEquals(1, model.predict(Arrays.asList(Tensor.fromDouble(0), Tensor.fromDouble(1))).get(0).size());
-	}
-	
-	@Test
-	public void builderShouldCreateModel() {
-		Matrix W = new SparseMatrix(5, 5);
-		W.put(1, 1, 1);
-		W.put(0, 1, 1);
-		W.put(1, 2, 1);
-		Model model = new ModelBuilder()
-				.var("u")
-				.var("v")
-				.constant("W", W)
-				.param("H0", new DenseMatrix(5, 3).setToOnes())
-				.operation("H1 = W * H0")
-				.operation("u1 = H1[u]")
-				.operation("v1 = H1[v]")
-				.operation("mult = sum(u1.v1)")
-				.out("mult")
-				.getModel();
-		
-		Assert.assertEquals(1, model.predict(Arrays.asList(Tensor.fromDouble(0), Tensor.fromDouble(1))).get(0).size());
-		Assert.assertEquals(6., model.predict(Arrays.asList(Tensor.fromDouble(0), Tensor.fromDouble(1))).get(0).toDouble(), 1.E-12);
 	}
 }

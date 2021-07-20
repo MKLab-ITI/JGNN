@@ -71,7 +71,7 @@ public abstract class NNOperation {
 		return false;
 	}
 	
-	final void clearPrediction() {
+	public final void clearPrediction() {
 		ThreadData data = data();
 		if(data.lastOutput==null)
 			return;

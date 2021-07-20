@@ -17,6 +17,11 @@ import mklab.JGNN.core.util.Range2D;
  */
 public class DenseMatrix extends Matrix {
 	private Tensor tensor;
+	/**
+	 * Generates a dense matrix with the designated number of rows and columns.
+	 * @param rows The number of rows.
+	 * @param cols The number of columns.
+	 */
 	public DenseMatrix(long rows, long cols) {
 		super(rows, cols);
 	}

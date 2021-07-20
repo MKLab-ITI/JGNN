@@ -9,6 +9,7 @@ import mklab.JGNN.core.Model;
 import mklab.JGNN.core.Optimizer;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.SparseMatrix;
+import mklab.JGNN.core.matrix.WrapCols;
 import mklab.JGNN.core.tensor.DenseTensor;
 import mklab.JGNN.measures.AUC;
 import mklab.JGNN.measures.Accuracy;
@@ -58,9 +59,9 @@ public class ClassificationGCN extends Model {
 			if(testNodes!=null)
 				System.out.print("Epoch "+epoch);
 			trainSample(optimizer, Arrays.asList(trainingNodes), 
-					Arrays.asList(Matrix.fromSparseColumns(trainingLabels)));
+					Arrays.asList(new WrapCols(trainingLabels)));
 			if(testNodes!=null)  {
-				List<Tensor> outputs = ((Matrix)predict(Arrays.asList(testNodes)).get(0)).toSparseColumns();
+				List<Tensor> outputs = ((Matrix)predict(Arrays.asList(testNodes)).get(0)).accessColumns();
 				System.out.println(
 								   " | test AUC "+new AUC().evaluate(outputs, testLabels)
 								  +" | test prec "+new Precision().evaluate(outputs, testLabels)

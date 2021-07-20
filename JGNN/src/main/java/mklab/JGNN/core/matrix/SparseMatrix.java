@@ -17,6 +17,11 @@ import mklab.JGNN.core.tensor.SparseTensor;
  */
 public class SparseMatrix extends Matrix {
 	private Tensor tensor;
+	/**
+	 * Generates a sparse matrix with the designated number of rows and columns.
+	 * @param rows The number of rows.
+	 * @param cols The number of columns.
+	 */
 	public SparseMatrix(long rows, long cols) {
 		super(rows, cols);
 	}

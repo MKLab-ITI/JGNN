@@ -10,14 +10,19 @@ import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.tensor.SparseTensor;
 
 /**
- * Defines a {@link SparseMatrix} that is constrained to by symmetric.
- * Taking advantage of this contraint it consumes only half the memory.
+ * Defines a {@link SparseMatrix} that is constrained to be symmetric
+ * in that it returns the sum of values put on elements (i,j) and (j ,i).
  * 
  * @author Emmanouil Krasanakis
  * @deprecated Under development.
  */
 public class SparseSymmetric extends Matrix {
 	private Tensor tensor;
+	/**
+	 * Generates a symmetric matrix with the designated number of rows and columns.
+	 * @param rows The number of rows.
+	 * @param cols The number of columns.
+	 */
 	public SparseSymmetric(long rows, long cols) {
 		super(rows, cols);
 	}
