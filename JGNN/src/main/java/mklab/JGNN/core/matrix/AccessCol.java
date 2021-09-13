@@ -8,7 +8,7 @@ import mklab.JGNN.core.util.Range;
 
 /**
  * Accesses a column of a {@link Matrix} as if it were a dense {@link Tensor}.
- * Prefer using {@link mklab.JGNN.core.Matrix#getCol(long)}, which wraps usage
+ * Prefer using {@link mklab.JGNN.core.Matrix#accessCol(long)}, which wraps usage
  * of this class. Instances of this class share elements with the matrix which
  * they access and do <i>not</i> allocate new memory.
  * 

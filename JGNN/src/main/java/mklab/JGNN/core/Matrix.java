@@ -7,7 +7,10 @@ import java.util.List;
 import mklab.JGNN.core.matrix.AccessRow;
 import mklab.JGNN.core.matrix.AccessCol;
 import mklab.JGNN.core.matrix.DenseMatrix;
+import mklab.JGNN.core.matrix.SparseMatrix;
 import mklab.JGNN.core.matrix.TransposedMatrix;
+import mklab.JGNN.core.matrix.WrapCols;
+import mklab.JGNN.core.matrix.WrapRows;
 import mklab.JGNN.core.tensor.DenseTensor;
 
 import java.util.Map.Entry;
@@ -53,13 +56,13 @@ public abstract class Matrix extends Tensor {
 	 * checks that the copy has a total number of elements equal to the given size.
 	 * @param size The desired size of the matrix.
 	 * @return A Matrix with the same class and dimensions.
-	 * @throws RuntimeException If the desired 
+	 * @throws RuntimeException If the resulting tensor is not of the same size.
 	 * @see #zeroCopy(long, long)
 	 */
 	@Override
 	public final Tensor zeroCopy(long size) {
 		if(size!=size())
-			throw new RuntimeException("Desired atrix size "+size+" can only be equal to rows "+rows+" * "+cols);
+			throw new RuntimeException("To avoid ambiguity, desired matrix zeroCopy size "+size+" can only be equal to rows "+rows+" * "+cols);
 		return zeroCopy(rows, cols);
 	}
 	/**
@@ -156,7 +159,7 @@ public abstract class Matrix extends Tensor {
 	public final Matrix matmul(Matrix with) {
 		if(cols!=with.getRows())
 			throw new IllegalArgumentException("Mismatched matrix sizes between "+describe()+" and "+with.describe());
-		Matrix ret = with.zeroCopy(getRows(), with.getCols());
+		Matrix ret = determineZeroCopy(with, getRows(), with.getCols());
 		for(Entry<Long, Long> element : getNonZeroEntries()) {
 			long row = element.getKey();
 			long col = element.getValue();
@@ -183,7 +186,7 @@ public abstract class Matrix extends Tensor {
 	public final Matrix matmul(Matrix with, boolean transposeSelf, boolean transposeWith) {
 		if((transposeSelf?rows:cols)!=(transposeWith?with.getCols():with.getRows()))
 			throw new IllegalArgumentException("Mismatched matrix sizes");
-		Matrix ret = with.zeroCopy(transposeSelf?cols:rows, transposeWith?with.getRows():with.getCols());
+		Matrix ret = determineZeroCopy(with, transposeSelf?cols:rows, transposeWith?with.getRows():with.getCols());
 		for(Entry<Long, Long> element : getNonZeroEntries()) {
 			long row = transposeSelf?element.getValue():element.getKey();
 			long col = transposeSelf?element.getKey():element.getValue();
@@ -201,7 +204,7 @@ public abstract class Matrix extends Tensor {
 		return ret;
 	}
 	
-	@Override
+	/*@Override
 	public Tensor selfMultiply(Tensor other) {
 		if(other.size()==getCols()) {
 			for(Entry<Long, Long> element : getNonZeroEntries()) {
@@ -213,7 +216,7 @@ public abstract class Matrix extends Tensor {
 		}
 		else
 			return super.selfMultiply(other);
-	}
+	}*/
 	
 	@Override
 	protected boolean isMatching(Tensor other) {
@@ -294,8 +297,12 @@ public abstract class Matrix extends Tensor {
 	 * No new memory is allocated for matrix values.
 	 * @param row The given row.
 	 * @return A {@link AccessRow} instance of the corresponding row.
+	 * @see #accessCol(long)
+	 * @see #accessRows()
+	 * @see #accessRows(long...)
+	 * @see #accessRows(Tensor)
 	 */
-	public Tensor getRow(long row) {
+	public Tensor accessRow(long row) {
 		return new AccessRow(this, row);
 	}
 
@@ -305,9 +312,12 @@ public abstract class Matrix extends Tensor {
 	 * No new memory is allocated for matrix values.
 	 * @param col The given column.
 	 * @return A {@link AccessCol} of the corresponding column.
+	 * @see #accessRow(long)
 	 * @see #accessColumns()
+	 * @see #accessColumns(long...)
+	 * @see #accessColumns(Tensor)
 	 */
-	public Tensor getCol(long col) {
+	public Tensor accessCol(long col) {
 		return new AccessCol(this, col);
 	}
 	
@@ -338,28 +348,89 @@ public abstract class Matrix extends Tensor {
 	 * This operation does not allocate memory for matrix elements and editing 
 	 * tensor elements edits the original matrix's elements.
 	 * @return A list of {@link AccessRow}.
-	 * @see #getCol(long)
+	 * @see #accessCol(long)
 	 * @see #accessColumns()
 	 */
 	public final List<Tensor> accessRows() {
 		List<Tensor> ret = new ArrayList<Tensor>();
 		for(long row=0;row<getRows();row++)
-			ret.add(getRow(row));
+			ret.add(accessRow(row));
 		return ret;
+	}
+	/**
+	 * Organizes specific matrix columns to a list of tensors that share entries.
+	 * This operation does not allocate memory for matrix elements and editing 
+	 * tensor elements edits the original matrix's elements.
+	 * @return A list of {@link AccessCol}.
+	 * @see #accessCol(long)
+	 * @see #accessRows()
+	 */
+	public final List<Tensor> accessColumns() {
+		List<Tensor> ret = new ArrayList<Tensor>();
+		for(long col=0;col<getCols();col++)
+			ret.add(accessCol(col));
+		return ret;
+	}
+	/**
+	 * Organizes specific matrix rows to a list of tensors that share entries.
+	 * This operation does not allocate memory for matrix elements and editing 
+	 * tensor elements edits the original matrix's elements.
+	 * @param cols An array of rows to access.
+	 * @return A list of {@link AccessRow}.
+	 * @see #accessCol(long)
+	 * @see #accessColumns()
+	 */
+	public final Matrix accessRows(long ... rows) {
+		List<Tensor> ret = new ArrayList<Tensor>();
+		for(long row : rows)
+			ret.add(accessRow(row));
+		return new WrapRows(ret);
+	}
+	/**
+	 * Organizes specific matrix columns to a list of tensors that share entries.
+	 * This operation does not allocate memory for matrix elements and editing 
+	 * tensor elements edits the original matrix's elements.
+	 * @param cols An array of columns to access.
+	 * @return A list of {@link AccessCol}.
+	 * @see #accessCol(long)
+	 * @see #accessRows()
+	 */
+	public final Matrix accessColumns(long ... cols) {
+		List<Tensor> ret = new ArrayList<Tensor>();
+		for(long col=0;col<getCols();col++)
+			ret.add(accessCol(col));
+		return new WrapCols(ret);
+	}
+
+	/**
+	 * Organizes specific matrix rows to a list of tensors that share entries.
+	 * This operation does not allocate memory for matrix elements and editing 
+	 * tensor elements edits the original matrix's elements.
+	 * @param cols A tensor whose values hold the rows to access.
+	 * @return A list of {@link AccessRow}.
+	 * @see #accessCol(long)
+	 * @see #accessColumns(Tensor)
+	 */
+	public final Matrix accessRows(Tensor rows) {
+		List<Tensor> ret = new ArrayList<Tensor>();
+		for(long row=0;row<rows.size();row++)
+			ret.add(accessRow((long)rows.get(row)));
+		return new WrapRows(ret);
 	}
 	/**
 	 * Organizes matrix columns to a list of tensors that share entries.
 	 * This operation does not allocate memory for matrix elements and editing 
 	 * tensor elements edits the original matrix's elements.
+	 * @param cols A tensor whose values hold the columns to access.
 	 * @return A list of {@link AccessCol}.
-	 * @see #getCol(long)
-	 * @see #acceRows()
+	 * @see #accessCol(long)
+	 * @see #accessRows(Tensor)
 	 */
-	public final List<Tensor> accessColumns() {
-		List<Tensor> ret = new ArrayList<Tensor>();
-		for(long col=0;col<getCols();col++)
-			ret.add(getCol(col));
-		return ret;
+	public final Matrix accessColumns(Tensor cols) {
+		ArrayList<Tensor> ret = new ArrayList<Tensor>();
+		for(long col=0;col<cols.size();col++)
+			ret.add(accessCol((long)cols.get(col)));
+		return new WrapCols(ret);
 	}
 	/*public final List<Tensor> toSparseColumns() {
 		List<Tensor> ret = new ArrayList<Tensor>();
@@ -384,5 +455,34 @@ public abstract class Matrix extends Tensor {
 		Matrix ret = new DenseMatrix(1, 1);
 		ret.put(0, 0, value);
 		return ret;
+	}
+	
+	protected Matrix determineZeroCopy(Matrix with, long rows, long cols) {
+		try {
+			return zeroCopy(rows, cols);
+		}
+		catch(UnsupportedOperationException e) {
+		}
+		try {
+			return ((Matrix)with).zeroCopy(rows, cols);
+		}
+		catch(UnsupportedOperationException e) {
+		}
+		return new DenseMatrix(rows, cols);
+		//throw new UnsupportedOperationException("Neither "+describe()+" nor "+with.describe()+" support zeroCopy("+rows+", "+cols+")");
+	}
+	/**
+	 * Creates a copy of the matrix organized as a dense matrix.
+	 * @return A {@link DenseMatrix} instance.
+	 */
+	public DenseMatrix toDense() {
+		return (DenseMatrix)new DenseMatrix(getRows(), getCols()).selfAdd(this);
+	}
+	/**
+	 * Creates a copy of the matrix organized as a sparse matrix.
+	 * @return A {@link SparseMatrix} instance.
+	 */
+	public SparseMatrix toSparse() {
+		return (SparseMatrix)new SparseMatrix(getRows(), getCols()).selfAdd(this);
 	}
 }

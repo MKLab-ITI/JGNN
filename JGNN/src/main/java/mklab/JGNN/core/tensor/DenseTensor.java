@@ -1,5 +1,6 @@
 package mklab.JGNN.core.tensor;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 
 import mklab.JGNN.core.Tensor;
@@ -12,14 +13,38 @@ import mklab.JGNN.core.util.Range;
  */
 public class DenseTensor extends Tensor {
 	private double[] values;
-	
+
+	/**
+	 * Constructs a dense tensor from an iterator holding
+	 * that outputs its values. Tensor size is equal to the
+	 * number of extracted values.
+	 * @param iterator The iterator to obtain values from.
+	 */
+	public DenseTensor(Iterator<? extends Number> iterator) {
+		ArrayList<Number> list = new ArrayList<Number>();
+		iterator.forEachRemaining(list::add);
+		init(list.size());
+		for(int i=0;i<list.size();i++)
+			put(i, list.get(i).doubleValue());
+			
+	}
+	/**
+	 * Constructs a dense tensor from an array of values. Size
+	 * is automatically determined to be the same as the 
+	 * number of values.
+	 * @param values The values to put into tensor elements.
+	 */
 	public DenseTensor(double... values) {
 		this(values.length);
 		for(int i=0;i<values.length;i++)
 			put(i, values[i]);
 	}
-	public DenseTensor(long length) {
-		super(length);
+	/**
+	 * Constructs a dense tensor holding zero values.
+	 * @param size The size of the tensor.
+	 */
+	public DenseTensor(long size) {
+		super(size);
 	}
 	/**
 	 * Reconstructs a serialized Tensor (i.e. the outcome of {@link #toString()})

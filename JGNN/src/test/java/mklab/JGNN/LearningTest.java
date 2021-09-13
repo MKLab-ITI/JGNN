@@ -29,6 +29,7 @@ import mklab.JGNN.nn.optimizers.GradientDescent;
 import mklab.JGNN.nn.optimizers.Regularization;
 
 public class LearningTest {
+	/*
 	public Tensor classify(BatchOptimizer optimizer, int epochs) {
 		Dataset dataset = new Datasets.Lymphography();
 		Matrix labels = dataset.nodes().oneHot(dataset.labels()).asTransposed();
@@ -175,4 +176,5 @@ public class LearningTest {
 		Assert.assertEquals(1, model.predict(Arrays.asList(Tensor.fromDouble(0), Tensor.fromDouble(1))).get(0).size());
 		Assert.assertEquals(6., model.predict(Arrays.asList(Tensor.fromDouble(0), Tensor.fromDouble(1))).get(0).toDouble(), 1.E-12);
 	}
+	*/
 }

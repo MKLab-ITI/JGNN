@@ -2,10 +2,11 @@ package mklab.JGNN.core;
 
 import java.util.Iterator;
 
-import mklab.JGNN.core.matrix.ColumnRepetition;
-import mklab.JGNN.core.matrix.RowRepetition;
+import mklab.JGNN.core.matrix.WrapCols;
+import mklab.JGNN.core.matrix.WrapRows;
 import mklab.JGNN.core.tensor.AccessSubtensor;
 import mklab.JGNN.core.tensor.DenseTensor;
+import mklab.JGNN.core.util.Range;
 
 /**
  * This class provides a native java implementation of Tensor functionalities.
@@ -266,7 +267,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 */
 	public final Tensor multiply(Tensor tensor) {
 		assertMatching(tensor);
-		Tensor res = zeroCopy();
+		Tensor res = determineZeroCopy(tensor);
 		for(long i : getNonZeroElements())
 			res.put(i, get(i)*tensor.get(i));
 		return res;
@@ -628,10 +629,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @return A {@link DenseTensor} with size end-start
 	 */
 	public static Tensor fromRange(long start, long end) {
-		Tensor ret = new DenseTensor(end-start);
-		for(long pos=0;pos<end-start;pos++)
-			ret.put(pos, start+pos);
-		return ret;
+		return new DenseTensor(new Range(start, end));
 	}
 	/**
 	 * Converts a tensor of {@link #size()}==1 to double. Throws an exception otherwise.
@@ -647,19 +645,21 @@ public abstract class Tensor implements Iterable<Long> {
 	 * Accesses the tensor through a single-column matrix with the tensor as the only row.
 	 * Editing the returned matrix also edits the original tensor.
 	 * No new memory is allocated for tensor values.
-	 * @return A {@link RowRepetition} instance.
+	 * @return A {@link WrapCols} instance.
+	 * @see #asRow()
 	 */
-	public RowRepetition asColumn() {
-		return new RowRepetition(this, 1);
+	public WrapCols asColumn() {
+		return new WrapCols(this);
 	}
 	/**
 	 * Accesses the tensor through a single-row matrix with the tensor as the only column.
 	 * Editing the returned matrix also edits the original tensor.
 	 * No new memory is allocated for tensor values.
-	 * @return A {@link ColumnRepetition} instance.
+	 * @return A {@link WrapRows} instance.
+	 * @see #asColumn()
 	 */
-	public ColumnRepetition asRow() {
-		return new ColumnRepetition(1, this);
+	public WrapRows asRow() {
+		return new WrapRows(this);
 	}
 	/**
 	 * Describes the type, size and other characteristics of the tensor.
@@ -667,5 +667,19 @@ public abstract class Tensor implements Iterable<Long> {
 	 */
 	public String describe() {
 		return "Tensor ("+size()+")";
+	}
+
+	protected Tensor determineZeroCopy(Tensor with) {
+		try {
+			return zeroCopy(size());
+		}
+		catch(UnsupportedOperationException e) {
+		}
+		try {
+			return with.zeroCopy(size());
+		}
+		catch(UnsupportedOperationException e) {
+		}
+		throw new UnsupportedOperationException("Neither "+describe()+" nor "+with.describe()+" support zeroCopy(rows, cols)");
 	}
 }

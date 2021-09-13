@@ -43,7 +43,8 @@ public class AccessSubtensor extends Tensor {
 	public Tensor put(long pos, double value) {
 		if(pos<0 || pos>=size())
 			throw new IllegalArgumentException("Tensor position "+pos+" out of range [0, "+size()+")");
-		return baseTensor.put(pos+begin, value);
+		baseTensor.put(pos+begin, value);
+		return this;
 	}
 
 	@Override

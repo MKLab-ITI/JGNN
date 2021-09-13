@@ -1,5 +1,6 @@
 package mklab.JGNN.core.matrix;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -35,7 +36,13 @@ public class WrapCols extends Matrix {
 	}
 	@Override
 	public Matrix zeroCopy(long rows, long cols) {
-		throw new UnsupportedOperationException();
+		if(cols!=getCols() && rows!=getCols())
+			throw new UnsupportedOperationException();
+		long rowSize = cols==getCols()?rows:cols;
+		ArrayList<Tensor> newCols = new ArrayList<Tensor>();
+		for(Tensor col : this.cols)
+			newCols.add(col.zeroCopy(rowSize));
+		return cols==getCols()?new WrapCols(newCols):new WrapRows(newCols);
 	}
 	@Override
 	protected void allocate(long size) {

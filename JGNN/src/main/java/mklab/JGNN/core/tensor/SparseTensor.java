@@ -1,7 +1,9 @@
 package mklab.JGNN.core.tensor;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 import mklab.JGNN.core.Tensor;
 
@@ -19,6 +21,7 @@ import mklab.JGNN.core.Tensor;
  */
 public class SparseTensor extends Tensor {
 	private HashMap<Long, Double> values;
+	private List<Long> keySet;
 	
 	public SparseTensor(long length) {
 		super(length);
@@ -36,6 +39,7 @@ public class SparseTensor extends Tensor {
 				values.remove(pos);
 			else
 				values.put(pos, value);
+			keySet = null;
 		}
 		return this;
 	}
@@ -54,6 +58,8 @@ public class SparseTensor extends Tensor {
 	}
 	@Override
 	public synchronized Iterator<Long> traverseNonZeroElements() {
-		return values.keySet().iterator();
+		if(keySet==null)
+			keySet = new ArrayList<Long>(values.keySet());
+		return keySet.iterator();
 	}
 }

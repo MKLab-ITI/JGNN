@@ -103,7 +103,7 @@ public abstract class NNOperation {
 			lastInputs.add(input.runPrediction());
 		//System.out.println("Predicting... "+this.getClass());
 		data.lastOutput = forward(lastInputs);
-		data.tapeError = data.lastOutput.zeroCopy();
+		data.tapeError = null;
 		data.countTapeSources = 0;
 		//System.out.println("Predicted "+describe());
 		return data.lastOutput;
@@ -113,8 +113,11 @@ public abstract class NNOperation {
 		ThreadData data = data();
 		//if(error!=null)
 		//	System.out.println("Packpropagating... "+describe()+" Derivative "+error.describe()+" on thread "+ThreadPool.getCurrentThreadId());
-		if(error!=null) 
+		if(error!=null) {
+			if(data.tapeError==null)
+				data.tapeError = data.lastOutput.zeroCopy();
 			data.tapeError.selfAdd(error);
+		}
 		data.countTapeSources++;
 		if(data.countTapeSources>outputs.size())
 			throw new RuntimeException("Redundant backpropagations were erroneously called");

@@ -34,10 +34,6 @@ public class TransposedMatrix extends Matrix {
 			return col+row*getRows(); //transposed of Matrix.put convention
 		}
 		@Override
-		public void remove() {
-			throw new UnsupportedOperationException();
-		}
-		@Override
 		public Iterator<Long> iterator() {
 			return this;
 		}
@@ -55,10 +51,6 @@ public class TransposedMatrix extends Matrix {
 		public Entry<Long, Long> next() {
 			Entry<Long, Long> origin = iterator.next();
 			return new AbstractMap.SimpleEntry<Long,Long>(Long.valueOf(origin.getValue()), Long.valueOf(origin.getKey()));
-		}
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException();
 		}
 		@Override
 		public Iterator<Entry<Long, Long>> iterator() {

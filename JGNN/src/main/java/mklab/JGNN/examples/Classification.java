@@ -6,6 +6,7 @@ import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.ModelBuilder;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.DenseMatrix;
+import mklab.JGNN.core.tensor.DenseTensor;
 import mklab.JGNN.data.datasets.Dataset;
 import mklab.JGNN.data.datasets.Datasets;
 import mklab.JGNN.nn.optimizers.BatchOptimizer;
@@ -32,21 +33,22 @@ public class Classification {
 				.operation("yhat = sigmoid(w1@x)")
 				.out("yhat")
 				.print();
+		Tensor trainingSamples = new DenseTensor(dataset.nodes().getIds().iterator());
 		
 		BatchOptimizer optimizer = new BatchOptimizer(new Regularization(new GradientDescent(0.1), 0.001));
 		for(int epoch=0;epoch<150;epoch++) {
 			System.out.print("Epoch "+epoch);
 			Tensor errors = 
 					modelBuilder.getModel().trainSampleDifference(optimizer, 
-					Arrays.asList(features), 
-					Arrays.asList(labels))
+					Arrays.asList(features.accessColumns(trainingSamples)), 
+					Arrays.asList(labels.accessColumns(trainingSamples)))
 					.get(0)
 					.subtract(labels);
 			
 			double acc = 0;
 			for(Integer node : dataset.nodes().getIds()) {
-				Matrix nodeFeatures = features.getCol(node).asColumn();
-				Matrix nodeLabels = labels.getCol(node).asColumn();
+				Matrix nodeFeatures = features.accessCol(node).asColumn();
+				Matrix nodeLabels = labels.accessCol(node).asColumn();
 				Tensor output = modelBuilder.getModel().predict(nodeFeatures).get(0);
 				acc += (output.argmax()==nodeLabels.argmax()?1:0);
 			}
