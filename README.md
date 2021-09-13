@@ -113,7 +113,7 @@ for(int epoch=0;epoch<150;epoch++) {
 }
 ```
 
-### Predicting
+### Testing
 We finally report training accuracy on the test set. We demonstrate how single-node (single-sample) predictions can be
 made and measure the accuracy of those. To dothis, we use `Matrix.getCol` to obtain specific matrix columns from node
 features as tensors and `Tensor.asColumn` method to convert the obtained tensors into a column representation that can
@@ -129,7 +129,6 @@ for(Integer node : testIds) {
 	acc += (output.argmax()==nodeLabels.argmax()?1:0);
 }
 System.out.println("Accuracy "+acc/testIds.size());
-}
 ```
 
 # :fire: Features
