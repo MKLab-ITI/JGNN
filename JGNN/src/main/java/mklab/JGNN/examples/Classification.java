@@ -54,7 +54,7 @@ public class Classification {
 		for(int epoch=0;epoch<150;epoch++) {
 			System.out.print("Epoch "+epoch);
 			Tensor errors = 
-					model.trainSampleDifference(optimizer, Arrays.asList(trainFeatures), Arrays.asList(trainLabels))
+					model.trainL2(optimizer, Arrays.asList(trainFeatures), Arrays.asList(trainLabels))
 					.get(0)
 					.subtract(trainLabels);
 			

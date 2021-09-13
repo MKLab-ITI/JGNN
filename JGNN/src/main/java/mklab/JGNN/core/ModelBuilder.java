@@ -49,13 +49,13 @@ public class ModelBuilder {
 	}
 	protected void assertValidName(String name) {
 		if(name==null || name.isEmpty())
-			throw new RuntimeException("Invalid component name");
+			throw new IllegalArgumentException("Invalid component name");
 		if(components.containsKey(name)) 
-			throw new RuntimeException("Component name "+name+" already in use by another model component");
+			throw new IllegalArgumentException("Component name "+name+" already in use by another model component");
 	}
 	protected void assertExists(String name) {
 		if(!components.containsKey(name))
-			throw new RuntimeException("Component name "+name+" not declared");
+			throw new IllegalArgumentException("Component name "+name+" not declared");
 	}
 	
 	public ModelBuilder var(String name) {
@@ -197,7 +197,7 @@ public class ModelBuilder {
 					break;
 				String[] splt = desc.split("\\s*=\\s*");
 				if(splt.length!=2)
-					throw new RuntimeException("Exactly one equality needed in each operation: "+desc);
+					throw new IllegalArgumentException("Exactly one equality needed in each operation: "+desc);
 				newDesc = "";
 				int lastArgPos = -1;
 				for(int i=0;i<splt[1].length();i++) {
@@ -385,7 +385,7 @@ public class ModelBuilder {
 		HashSet<NNOperation> actualComponents = new HashSet<NNOperation>(components.values());
 		for(NNOperation component : allFoundComponents)
 			if(!actualComponents.contains(component))
-				System.err.println("The component "+component.describe()+" was not added by this builder");
+				System.err.println("The component "+component.describe()+" was not added by this builder to its model's pipeline");
 		for(NNOperation component : actualComponents)
 			if(!allFoundComponents.contains(component)) {
 				System.err.println("The component "+component.describe()+" does not lead to an output and will be removed from the outputs of other components");

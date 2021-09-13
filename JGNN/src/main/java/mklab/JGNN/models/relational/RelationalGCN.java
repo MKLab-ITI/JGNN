@@ -88,7 +88,7 @@ public class RelationalGCN extends Model {
 			if(testMatrix!=null)
 				System.out.print("Epoch "+epoch);
 			RelationalData trainingData = new RelationalData((SparseMatrix) W, RelationalData.NegativeSamplingType.PERMUTATION);
-			trainSample(optimizer, trainingData.getInputs(), trainingData.getOutputs());
+			trainCrossEntropy(optimizer, trainingData.getInputs(), trainingData.getOutputs());
 			if(testMatrix!=null)  {
 				RelationalData testData = new RelationalData((SparseMatrix) testMatrix, W, 
 						RelationalData.NegativeSamplingType.RANDOM);

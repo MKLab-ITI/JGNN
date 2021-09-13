@@ -58,7 +58,7 @@ public class ClassificationGCN extends Model {
 		for(int epoch=0;epoch<epochs;epoch++) {
 			if(testNodes!=null)
 				System.out.print("Epoch "+epoch);
-			trainSample(optimizer, Arrays.asList(trainingNodes), 
+			trainCrossEntropy(optimizer, Arrays.asList(trainingNodes), 
 					Arrays.asList(new WrapCols(trainingLabels)));
 			if(testNodes!=null)  {
 				List<Tensor> outputs = ((Matrix)predict(Arrays.asList(testNodes)).get(0)).accessColumns();

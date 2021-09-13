@@ -32,7 +32,7 @@ public class SimpleNetwork {
 		// when no output is passed to training, the output is considered to be an error
 		for(int i=0;i<10000;i++) {
 			for(int j=0;j<10;j++)
-				modelBuilder.getModel().trainSampleDifference(optimizer, 
+				modelBuilder.getModel().trainL2(optimizer, 
 						Arrays.asList(Matrix.fromDouble(x1.get(j))), 
 						Arrays.asList(Matrix.fromDouble(y.get(j))));
 			optimizer.updateAll();
