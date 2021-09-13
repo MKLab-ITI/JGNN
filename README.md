@@ -6,10 +6,10 @@ Graph Neural Networks (GNNs) have seen a dramatic increase in popularity
 thanks to their ability to understand relations between nodes.
 This library aims to provide GNN capabilities to native Java applications, 
 for example to perform machine learning on Android. It does so by avoiding
-the overhead of employing c- or python- based machine learning libraries,
-such as TensorFlow Lite, that are often designed with pure performance in mind,
-but from which GNNs do not get a large boost (operations such as graph convolutions
-still  exhibit the big-O time complexity).
+c-based machine learning libraries, such as [TensorFlow Lite](https://www.tensorflow.org/lite),
+that are often designed with pure performance in mind but which often require
+specific hardware to run, such as GPUs, and drastically increase the size of
+deployed applications.
 
 
 # :hammer_and_wrench: Installation
