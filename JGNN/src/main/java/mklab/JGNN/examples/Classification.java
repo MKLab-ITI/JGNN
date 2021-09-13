@@ -6,6 +6,7 @@ import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.ModelBuilder;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.DenseMatrix;
+import mklab.JGNN.data.IdConverter;
 import mklab.JGNN.data.datasets.Dataset;
 import mklab.JGNN.data.datasets.Datasets;
 import mklab.JGNN.nn.optimizers.BatchOptimizer;
@@ -16,8 +17,9 @@ public class Classification {
 
 	public static void main(String[] args) {
 		Dataset dataset = new Datasets.Lymphography();
-		Matrix labels = dataset.nodes().oneHot(dataset.labels()).asTransposed();
-		Matrix features = dataset.nodes().oneHot(dataset.features()).asTransposed();
+		IdConverter nodes = dataset.nodes();
+		Matrix labels = nodes.oneHot(dataset.labels()).asTransposed();
+		Matrix features = nodes.oneHot(dataset.features()).asTransposed();
 		
 		System.out.println("Nodes\t: "+dataset.nodes().size());
 		System.out.println("Labels\t: "+labels.describe());
