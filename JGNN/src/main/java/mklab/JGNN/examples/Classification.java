@@ -1,12 +1,18 @@
 package mklab.JGNN.examples;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import mklab.JGNN.core.Matrix;
+import mklab.JGNN.core.Model;
 import mklab.JGNN.core.ModelBuilder;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.DenseMatrix;
+import mklab.JGNN.core.matrix.WrapCols;
 import mklab.JGNN.core.tensor.DenseTensor;
+import mklab.JGNN.data.IdConverter;
 import mklab.JGNN.data.datasets.Dataset;
 import mklab.JGNN.data.datasets.Datasets;
 import mklab.JGNN.nn.optimizers.BatchOptimizer;
@@ -17,8 +23,9 @@ public class Classification {
 
 	public static void main(String[] args) {
 		Dataset dataset = new Datasets.Lymphography();
-		Matrix labels = dataset.nodes().oneHot(dataset.labels()).asTransposed();
-		Matrix features = dataset.nodes().oneHot(dataset.features()).asTransposed();
+		IdConverter nodes = dataset.nodes();
+		Matrix labels = nodes.oneHot(dataset.labels()).asTransposed();
+		Matrix features = nodes.oneHot(dataset.features()).asTransposed();
 		
 		System.out.println("Nodes\t: "+dataset.nodes().size());
 		System.out.println("Labels\t: "+labels.describe());
@@ -33,28 +40,34 @@ public class Classification {
 				.operation("yhat = sigmoid(w1@x)")
 				.out("yhat")
 				.print();
-		Tensor trainingSamples = new DenseTensor(dataset.nodes().getIds().iterator());
 		
 		BatchOptimizer optimizer = new BatchOptimizer(new Regularization(new GradientDescent(0.1), 0.001));
+		Model model = modelBuilder.getModel();
+		ArrayList<Long> nodeIds = dataset.nodes().getIds();
+		Collections.shuffle(nodeIds);
+		List<Long> trainIds = nodeIds.subList(nodeIds.size()/5, nodeIds.size());
+		List<Long> testIds = nodeIds.subList(0, nodeIds.size()/5);
+		Matrix trainFeatures = new WrapCols(features.accessColumns(trainIds));
+		Matrix trainLabels = new WrapCols(labels.accessColumns(trainIds));
+		System.out.println("Train features: "+trainFeatures.describe());
+		
 		for(int epoch=0;epoch<150;epoch++) {
 			System.out.print("Epoch "+epoch);
 			Tensor errors = 
-					modelBuilder.getModel().trainSampleDifference(optimizer, 
-					Arrays.asList(features.accessColumns(trainingSamples)), 
-					Arrays.asList(labels.accessColumns(trainingSamples)))
+					model.trainSampleDifference(optimizer, Arrays.asList(trainFeatures), Arrays.asList(trainLabels))
 					.get(0)
-					.subtract(labels);
+					.subtract(trainLabels);
 			
 			double acc = 0;
-			for(Integer node : dataset.nodes().getIds()) {
+			for(Long node : testIds) {
 				Matrix nodeFeatures = features.accessCol(node).asColumn();
 				Matrix nodeLabels = labels.accessCol(node).asColumn();
 				Tensor output = modelBuilder.getModel().predict(nodeFeatures).get(0);
 				acc += (output.argmax()==nodeLabels.argmax()?1:0);
 			}
 			optimizer.updateAll();
-			System.out.print("\t error "+errors.abs().sum()/dataset.nodes().size());
-			System.out.println("\t accuracy "+acc/dataset.nodes().size());
+			System.out.print("\t error "+errors.abs().sum()/trainLabels.size());
+			System.out.println("\t accuracy "+acc/testIds.size());
 		}
 	}
 

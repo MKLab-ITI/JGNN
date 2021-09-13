@@ -371,6 +371,7 @@ public abstract class Matrix extends Tensor {
 			ret.add(accessCol(col));
 		return ret;
 	}
+	
 	/**
 	 * Organizes specific matrix rows to a list of tensors that share entries.
 	 * This operation does not allocate memory for matrix elements and editing 
@@ -408,7 +409,7 @@ public abstract class Matrix extends Tensor {
 	 * tensor elements edits the original matrix's elements.
 	 * @param cols A tensor whose values hold the rows to access.
 	 * @return A list of {@link AccessRow}.
-	 * @see #accessCol(long)
+	 * @see #accessRow(long)
 	 * @see #accessColumns(Tensor)
 	 */
 	public final Matrix accessRows(Tensor rows) {
@@ -431,6 +432,38 @@ public abstract class Matrix extends Tensor {
 		for(long col=0;col<cols.size();col++)
 			ret.add(accessCol((long)cols.get(col)));
 		return new WrapCols(ret);
+	}
+
+	/**
+	 * Organizes some matrix rows to a list of tensors that share entries.
+	 * This operation does not allocate memory for matrix elements and editing 
+	 * tensor elements edits the original matrix's elements.
+	 * @param rowIds The rows to access.
+	 * @return A list of {@link AccessRow}.
+	 * @see #getCol(long)
+	 * @see #accessColumns()
+	 */
+	public final List<Tensor> accessRows(Iterable<Long> rowIds) {
+		List<Tensor> ret = new ArrayList<Tensor>();
+		for(long row : rowIds)
+			ret.add(accessRow(row));
+		return ret;
+	}
+	
+	/**
+	 * Organizes some matrix columns to a list of tensors that share entries.
+	 * This operation does not allocate memory for matrix elements and editing 
+	 * tensor elements edits the original matrix's elements.
+	 * @param colIds The columns to access.
+	 * @return A list of {@link AccessCol}.
+	 * @see #getCol(long)
+	 * @see #accessRows()
+	 */
+	public final List<Tensor> accessColumns(Iterable<Long> colIds) {
+		List<Tensor> ret = new ArrayList<Tensor>();
+		for(long col : colIds)
+			ret.add(accessCol(col));
+		return ret;
 	}
 	/*public final List<Tensor> toSparseColumns() {
 		List<Tensor> ret = new ArrayList<Tensor>();

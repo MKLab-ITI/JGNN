@@ -28,12 +28,6 @@ public class DenseTensor extends Tensor {
 			put(i, list.get(i).doubleValue());
 			
 	}
-	/**
-	 * Constructs a dense tensor from an array of values. Size
-	 * is automatically determined to be the same as the 
-	 * number of values.
-	 * @param values The values to put into tensor elements.
-	 */
 	public DenseTensor(double... values) {
 		this(values.length);
 		for(int i=0;i<values.length;i++)
