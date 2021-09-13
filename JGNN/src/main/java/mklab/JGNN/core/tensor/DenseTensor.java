@@ -1,6 +1,7 @@
 package mklab.JGNN.core.tensor;
 
 import java.util.Iterator;
+import java.util.List;
 
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.util.Range;
@@ -12,7 +13,12 @@ import mklab.JGNN.core.util.Range;
  */
 public class DenseTensor extends Tensor {
 	private double[] values;
-	
+
+	public DenseTensor(List<? extends Number> values) {
+		this(values.size());
+		for(int i=0;i<values.size();i++)
+			put(i, (double)values.get(i));
+	}
 	public DenseTensor(double... values) {
 		this(values.length);
 		for(int i=0;i<values.length;i++)

@@ -1,11 +1,19 @@
 package mklab.JGNN.examples;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import mklab.JGNN.core.Matrix;
+import mklab.JGNN.core.Model;
 import mklab.JGNN.core.ModelBuilder;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.DenseMatrix;
+import mklab.JGNN.core.matrix.WrapCols;
+import mklab.JGNN.core.matrix.WrapRows;
+import mklab.JGNN.core.tensor.DenseTensor;
+import mklab.JGNN.core.util.Range;
 import mklab.JGNN.data.IdConverter;
 import mklab.JGNN.data.datasets.Dataset;
 import mklab.JGNN.data.datasets.Datasets;
@@ -36,25 +44,32 @@ public class Classification {
 				.print();
 		
 		BatchOptimizer optimizer = new BatchOptimizer(new Regularization(new GradientDescent(0.1), 0.001));
+		Model model = modelBuilder.getModel();
+		ArrayList<Long> nodeIds = dataset.nodes().getIds();
+		Collections.shuffle(nodeIds);
+		List<Long> trainIds = nodeIds.subList(nodeIds.size()/5, nodeIds.size());
+		List<Long> testIds = nodeIds.subList(0, nodeIds.size()/5);
+		Matrix trainFeatures = new WrapCols(features.accessColumns(trainIds));
+		Matrix trainLabels = new WrapCols(labels.accessColumns(trainIds));
+		System.out.println("Train features: "+trainFeatures.describe());
+		
 		for(int epoch=0;epoch<150;epoch++) {
 			System.out.print("Epoch "+epoch);
 			Tensor errors = 
-					modelBuilder.getModel().trainSampleDifference(optimizer, 
-					Arrays.asList(features), 
-					Arrays.asList(labels))
+					model.trainSampleDifference(optimizer, Arrays.asList(trainFeatures), Arrays.asList(trainLabels))
 					.get(0)
-					.subtract(labels);
+					.subtract(trainLabels);
 			
 			double acc = 0;
-			for(Integer node : dataset.nodes().getIds()) {
+			for(Long node : testIds) {
 				Matrix nodeFeatures = features.getCol(node).asColumn();
 				Matrix nodeLabels = labels.getCol(node).asColumn();
 				Tensor output = modelBuilder.getModel().predict(nodeFeatures).get(0);
 				acc += (output.argmax()==nodeLabels.argmax()?1:0);
 			}
 			optimizer.updateAll();
-			System.out.print("\t error "+errors.abs().sum()/dataset.nodes().size());
-			System.out.println("\t accuracy "+acc/dataset.nodes().size());
+			System.out.print("\t error "+errors.abs().sum()/trainLabels.size());
+			System.out.println("\t accuracy "+acc/testIds.size());
 		}
 	}
 

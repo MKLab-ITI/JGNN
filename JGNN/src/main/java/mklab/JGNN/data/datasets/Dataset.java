@@ -27,9 +27,9 @@ import net.lingala.zip4j.ZipFile;
  */
 public class Dataset {
 	private IdConverter nodeIds = new IdConverter();
-	private HashMap<Integer, String> nodeLabels = new HashMap<Integer, String>();
-	private HashMap<Integer, ArrayList<String>> nodeFeatures = new HashMap<Integer, ArrayList<String>>();
-	private ArrayList<Entry<Integer, Integer>> interactions = new ArrayList<Entry<Integer, Integer>>();
+	private HashMap<Long, String> nodeLabels = new HashMap<Long, String>();
+	private HashMap<Long, ArrayList<String>> nodeFeatures = new HashMap<Long, ArrayList<String>>();
+	private ArrayList<Entry<Long, Long>> interactions = new ArrayList<Entry<Long, Long>>();
 	private int numFeatures = 0;
 	
 	protected Dataset() {
@@ -51,27 +51,27 @@ public class Dataset {
 		return nodeIds;
 	}
 
-	public HashMap<Integer, String> labels() {
+	public HashMap<Long, String> labels() {
 		return nodeLabels;
 	}
 	
-	public String getLabel(int node) {
+	public String getLabel(long node) {
 		if(nodeLabels.isEmpty())
 			throw new RuntimeException("Dataset "+toString()+" does not comprise node labels");
 		return nodeLabels.get(node);
 	}
 	
-	public ArrayList<String> getFeatures(int node) {
+	public ArrayList<String> getFeatures(long node) {
 		if(nodeFeatures.isEmpty())
 			throw new RuntimeException("Dataset "+toString()+" does not comprise node features");
 		return nodeFeatures.get(node);
 	}
 	
-	public ArrayList<HashMap<Integer, String>> features() {
-		ArrayList<HashMap<Integer, String>> ret = new ArrayList<HashMap<Integer, String>>();
+	public ArrayList<HashMap<Long, String>> features() {
+		ArrayList<HashMap<Long, String>> ret = new ArrayList<HashMap<Long, String>>();
 		for(int i=0;i<numFeatures;i++) {
-			HashMap<Integer, String> feature = new HashMap<Integer, String>();
-			for(Integer node : nodeIds.getIds())
+			HashMap<Long, String> feature = new HashMap<Long, String>();
+			for(Long node : nodeIds.getIds())
 				feature.put(node, getFeatures(node).get(i));
 			ret.add(feature);
 		}
@@ -223,7 +223,7 @@ public class Dataset {
 	}
 	
 	protected void addInteraction(String u, String v) {
-		this.interactions.add(new AbstractMap.SimpleEntry<Integer, Integer>(nodeIds.getOrCreateId(u), nodeIds.getOrCreateId(v)));
+		this.interactions.add(new AbstractMap.SimpleEntry<Long, Long>(nodeIds.getOrCreateId(u), nodeIds.getOrCreateId(v)));
 		
 	}
 	protected void setLabel(String u, String label) {
@@ -237,7 +237,7 @@ public class Dataset {
 		this.nodeFeatures.put(nodeIds.getOrCreateId(u), features);
 	}
 	
-	public ArrayList<Entry<Integer, Integer>> getInteractions() {
+	public ArrayList<Entry<Long, Long>> getInteractions() {
 		if(interactions.isEmpty())
 			throw new RuntimeException("Dataset "+toString()+" does not comprise interactions");
 		return interactions;

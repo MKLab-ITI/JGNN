@@ -55,7 +55,7 @@ public class LearningTest {
 					.subtract(labels);
 			
 			double acc = 0;
-			for(Integer node : dataset.nodes().getIds()) {
+			for(Long node : dataset.nodes().getIds()) {
 				Matrix nodeFeatures = features.getCol(node).asColumn();
 				Matrix nodeLabels = labels.getCol(node).asColumn();
 				output = modelBuilder.getModel().predict(nodeFeatures).get(0);

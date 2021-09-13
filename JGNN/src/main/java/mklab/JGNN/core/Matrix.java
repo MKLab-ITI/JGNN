@@ -353,11 +353,43 @@ public abstract class Matrix extends Tensor {
 	 * tensor elements edits the original matrix's elements.
 	 * @return A list of {@link AccessCol}.
 	 * @see #getCol(long)
-	 * @see #acceRows()
+	 * @see #accessRows()
 	 */
 	public final List<Tensor> accessColumns() {
 		List<Tensor> ret = new ArrayList<Tensor>();
 		for(long col=0;col<getCols();col++)
+			ret.add(getCol(col));
+		return ret;
+	}
+
+	/**
+	 * Organizes some matrix rows to a list of tensors that share entries.
+	 * This operation does not allocate memory for matrix elements and editing 
+	 * tensor elements edits the original matrix's elements.
+	 * @param rowIds The rows to access.
+	 * @return A list of {@link AccessRow}.
+	 * @see #getCol(long)
+	 * @see #accessColumns()
+	 */
+	public final List<Tensor> accessRows(Iterable<Long> rowIds) {
+		List<Tensor> ret = new ArrayList<Tensor>();
+		for(long row : rowIds)
+			ret.add(getRow(row));
+		return ret;
+	}
+	
+	/**
+	 * Organizes some matrix columns to a list of tensors that share entries.
+	 * This operation does not allocate memory for matrix elements and editing 
+	 * tensor elements edits the original matrix's elements.
+	 * @param colIds The columns to access.
+	 * @return A list of {@link AccessCol}.
+	 * @see #getCol(long)
+	 * @see #accessRows()
+	 */
+	public final List<Tensor> accessColumns(Iterable<Long> colIds) {
+		List<Tensor> ret = new ArrayList<Tensor>();
+		for(long col : colIds)
 			ret.add(getCol(col));
 		return ret;
 	}

@@ -35,7 +35,8 @@ public class WrapCols extends Matrix {
 	}
 	@Override
 	public Matrix zeroCopy(long rows, long cols) {
-		throw new UnsupportedOperationException();
+		// TODO: organize code so that this automatically obtains sparsity 
+		return new DenseMatrix(rows, cols);
 	}
 	@Override
 	protected void allocate(long size) {
