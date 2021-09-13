@@ -18,6 +18,7 @@ For quick installation of the latest working version of the library, you can inc
 
 
 # :zap: Quickstart
+### Dataset
 As an example, we will create a custom model to make predictions on the Lymphography dataset.
 First, we load the dataset (it is automatically downloaded) and use the `IdConverter` class
 to transform its labels and features into matrices. To save memory space, the library implicitly
@@ -40,6 +41,7 @@ Matrix labels = nodeIdConverter.oneHot(dataset.labels()).asTransposed();
 Matrix features = nodeIdConverter.oneHot(dataset.features()).asTransposed();
 ```
 
+### Model definition
 We then store the number of features and class labels that will help us define our model. It
 is worth noting that matrix dimensions and elements are `long` numbers. Dense matrices can only
 store up to integers, but this conversion allows us to handle large sparce matrices through the
@@ -67,6 +69,7 @@ ModelBuilder modelBuilder = new ModelBuilder()
 		.print();
 ```
 
+### Learning
 ```java
 BatchOptimizer optimizer = new BatchOptimizer(new Regularization(new GradientDescent(0.1), 0.001));
 for(int epoch=0;epoch<150;epoch++) {
