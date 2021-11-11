@@ -84,10 +84,13 @@ Optimizer optimizer = new Regularization(new GradientDescent(0.1), 0.001);
 BatchOptimizer batchOptimizer = new BatchOptimizer(batchOptimizer);
 ```
 
+:bulb: **Always** use batch optimizers for complicated models, as more than one gradient paths may arrive
+at trainable variables and they need to perform simultaneous updates.
+
 We finally perform training over a total of 150 epochs. For each of these, we obtain the model held by the model builder
 and call its `Model.trainSampleDifference` method to train it with a provided optimizer, list of of inputs variable
 values and list of output variable values (these lists comprise only one matrix each). This method returns the original
-predictions as a list. To showcase primitive operations, we also 
+predictions as a list. Batching and parallelized batch training are covered in [introduction to models and builders](Models.md).
 
 :bulb: The order of input and output list elements, if more than one need to be provided or retrieved, corresponds to
 of their definition order in the model builder.
@@ -95,7 +98,7 @@ of their definition order in the model builder.
 ```java
 Model model = modelBuilder.getModel();
 for(int epoch=0;epoch<150;epoch++) {
-	Tensor yhat = model.trainSampleDifference(optimizer, Arrays.asList(features), Arrays.asList(labels)).get(0);
+	Tensor yhat = model.trainSampleDifference(batchOptimizer, Arrays.asList(features), Arrays.asList(labels)).get(0);
 	Tensor errors = yhat.subtract(labels);
 	batchOptimizer.updateAll();
 	print("Epoch "+epoch+" error "+errors.abs().sum()/trainIds.size())
@@ -105,9 +108,9 @@ for(int epoch=0;epoch<150;epoch++) {
 # Testing
 We finally report training accuracy on the test set. We demonstrate how single-node (single-sample) predictions can be
 made and measure the accuracy of those. To dothis, we use `Matrix.accessCol` to obtain specific matrix columns from node
-features as tensors and `Tensor.asColumn` method to convert the obtained tensors into a column representation that can
-pass through the model's defined matrix multiplication. We finally use `argmax` to convert one-hot prediction encodings
-to label ids. Overall, this sample code achieves 82.8% accuracy.
+features as tensors and `Tensor.asColumn` to convert the obtained tensors into a column representation. Column representations
+are matrices and hence can pass through the model's defined matrix multiplication. We finally use `argmax` to convert one-hot 
+prediction encodings to label ids. Overall, this sample code achieves 82.8% accuracy.
 
 ```java
 double acc = 0;

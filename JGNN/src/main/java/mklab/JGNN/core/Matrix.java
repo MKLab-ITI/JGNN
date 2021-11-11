@@ -196,6 +196,13 @@ public abstract class Matrix extends Tensor {
 		return ret;
 	}
 	
+	/**
+	 * Produces the external product of two tensors.
+	 * This is equivalent but faster to calling matmul(horizontal.asColum(), vertical.asRow()).
+	 * @param horizontal The first tensor.
+	 * @param vertical The second tensor.
+	 * @return A dense matrix holding the external product.
+	 */
 	public static Matrix external(Tensor horizontal, Tensor vertical) {
 		Matrix ret = new DenseMatrix(horizontal.size(), vertical.size());
 		for(long row=0;row<horizontal.size();row++)
@@ -249,15 +256,22 @@ public abstract class Matrix extends Tensor {
 		return getClass().getSimpleName()+" ("+rows+","+cols+")";
 	}
 	
+	/**
+	 * Produces a mask that indicates the non-zero elements of the matrix.
+	 * Element's correspond to the matrix's whose non-zero ones are set to 1.
+	 * @return A matrix of the same dimensions.
+	 */
 	public Matrix onesMask() {
 		Matrix ones = zeroCopy(getRows(), getCols());
 		for(Entry<Long, Long> element : getNonZeroEntries()) {
 			long row = element.getKey();
 			long col = element.getValue();
-			ones.put(row, col, 1.);
+			if(get(row, col)!=0)
+				ones.put(row, col, 1.);
 		}
 		return ones;
 	}
+	
 	/**
 	 * Creates a copy of the Matrix that holds its normalized Laplacian transformation.
 	 * @return A new Matrix of the same dimensions.
@@ -266,6 +280,7 @@ public abstract class Matrix extends Tensor {
 	public Matrix laplacian() {
 		return ((Matrix)copy()).setToLaplacian();
 	}
+	
 	/**
 	 * Sets the Matrix to its normalized Laplacian transformation by appropriately adjusting its element values.
 	 * @return <code>this</code> Matrix instance.

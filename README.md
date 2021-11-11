@@ -21,11 +21,11 @@ For quick installation of the latest working version of the library, you can inc
 
 # :fire: Features
 * Cross-platform support (written in native java)
-* Speed ups with direct memory access
+* Speed ups with direct memory access and parallelized batching
 
 # :link: Material
 * [Javadoc](https://maniospas.github.io/JGNN/)
-* [Introduction to JGNN primitive](tutorials/Primitives.md) A collection of vector and matrix primitives support low-level arithmetic operations, in-place version of the same operations and both sparse and dense memory structures. The can also support applications outside the scope of the library. This tutorial covers the use of machine learning primitives.
+* [Introduction to JGNN primitives](tutorials/Primitives.md) A collection of vector and matrix primitives support low-level arithmetic operations, in-place version of the same operations and both sparse and dense memory structures. The can also support applications outside the scope of the library. This tutorial covers the use of machine learning primitives.
 * [Introduction to JGNN models and builders](tutorials/Models.md) Learning tasks can be automated by defining symbolic pipelines. This tutorial covers tools that can be used to create trainable machine learning models, including builders that can build those tools from  simple String expressions.
 * [Introduction to JGNN benchmarking] A collection of publically available datasets that can be automatically downloaded and imported from respective external sources to facilitate benchmarking tasks. 
 

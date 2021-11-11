@@ -30,15 +30,15 @@ You can safely skip to that segment to learn how to write machine learning model
 | constant | mklab.JGNN.nn.operations.Constant(tensor) | 0 |
 | parameter | mklab.JGNN.nn.operations.Parameter(tensor) | 0 |
 | relu | mklab.JGNN.nn.activations.Relu() | 1 |
-| relu | mklab.JGNN.nn.activations.Tanh() | 1 |
-| relu | mklab.JGNN.nn.activations.Sigmoid() | 1 |
+| tanh | mklab.JGNN.nn.activations.Tanh() | 1 |
+| sigmoid | mklab.JGNN.nn.activations.Sigmoid() | 1 |
 | lrelu | mklab.JGNN.nn.activations.LRelu() | 2 |
-| lrelu | mklab.JGNN.nn.activations.PRelu() | 2 |
+| prelu | mklab.JGNN.nn.activations.PRelu() | 2 |
 
-:Warn: In principle, the `addInput` should be called a number of times equal to the number of operator arguments for each operator.
+:warning: In principle, the `addInput` should be called a number of times equal to the number of operator arguments for each operator.
 It is defined for the sake of convenience, for example to initialize operators at different parts of the code than the one linking them.
 
-:Warn: Detailed error checking of JGNN operations is under development.
+:warning: Detailed error checking of JGNN operations is under development.
 
 For example, the expression *y=log(2x+1)* can be constructed with the following code:
 
