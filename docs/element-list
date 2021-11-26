@@ -1,0 +1,17 @@
+mklab.JGNN
+mklab.JGNN.builders
+mklab.JGNN.core
+mklab.JGNN.core.distribution
+mklab.JGNN.core.matrix
+mklab.JGNN.core.tensor
+mklab.JGNN.core.util
+mklab.JGNN.data
+mklab.JGNN.data.datasets
+mklab.JGNN.examples
+mklab.JGNN.measures
+mklab.JGNN.models.relational
+mklab.JGNN.nn.activations
+mklab.JGNN.nn.inputs
+mklab.JGNN.nn.operations
+mklab.JGNN.nn.optimizers
+mklab.JGNN.nn.pooling
