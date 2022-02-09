@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import mklab.JGNN.core.matrix.WrapCols;
+import mklab.JGNN.core.matrix.WrapRows;
 import mklab.JGNN.nn.optimizers.BatchOptimizer;
 
 /**
@@ -58,19 +58,25 @@ public class ModelTraining {
 	public Model train(Model model, Matrix features, Matrix labels, List<Long> trainingSamples) {
 		for(int epoch=0;epoch<epochs;epoch++) {
 			Collections.shuffle(trainingSamples, new Random(epoch));
+			double[] batchLosses = new double[numBatches];
 			for(int batch=0;batch<numBatches;batch++) {
 				int start = (trainingSamples.size() / numBatches)*batch;
 				int end = Math.min(trainingSamples.size(), start+(trainingSamples.size() / numBatches));
-				Matrix trainFeatures = new WrapCols(features.accessColumns(trainingSamples.subList(start, end)));
-				Matrix trainLabels = new WrapCols(labels.accessColumns(trainingSamples.subList(start, end)));
+				int batchId = batch;
+				Matrix trainFeatures = new WrapRows(features.accessRows(trainingSamples.subList(start, end)));
+				Matrix trainLabels = new WrapRows(labels.accessRows(trainingSamples.subList(start, end)));
 				Runnable batchCode = new Runnable() {
 					@Override
 					public void run() {
+						List<Tensor> outputs;
 						if(loss==Loss.L2)
-							model.trainL2(optimizer, Arrays.asList(trainFeatures), Arrays.asList(trainLabels));
+							outputs = model.trainL2(optimizer, Arrays.asList(trainFeatures), Arrays.asList(trainLabels));
 						else if(loss==Loss.CrossEntropy)
-							model.trainCrossEntropy(optimizer, Arrays.asList(trainFeatures), Arrays.asList(trainLabels));
+							outputs = model.trainCrossEntropy(optimizer, Arrays.asList(trainFeatures), Arrays.asList(trainLabels));
+						else
+							throw new RuntimeException("Unimplemented loss method "+loss);
 						optimizer.updateAll();
+						batchLosses[batchId] = outputs.get(0).multiply(-1).cast(Matrix.class).selfAdd(trainLabels).selfAbs().norm();
 					}
 				};
 				if(paralellization)
@@ -80,6 +86,10 @@ public class ModelTraining {
 			}
 			if(paralellization)
 				ThreadPool.getInstance().waitForConclusion();
+			double totalLoss = 0;
+			for(double batchLoss : batchLosses)
+				totalLoss += batchLoss/numBatches;
+			System.out.println("Epoch "+epoch+" with avg loss "+totalLoss);
 		}
 		return model;
 	}

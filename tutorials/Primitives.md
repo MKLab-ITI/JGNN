@@ -11,6 +11,7 @@ one.
 1. [Tensor operations](#tensor-operations)
 2. [Vector initialization](#vector-initialization)
 3. [Matrix initialization and operations](#matrix-initialization-and-operations)
+4. [Named dimensions](#named-dimensions)
 
 ## Tensor operations
 Tensor operations are performed element-by-element and can be split
@@ -103,3 +104,21 @@ Operation | Type | Comments
 `Matrix put(long row, long col, double value)` | element access | NaN values throw exceptions. Is in-place.
 `Iterable<Entry<Long, Long>> getNonZeroEntries()` | element access | Similar to getNonZeroElements() but iterates through (row, col) pairs.
 
+
+## Named dimensions
+In addition to other oeprations, there exists a type of in-place arithmetic operations that do not affect tensor or matrix values but are only
+responsible for dimension names. These are purely decorative and only aim to improve debugging by throwing errors for incompatible non-null
+names. For example, adding two tensors with dimension
+
+Operation | Type | Comments
+--- | --- | ---
+`Tensor setDimensionName(String name)` | arithmetic | For naming tensor dimensions (of the 1D space tensors lie in).
+ `Tensor setRowName(String rowName)` | arithmetic | For naming what kind of information matrix rows hold (e.g. `"samples"`).
+ `Tensor setColName(String colName)` | arithmetic | For naming what kind of information matrix columns hold (e.g. `"features"`).
+ `Tensor setDimensionName(String rowName, String colName)` | arithmetic | As a shorthand of running `setRowName(rowName).setColName(colName)`.
+ 
+ 
+Arithmetic operations, *including* matrix multiplication automatically infer what dimension names in the result they can
+to make sure that only compatible data types are compared. Dimension names can be freely changed on operation names *without*
+backtracking changes (even for see-through data types, shuch as asTransposed()).
+ 

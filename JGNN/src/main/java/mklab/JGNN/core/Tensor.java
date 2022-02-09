@@ -15,6 +15,8 @@ import mklab.JGNN.core.util.Range;
  */
 public abstract class Tensor implements Iterable<Long> {
 	private long size;
+	private String dimensionName;
+	
 	/**
 	 * Construct that creates a tensor of zeros given its number of elements
 	 * @param size The number of tensor elements
@@ -23,6 +25,22 @@ public abstract class Tensor implements Iterable<Long> {
 		init(size);
 	}
 	protected Tensor() {}
+	
+	/**
+	 * Sets a name for the tensor's one dimension. If set, names are checked for
+	 * compatibility during operations, so that tensors laying across different dimensions
+	 * do not match. Removed dimension names are matched to anything.
+	 * @param dimensionName The new row name or <code>null</code> to remove current name.
+	 * @return <code>this</code> Tensor instance.
+	 * @see #getDimensionName()
+	 */
+	public final Tensor setDimensionName(String dimensionName) {
+		this.dimensionName = dimensionName;
+		return this;
+	}
+	public final String getDimensionName() {
+		return dimensionName;
+	}
 	/**
 	 * Set tensor elements to random values from the uniform range [0,1]
 	 * @return <code>this</code> Tensor instance.
@@ -111,14 +129,16 @@ public abstract class Tensor implements Iterable<Long> {
 	}
 	/**
 	 * Asserts that the tensor's dimensions match with another tensor. This check can be made
-	 * more complex by derived classes, but for a base Tensor instance it is equivalent {@link #assertSize(int)}.
+	 * more complex by derived classes, but for a base Tensor instance it is equivalent {@link #assertSize(long)}.
 	 * This method calls {@link #isMatching(Tensor)} to compare the tensors and throws an exception
 	 * if it returns false.
 	 * @param other The other tensor to compare with.
+	 * @return <code>this</code> Tensor instance.
 	 */
-	public final void assertMatching(Tensor other) {
+	public final Tensor assertMatching(Tensor other) {
 		if(!isMatching(other)) 
 			throw new RuntimeException("Non-compliant: "+describe()+" vs "+other.describe());
+		return this;
 	}
 	/**
 	 * Compares the tensor with another given tensor to see if they are of a same type.
@@ -131,7 +151,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @see #assertMatching(Tensor)
 	 */
 	protected boolean isMatching(Tensor other) {
-		return size==other.size();
+		return size==other.size() && (dimensionName==null || other.getDimensionName()==null || dimensionName==other.getDimensionName());
 	}
 	/**
 	 * Creates a tensor of the same class with the same size and all element set to zero.
@@ -139,9 +159,21 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @see #zeroCopy(long)
 	 */
 	public Tensor zeroCopy() {
-		return zeroCopy(size());
+		return zeroCopy(size()).setDimensionName(this);
 	}
-
+	/**
+	 * Fills in dimension names per an example {@link isMatching} tensor. This appropriately fills in dimension
+	 * names of inherited classes too, such as matrices. Effectively, this method automatically infers
+	 * dimension names during operations.
+	 * @param other The tensor from which to retrieve dimension names.
+	 * @return <code>this</code> Tensor instance.
+	 */
+	public Tensor setDimensionName(Tensor other) {
+		assertMatching(other); 
+		if(dimensionName==null)
+			dimensionName = other.getDimensionName();
+		return this;
+	}
 	/**
 	 * Creates a tensor of the same class with  a given size and all element set to zero.
 	 * @param size The size of the new tensor.
@@ -433,7 +465,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * so that <code>accessSubtensor(0, size())</code> is
 	 * a see-through copy of the original tensor.
 	 * @param from The starting position of the subtensor.
-	 * @param to The end position of the subtensor that is <it>not</it> included.
+	 * @param to The end position of the subtensor that is not included.
 	 * @return An {@link AccessSubtensor}.
 	 * @see #accessSubtensor(long)
 	 */
@@ -666,9 +698,18 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @return A String description.
 	 */
 	public String describe() {
-		return "Tensor ("+size()+")";
+		return "Tensor ("+(dimensionName==null?"":(dimensionName+" "))+size()+")";
 	}
-
+	@SuppressWarnings("unchecked")
+	public <Type> Type cast(Class<Type> type) {
+		return (Type)this;
+	}
+	/**
+	 * Automatically determines which between the tensor and a competitor is chosen create zero copies for two-argument operations.
+	 * 
+	 * @param with The competitor.
+	 * @return A zero copy of either the tensor or the competitor.
+	 */
 	protected Tensor determineZeroCopy(Tensor with) {
 		try {
 			return zeroCopy(size());

@@ -1,4 +1,4 @@
-package mklab.JGNN.examples;
+package mklab.JGNN.examples.nodeClassification;
 
 import java.util.HashMap;
 import java.util.Map.Entry;

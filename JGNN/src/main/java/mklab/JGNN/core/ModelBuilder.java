@@ -1,6 +1,7 @@
 package mklab.JGNN.core;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -23,8 +24,10 @@ import mklab.JGNN.nn.operations.Log;
 import mklab.JGNN.nn.operations.MatMul;
 import mklab.JGNN.nn.operations.Multiply;
 import mklab.JGNN.nn.operations.Repeat;
+import mklab.JGNN.nn.operations.Transpose;
 import mklab.JGNN.nn.pooling.SoftMax;
 import mklab.JGNN.nn.pooling.Sum;
+import mklab.JGNN.nn.pooling.Max;
 
 /**
  * This class and subclasses can be used to create {@link Model} instances 
@@ -164,7 +167,7 @@ public class ModelBuilder {
 							if(!args.isEmpty())
 								args += " , ";
 							String arg = subop.toString().trim();
-							if(components.containsKey(arg)) 
+							if(components.containsKey(arg) || arg.equals("col") || arg.equals("row")) 
 								args += arg;
 							else {
 								String tmpName = "_tmp"+tmpVariableIdentifier;
@@ -252,14 +255,13 @@ public class ModelBuilder {
 		String arg0 = null;
 		String arg1 = null;
 		assertValidName(name);
-		
 		NNOperation component;
 		if(splt.length==3) {
 			double val = Double.parseDouble(splt[2]);
 			constant(name, Tensor.fromDouble(val));
 			return this;
 		}
-		if(splt[3].equals("+")) {
+		else if(splt[3].equals("+")) {
 			component = new Add();
 			arg0 = splt[2];
 			arg1 = splt[4];
@@ -269,20 +271,46 @@ public class ModelBuilder {
 			arg0 = splt[2];
 			arg1 = splt[4];
 		}
+		else if(splt[2].equals("softmax")) {
+			boolean mode = false;
+			if(splt.length>4) {
+				String modeText = splt[4].trim();
+				if(modeText.equals("row"))
+					mode = false;
+				else if(modeText.equals("col"))
+					mode = true;
+				else
+					throw new RuntimeException("Invalid argument "+modeText+" to softmax");
+			}
+			component = new SoftMax(mode);
+			arg0 = splt[3];
+		}
 		else if(splt[2].equals("sum")) {
-			component = new Sum();
+			boolean mode = false;
+			if(splt.length>4) {
+				String modeText = splt[4].trim();
+				if(modeText.equals("row"))
+					mode = false;
+				else if(modeText.equals("col"))
+					mode = true;
+				else
+					throw new RuntimeException("Invalid argument "+modeText+" to softmax");
+			}
+			component = new Sum(mode);
 			arg0 = splt[3];
 		}
-		else if(splt[2].equals("max") || splt[2].equals("softmax")) {
-			component = new SoftMax();
-			arg0 = splt[3];
-		}
-		else if(splt[2].equals("maxrow") || splt[2].equals("softmaxrow")) {
-			component = new SoftMax(true);
-			arg0 = splt[3];
-		}
-		else if(splt[2].equals("maxcol") || splt[2].equals("softmaxcol")) {
-			component = new SoftMax(false);
+		else if(splt[2].equals("max")) {
+			boolean mode = false;
+			if(splt.length>4) {
+				String modeText = splt[4].trim();
+				if(modeText.equals("row"))
+					mode = false;
+				else if(modeText.equals("col"))
+					mode = true;
+				else
+					throw new RuntimeException("Invalid argument "+modeText+" to softmax");
+			}
+			component = new Max(mode);
 			arg0 = splt[3];
 		}
 		else if(splt[2].equals("relu")) {
@@ -305,6 +333,10 @@ public class ModelBuilder {
 		}
 		else if(splt[2].equals("log")) {
 			component = new Log();
+			arg0 = splt[3];
+		}
+		else if(splt[2].equals("transpose")) {
+			component = new Transpose();
 			arg0 = splt[3];
 		}
 		else if(splt[2].equals("sigmoid")) {

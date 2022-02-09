@@ -3,7 +3,7 @@ A native Java library for Graph Neural Networks.
 
 # :brain: About
 Graph Neural Networks (GNNs) have seen a dramatic increase in popularity
-thanks to their ability to understand relations between nodes.
+thanks to their ability to understand relations between graph nodes.
 This library aims to provide GNN capabilities to native Java applications, 
 for example to perform machine learning on Android. It does so by avoiding
 c-based machine learning libraries, such as [TensorFlow Lite](https://www.tensorflow.org/lite),
@@ -21,13 +21,15 @@ For quick installation of the latest working version of the library, you can inc
 
 # :fire: Features
 * Cross-platform support (written in native java)
-* Speed ups with direct memory access and parallelized batching
+* Lightweight
+* Speed ups and minimal memory footprint with direct memory access
+* Parallelized batching
 
 # :link: Material
 * [Javadoc](https://maniospas.github.io/JGNN/)
 * [Introduction to JGNN primitives](tutorials/Primitives.md) A collection of vector and matrix primitives support low-level arithmetic operations, in-place version of the same operations and both sparse and dense memory structures. The can also support applications outside the scope of the library. This tutorial covers the use of machine learning primitives.
-* [Introduction to JGNN models and builders](tutorials/Models.md) Learning tasks can be automated by defining symbolic pipelines. This tutorial covers tools that can be used to create trainable machine learning models, including builders that can build those tools from  simple String expressions.
-* [Introduction to JGNN benchmarking] A collection of publically available datasets that can be automatically downloaded and imported from respective external sources to facilitate benchmarking tasks. 
+* [Introduction to models and builders](tutorials/Models.md) Learning tasks can be automated by defining symbolic pipelines. This tutorial covers tools that can be used to create trainable machine learning models, including builders that can build those tools from  simple String expressions.
+* [Introduction to benchmarking] A collection of publically available datasets that can be automatically downloaded and imported from respective external sources to facilitate benchmarking tasks. 
 
 # :thumbsup: Contributing
 Feel free to contribute in any way, for example through the [issue tracker]() or by participating in [discussions]().

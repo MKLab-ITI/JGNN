@@ -40,7 +40,8 @@ It is defined for the sake of convenience, for example to initialize operators a
 
 :warning: Detailed error checking of JGNN operations is under development.
 
-For example, the expression *y=log(2x+1)* can be constructed with the following code:
+For example, the expression *y=log(2x+1)* can be constructed with the following code - a more consise way to do this is presented in 
+[Symbolic Model Definition](#symbolic-model-definition):
 
 ```java
 	Variable x = new Variable();
@@ -64,7 +65,7 @@ comma-separated tensors to pass into the model.
 If the number of inputs is dynamically created, an overloaded version of the same method supports an array list of input tensors
 `Tensor Model.predict(ArrayList<Tensor>)`. 
 
-:warn: Input tensor order should be the same to the order variables were added to the model.
+:warning: Input tensor order should be the same as the order in which variables were added to the model.
 
 Obtaining the last value of intermediate (i.e. non-ouput) operations *after* the run can achieved with the `Tensor NNOperation.getPrediction()` method. To sum up with an example, running a model of the previously defined *y=log(2x+1)* for *x=2* and printing both the value of *y* (approx. 1.61) and the value inside the logarithm (5) can be achieved with with the following code:
 
@@ -94,7 +95,7 @@ System.out.println(modelBuilder.getModel().predict(Tensor.fromDouble(2)));
 
 Examples up to this point were limited to using constant and variable data. However, machine learning
 tasks typically introduce the notion of *parameters* as constants whose values can be learned to optimize
-learning objectives, such as making model output values as close as possible to desired ones.
+certain objectives, such as making model output values as close as possible to desired ones.
 
 Parameter operations can be instantiated with the constructor `new mklab.JGGN.nn.Parameter(Tensor initialValue)`,
 where their initial values or provided. Model builder parameters need to be defined before they are used
@@ -104,7 +105,7 @@ by operations and can be symbolically defined with the method
 Approximating ideal parameter values for a model requires three steps: a) selecting an optimization scheme responsible for
 updating parameters based on backpropagated errors, b) selecting a loss function quantifying how much model outputs deviate
 from optimal ones and c) repeatedly calling one of the model's overloaded `Model.trainSample` methods for a number of epochs. 
-For the sake of simplicity, consider a single sample before we discuss how to handle multiple ones.
+For the sake of simplicity, in the following example we consider a single sample before we discuss how to handle multiple ones:
 
 
 ```java

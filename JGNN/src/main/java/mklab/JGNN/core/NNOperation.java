@@ -49,7 +49,7 @@ public abstract class NNOperation {
 	
 	public String describe() {
 		return this.getClass()+": "
-					+(description!=null?description:this.hashCode())+" "
+					+(description!=null?description:this.hashCode())+" = "
 					+(data().lastOutput!=null?data().lastOutput.describe():"null");
 	}
 	public String view() {
@@ -96,45 +96,70 @@ public abstract class NNOperation {
 	}
 	
 	public final Tensor runPrediction() {
-		ThreadData data = data();
-		if(data.lastOutput!=null)
+		try {
+			ThreadData data = data();
+			if(data.lastOutput!=null)
+				return data.lastOutput;
+			ArrayList<Tensor> lastInputs = new ArrayList<Tensor>();
+			for(NNOperation input : inputs)
+				lastInputs.add(input.runPrediction());
+			//System.out.println("Predicting... "+this.getClass());
+			//for(Tensor input : lastInputs)
+			//	System.out.println("\t"+input.describe());
+			data.lastOutput = forward(lastInputs);
+			data.tapeError = null;
+			data.countTapeSources = 0;
+			//System.out.println("Predicted "+describe());
 			return data.lastOutput;
-		ArrayList<Tensor> lastInputs = new ArrayList<Tensor>();
-		for(NNOperation input : inputs)
-			lastInputs.add(input.runPrediction());
-		//System.out.println("Predicting... "+this.getClass());
-		data.lastOutput = forward(lastInputs);
-		data.tapeError = null;
-		data.countTapeSources = 0;
-		//System.out.println("Predicted "+describe());
-		return data.lastOutput;
+		}
+		catch(Exception e) {
+			System.err.println(e.toString());
+			System.err.println("During the forward pass of "+describe()+" with the following inputs:");
+			for(NNOperation input : inputs)
+				System.err.println("\t"+input.describe());
+			e.printStackTrace();
+			System.exit(1);
+			return null;
+		}
 	}
 	
 	final void backpropagate(Optimizer optimizer, Tensor error) {
-		ThreadData data = data();
-		//if(error!=null)
-		//	System.out.println("Packpropagating... "+describe()+" Derivative "+error.describe()+" on thread "+ThreadPool.getCurrentThreadId());
-		if(error!=null) {
-			if(data.tapeError==null)
-				data.tapeError = data.lastOutput.zeroCopy();
-			data.tapeError.selfAdd(error);
+		try {
+			ThreadData data = data();
+			//if(error!=null)
+			//	System.out.println("Packpropagating... "+describe()+" Derivative "+error.describe()+" on thread "+ThreadPool.getCurrentThreadId());
+			if(error!=null) {
+				if(data.tapeError==null)
+					data.tapeError = data.lastOutput.zeroCopy();
+				data.tapeError.selfAdd(error);
+			}
+			data.countTapeSources++;
+			if(data.countTapeSources>outputs.size())
+				throw new RuntimeException("Redundant backpropagations were erroneously called");
+			if(data.countTapeSources<outputs.size())
+				return;
+			if(error==null)
+				return;
+			//System.out.println("Packpropagating... "+describe()+" Derivative "+data.tapeError+" prev out "+data.lastOutput);
+			ArrayList<Tensor> lastInputs = new ArrayList<Tensor>();
+			for(NNOperation input : inputs)
+				lastInputs.add(input.data().lastOutput);
+			for(int i=0;i<inputs.size();i++)
+				if(!inputs.get(i).isConstant())
+					inputs.get(i).backpropagate(optimizer, partial(i, lastInputs, data.lastOutput, data.tapeError));
+			trainParameters(optimizer, data.tapeError);
+			//System.out.println("Finished backpropagation on "+describe()+" on thread "+ThreadPool.getCurrentThreadId());
 		}
-		data.countTapeSources++;
-		if(data.countTapeSources>outputs.size())
-			throw new RuntimeException("Redundant backpropagations were erroneously called");
-		if(data.countTapeSources<outputs.size())
-			return;
-		if(error==null)
-			return;
-		//System.out.println("Packpropagating... "+describe()+" Derivative "+data.tapeError+" prev out "+data.lastOutput);
-		ArrayList<Tensor> lastInputs = new ArrayList<Tensor>();
-		for(NNOperation input : inputs)
-			lastInputs.add(input.data().lastOutput);
-		for(int i=0;i<inputs.size();i++)
-			if(!inputs.get(i).isConstant())
-				inputs.get(i).backpropagate(optimizer, partial(i, lastInputs, data.lastOutput, data.tapeError));
-		trainParameters(optimizer, data.tapeError);
-		//System.out.println("Finished backpropagation on "+describe()+" on thread "+ThreadPool.getCurrentThreadId());
+		catch(Exception e) {
+			System.err.println(e.toString());
+			System.err.println("During the backward pass of "+describe()+" with derivative:");
+			System.err.println("\t "+(error==null?"null":error.describe()));
+			System.err.println("and the following inputs:");
+			for(NNOperation input : inputs)
+				System.err.println("\t"+input.describe());
+			e.printStackTrace();
+			System.exit(1);
+		}
 	}
 
 	final void forceBackpropagate(Optimizer optimizer, Tensor error) {

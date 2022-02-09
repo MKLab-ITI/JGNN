@@ -1,4 +1,4 @@
-package mklab.JGNN.examples;
+package mklab.JGNN.examples.primitives;
 
 import java.util.Arrays;
 

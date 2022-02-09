@@ -23,6 +23,9 @@ public class AccessCol extends Tensor {
 		super(matrix.getRows());
 		this.matrix = matrix;
 		this.col = col;
+		this.setDimensionName(matrix.getColName());
+		if(col<0 || col>=matrix.getCols())
+			throw new IllegalArgumentException("Column "+col+" does not exist in "+matrix.describe());
 	}
 	
 	@Override

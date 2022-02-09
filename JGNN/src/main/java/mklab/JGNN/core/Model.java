@@ -25,8 +25,8 @@ public class Model {
 	
 	/**
 	 * Adds to the model's inputs the provided {@link Variable}.
-	 * @param input
-	 * @return
+	 * @param input A variable to set as an input.
+	 * @return <code>this</code> Model instance.
 	 * @see #addOutput(NNOperation)
 	 * @see #getInputs()
 	 * @see #predict(List)
@@ -39,8 +39,8 @@ public class Model {
 	
 	/**
 	 * Adds to the model's output the output of the provided operation.
-	 * @param output The provided operations
-	 * @return The model instance.
+	 * @param output An operation to set as an output.
+	 * @return <code>this</code> Model instance.
 	 * @see #addInput(Variable)
 	 * @see #getOutputs()
 	 * @see #predict(List)
@@ -125,9 +125,7 @@ public class Model {
 			throw new IllegalArgumentException("Incompatible output size");
 		ArrayList<Tensor> outputs = predict(inputs);
 		for(int i=0;i<outputs.size();i++) {
-			Tensor diff = outputs.get(i).zeroCopy();
-			for(long pos : outputs.get(i).getNonZeroElements()) 
-				diff.put(pos, outputs.get(i).get(pos)-desiredOutputs.get(i).get(pos));
+			Tensor diff = outputs.get(i).multiply(-1).selfAdd(desiredOutputs.get(i)).selfMultiply(-1);
 			this.outputs.get(i).forceBackpropagate(optimizer, diff);
 		}
 		return outputs;

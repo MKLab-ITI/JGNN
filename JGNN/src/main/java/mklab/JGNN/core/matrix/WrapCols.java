@@ -27,8 +27,9 @@ public class WrapCols extends Matrix {
 	public WrapCols(List<Tensor> cols) {
 		super(cols.get(0).size(), cols.size());
 		this.cols = cols;
-		for(Tensor col : cols)
-			col.assertSize(cols.get(0).size());
+		for(Tensor col : cols) 
+			col.assertMatching(cols.get(0));
+		setColName(cols.get(0).getDimensionName());
 	}
 	@Override
 	public Iterable<Entry<Long, Long>> getNonZeroEntries() {

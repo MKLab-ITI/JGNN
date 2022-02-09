@@ -45,12 +45,12 @@ long numClasses = labels.getRows();
 ```
 
 We then define a model using the library's symbolic definition builder class `ModelBuilder`. This
-has three important methods `var` to define model input variables, `param` to define learnable
+has three important methods: `var` to define model input variables, `param` to define learnable
 parameters, `operation` to define symbolic operations and `out` to define output variables.
-Most operations of this class return the same instance, so that models are incrementally builded.
+Most operations of this class return the builder's instance, so that models are incrementally constructed.
 For our example, we explicitly define a logistic regression model that performs a linear transformation
 without bias of inputs *x* using a learnable transformation matrix *w1* and obtaining outputs *yhat*.
-More operations can be handled by the mode
+More operations can be handled by the library and can be found in the (introduction to models and builders)(#Models.md).
 
 ```java
 ModelBuilder modelBuilder = new ModelBuilder()
@@ -63,8 +63,8 @@ ModelBuilder modelBuilder = new ModelBuilder()
 
 # Training
 To train the model, we first set up a training-test split of node identifiers. We also use the `WrapCols`
-subclass and the `Matrix.accessColumns` methods to acces the features and labels of specifically the
-training nodes without needing to re-allocate anything. The data split is
+subclass and the `Matrix.accessColumns` methods to access the features and labels of specifically the
+training nodes without needing to re-allocate anything, i.e. the data split is lightweight.
 
 ```java
 ArrayList<Long> nodeIds = dataset.nodes().getIds();
@@ -93,7 +93,7 @@ values and list of output variable values (these lists comprise only one matrix 
 predictions as a list. Batching and parallelized batch training are covered in [introduction to models and builders](Models.md).
 
 :bulb: The order of input and output list elements, if more than one need to be provided or retrieved, corresponds to
-of their definition order in the model builder.
+their definition order in the model builder.
 
 ```java
 Model model = modelBuilder.getModel();
@@ -107,10 +107,11 @@ for(int epoch=0;epoch<150;epoch++) {
 
 # Testing
 We finally report training accuracy on the test set. We demonstrate how single-node (single-sample) predictions can be
-made and measure the accuracy of those. To dothis, we use `Matrix.accessCol` to obtain specific matrix columns from node
+made and measure the accuracy of those. To do this, we use `Matrix.accessCol` to obtain specific matrix columns from node
 features as tensors and `Tensor.asColumn` to convert the obtained tensors into a column representation. Column representations
 are matrices and hence can pass through the model's defined matrix multiplication. We finally use `argmax` to convert one-hot 
-prediction encodings to label ids. Overall, this sample code achieves 82.8% accuracy.
+prediction encodings to label ids. Overall, this sample code achieves 82.8% accuracy (results may vary a little between experiment
+runs due to random splitting).
 
 ```java
 double acc = 0;

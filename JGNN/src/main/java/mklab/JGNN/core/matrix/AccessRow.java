@@ -23,6 +23,9 @@ public class AccessRow extends Tensor {
 		super(matrix.getCols());
 		this.matrix = matrix;
 		this.row = row;
+		this.setDimensionName(matrix.getRowName());
+		if(row<0 || row>=matrix.getRows())
+			throw new IllegalArgumentException("Row "+row+" does not exist in "+matrix.describe());
 	}
 	
 	@Override

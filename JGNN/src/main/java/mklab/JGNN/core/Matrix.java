@@ -27,11 +27,69 @@ import java.util.Map.Entry;
 public abstract class Matrix extends Tensor {
 	private long rows;
 	private long cols;
+	private String rowName;
+	private String colName;
+	
 	
 	protected Matrix(long rows, long cols) {
 		init(rows*cols);
 		this.rows = rows;
 		this.cols = cols;
+	}
+	
+	public final String getRowName() {
+		return rowName;
+	}
+	
+	public final String getColName() {
+		return colName;
+	}
+	
+	/**
+	 * Sets a name for the matrix's row and column dimensions. If set, names are checked for
+	 * compatibility during matrix operations.
+	 * @param rowName The new row name or <code>null</code> to remove current name.
+	 * @param colName The new column name or <code>null</code> to remove current name.
+	 * @return <code>this</code> Matrix instance.
+	 * @see #getRowName()
+	 * @see #getColName()
+	 * @see #setRowName(String)
+	 * @see #setColName(String)
+	 * @see #setDimensionName(String)
+	 * @see #setDimensionName(Tensor)
+	 */
+	public final Matrix setDimensionName(String rowName, String colName) {
+		setRowName(rowName);
+		setColName(colName);
+		return this;
+	}
+	
+	/**
+	 * Sets a name for the matrix's row dimension. If set, names are checked for
+	 * compatibility during matrix operations.
+	 * @param rowName The new row name or <code>null</code> to remove current name.
+	 * @return <code>this</code> Matrix instance.
+	 * @see #getRowName()
+	 * @see #setDimensionName(String, String)
+	 * @see #setColName(String)
+	 */
+	public final Matrix setRowName(String rowName) {
+		this.rowName = rowName;
+		return this;
+	}
+	
+	/**
+	 * Sets a name for the matrix's column dimension. If set, names are checked for
+	 * compatibility during matrix operations.
+	 * @param colName The new column name or <code>null</code> to remove current name.
+	 * @return <code>this</code> Matrix instance.
+	 * @see #getColName()
+	 * @see #setDimensionName(String, String)
+	 * @see #setRowName(String)
+	 */
+	public final Matrix setColName(String colName) {
+		this.colName = colName;
+		return this;
 	}
 	
 	/**
@@ -41,7 +99,16 @@ public abstract class Matrix extends Tensor {
 	 * @see #getNonZeroElements()
 	 */
 	public abstract Iterable<Entry<Long, Long>> getNonZeroEntries();
-
+	
+	public final Matrix setDimensionName(Tensor other) {
+		super.setDimensionName(other);
+		if(rowName==null)
+			rowName = other.cast(Matrix.class).getRowName();
+		if(colName==null)
+			colName = other.cast(Matrix.class).getColName();
+		return this;
+	}
+	
 	/**
 	 * Creates a Matrix with the same class and dimensions and all element set to zero.
 	 * @return A Matrix with the same class and dimensions.
@@ -49,7 +116,7 @@ public abstract class Matrix extends Tensor {
 	 */
 	@Override
 	public final Matrix zeroCopy() {
-		return zeroCopy(rows, cols);
+		return zeroCopy(rows, cols).setDimensionName(this).cast(Matrix.class);
 	}
 	/**
 	 * Creates a Matrix with the same class and dimensions and all element set to zero. This
@@ -68,7 +135,7 @@ public abstract class Matrix extends Tensor {
 	/**
 	 * Creates a matrix of the same class and all element set to zero, but with
 	 * a given number of rows and columns.
-	 * @param row The number of rows of the matrix.
+	 * @param rows The number of rows of the matrix.
 	 * @param cols The number of columns of the matrix.
 	 * @return A Matrix of the same class.
 	 * @see #zeroCopy()
@@ -96,7 +163,7 @@ public abstract class Matrix extends Tensor {
 	 */
 	public final double get(long row, long col) {
 		if(row<0 || col<0 || row>=rows || col>=cols)
-			throw new IllegalArgumentException("Element out of range ("+row+","+col+") for "+describe());
+			throw new IllegalArgumentException("Element ("+row+","+col+") out of range for "+describe());
 		return get(row+col*rows);
 	}
 
@@ -159,6 +226,8 @@ public abstract class Matrix extends Tensor {
 	public final Matrix matmul(Matrix with) {
 		if(cols!=with.getRows())
 			throw new IllegalArgumentException("Mismatched matrix sizes between "+describe()+" and "+with.describe());
+		if(colName!=null && with.getRowName()!=null && colName!=with.getRowName())
+			throw new IllegalArgumentException("Mismatched matrix dimension names between "+describe()+" and "+with.describe());
 		Matrix ret = determineZeroCopy(with, getRows(), with.getCols());
 		for(Entry<Long, Long> element : getNonZeroEntries()) {
 			long row = element.getKey();
@@ -166,7 +235,7 @@ public abstract class Matrix extends Tensor {
 			for(long col2=0;col2<with.getCols();col2++) 
 				ret.put(row, col2, ret.get(row, col2) + get(row, col)*with.get(col, col2));
 		}
-		return ret;
+		return ret.setRowName(getRowName()).setColName(with.getColName());
 	}
 
 	/**
@@ -186,6 +255,10 @@ public abstract class Matrix extends Tensor {
 	public final Matrix matmul(Matrix with, boolean transposeSelf, boolean transposeWith) {
 		if((transposeSelf?rows:cols)!=(transposeWith?with.getCols():with.getRows()))
 			throw new IllegalArgumentException("Mismatched matrix sizes");
+		if((transposeSelf?rowName:colName)!=null &&
+				(transposeWith?with.getColName():with.getRowName())!=null &&
+				(transposeSelf?rowName:colName)!=(transposeWith?with.getColName():with.getRowName()))
+			throw new IllegalArgumentException("Mismatched matrix dimension names");
 		Matrix ret = determineZeroCopy(with, transposeSelf?cols:rows, transposeWith?with.getRows():with.getCols());
 		for(Entry<Long, Long> element : getNonZeroEntries()) {
 			long row = transposeSelf?element.getValue():element.getKey();
@@ -193,7 +266,7 @@ public abstract class Matrix extends Tensor {
 			for(long col2=0;col2<(transposeWith?with.getRows():with.getCols());col2++) 
 				ret.put(row, col2, ret.get(row, col2) + get(element.getKey(),element.getValue())*with.get(transposeWith?col2:col, transposeWith?col:col2));
 		}
-		return ret;
+		return ret.setRowName(transposeSelf?getColName():getRowName()).setColName(transposeWith?with.getRowName():with.getColName());
 	}
 	
 	/**
@@ -233,7 +306,12 @@ public abstract class Matrix extends Tensor {
 			else
 				return super.isMatching(other);
 		}
-		else if(rows!=((Matrix)other).rows || cols!=((Matrix)other).cols)
+		else if(rows!=other.cast(Matrix.class).rows || cols!=other.cast(Matrix.class).cols)
+			return false;
+		Matrix otherMatrix = other.cast(Matrix.class);
+		if(rowName!=null && otherMatrix.rowName!=null && rowName != otherMatrix.rowName)
+			return false;
+		if(colName!=null && otherMatrix.colName!=null && colName != otherMatrix.colName)
 			return false;
 		return true;
 	}
@@ -253,7 +331,7 @@ public abstract class Matrix extends Tensor {
 	
 	@Override
 	public String describe() {
-		return getClass().getSimpleName()+" ("+rows+","+cols+")";
+		return getClass().getSimpleName()+" ("+(rowName==null?"":(rowName+" "))+rows+","+(colName==null?"":(" "+colName+" "))+cols+")";
 	}
 	
 	/**
@@ -363,7 +441,10 @@ public abstract class Matrix extends Tensor {
 	 * This operation does not allocate memory for matrix elements and editing 
 	 * tensor elements edits the original matrix's elements.
 	 * @return A list of {@link AccessRow}.
-	 * @see #accessCol(long)
+	 * @see #accessRow(long)
+	 * @see #accessRows(long...)
+	 * @see #accessRows(Tensor)
+	 * @see #accessRows(Iterable)
 	 * @see #accessColumns()
 	 */
 	public final List<Tensor> accessRows() {
@@ -378,6 +459,9 @@ public abstract class Matrix extends Tensor {
 	 * tensor elements edits the original matrix's elements.
 	 * @return A list of {@link AccessCol}.
 	 * @see #accessCol(long)
+	 * @see #accessColumns(long...)
+	 * @see #accessColumns(Tensor)
+	 * @see #accessColumns(Iterable)
 	 * @see #accessRows()
 	 */
 	public final List<Tensor> accessColumns() {
@@ -391,10 +475,14 @@ public abstract class Matrix extends Tensor {
 	 * Organizes specific matrix rows to a list of tensors that share entries.
 	 * This operation does not allocate memory for matrix elements and editing 
 	 * tensor elements edits the original matrix's elements.
-	 * @param cols An array of rows to access.
+	 * @param rows An array of rows to access.
 	 * @return A list of {@link AccessRow}.
-	 * @see #accessCol(long)
-	 * @see #accessColumns()
+	 * @return A list of {@link AccessRow}.
+	 * @see #accessRow(long)
+	 * @see #accessRows()
+	 * @see #accessRows(Tensor)
+	 * @see #accessRows(Iterable)
+	 * @see #accessColumns(long...)
 	 */
 	public final Matrix accessRows(long ... rows) {
 		List<Tensor> ret = new ArrayList<Tensor>();
@@ -408,8 +496,12 @@ public abstract class Matrix extends Tensor {
 	 * tensor elements edits the original matrix's elements.
 	 * @param cols An array of columns to access.
 	 * @return A list of {@link AccessCol}.
+	 * @return A list of {@link AccessCol}.
 	 * @see #accessCol(long)
-	 * @see #accessRows()
+	 * @see #accessColumns()
+	 * @see #accessColumns(Tensor)
+	 * @see #accessColumns(Iterable)
+	 * @see #accessRows(long...)
 	 */
 	public final Matrix accessColumns(long ... cols) {
 		List<Tensor> ret = new ArrayList<Tensor>();
@@ -422,9 +514,13 @@ public abstract class Matrix extends Tensor {
 	 * Organizes specific matrix rows to a list of tensors that share entries.
 	 * This operation does not allocate memory for matrix elements and editing 
 	 * tensor elements edits the original matrix's elements.
-	 * @param cols A tensor whose values hold the rows to access.
+	 * @param rows A tensor whose values hold the rows to access.
+	 * @return A list of {@link AccessRow}.
 	 * @return A list of {@link AccessRow}.
 	 * @see #accessRow(long)
+	 * @see #accessRows(long...)
+	 * @see #accessRows()
+	 * @see #accessRows(Iterable)
 	 * @see #accessColumns(Tensor)
 	 */
 	public final Matrix accessRows(Tensor rows) {
@@ -439,7 +535,11 @@ public abstract class Matrix extends Tensor {
 	 * tensor elements edits the original matrix's elements.
 	 * @param cols A tensor whose values hold the columns to access.
 	 * @return A list of {@link AccessCol}.
+	 * @return A list of {@link AccessCol}.
 	 * @see #accessCol(long)
+	 * @see #accessColumns(long...)
+	 * @see #accessColumns()
+	 * @see #accessColumns(Iterable)
 	 * @see #accessRows(Tensor)
 	 */
 	public final Matrix accessColumns(Tensor cols) {
@@ -455,8 +555,11 @@ public abstract class Matrix extends Tensor {
 	 * tensor elements edits the original matrix's elements.
 	 * @param rowIds The rows to access.
 	 * @return A list of {@link AccessRow}.
-	 * @see #getCol(long)
-	 * @see #accessColumns()
+	 * @see #accessRow(long)
+	 * @see #accessRows(long...)
+	 * @see #accessRows(Tensor)
+	 * @see #accessRows()
+	 * @see #accessColumns(Iterable)
 	 */
 	public final List<Tensor> accessRows(Iterable<Long> rowIds) {
 		List<Tensor> ret = new ArrayList<Tensor>();
@@ -471,8 +574,11 @@ public abstract class Matrix extends Tensor {
 	 * tensor elements edits the original matrix's elements.
 	 * @param colIds The columns to access.
 	 * @return A list of {@link AccessCol}.
-	 * @see #getCol(long)
-	 * @see #accessRows()
+	 * @see #accessCol(long)
+	 * @see #accessColumns(long...)
+	 * @see #accessColumns(Tensor)
+	 * @see #accessColumns()
+	 * @see #accessRows(Iterable)
 	 */
 	public final List<Tensor> accessColumns(Iterable<Long> colIds) {
 		List<Tensor> ret = new ArrayList<Tensor>();

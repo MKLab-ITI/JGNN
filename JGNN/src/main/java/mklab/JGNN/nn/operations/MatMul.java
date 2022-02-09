@@ -16,16 +16,16 @@ public class MatMul extends NNOperation {
 	protected Tensor forward(List<Tensor> inputs) {
 		if(inputs.size()!=2)
 			throw new IllegalArgumentException();
-		Matrix W = (Matrix) inputs.get(0);
-		Matrix H = (Matrix) inputs.get(1);
+		Matrix W = inputs.get(0).cast(Matrix.class);
+		Matrix H = inputs.get(1).cast(Matrix.class);
 		return W.matmul(H);
 	}
 
 	@Override
 	protected Tensor partial(int inputId, List<Tensor> inputs, Tensor output, Tensor error) {
 		Matrix errorMatrix = (Matrix)error;
-		Matrix W = (Matrix) inputs.get(0);
-		Matrix H = (Matrix) inputs.get(1);
+		Matrix W = inputs.get(0).cast(Matrix.class);
+		Matrix H = inputs.get(1).cast(Matrix.class);
 		if(inputId==0)
 			errorMatrix = errorMatrix.matmul(H, false, true);
 		else if(inputId==1) 

@@ -7,7 +7,7 @@ import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.NNOperation;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.ColumnRepetition;
-import mklab.JGNN.nn.pooling.SumT;
+import mklab.JGNN.nn.pooling.Sum;
 
 /**
  * Implements a {@link NNOperation} that multiplies its two inputs element-by-element.
@@ -51,7 +51,7 @@ public class Multiply extends NNOperation {
 		}
 		else if(inputId==1) {
 			if(input0 instanceof Matrix && !(input1 instanceof Matrix)) 
-				return (new SumT().forward(Arrays.asList(error.multiply(input0))));
+				return (new Sum(true).forward(Arrays.asList(error.multiply(input0))));
 			else {
 				Tensor partialProduct = error.copy();
 				partialProduct.selfMultiply(input0);

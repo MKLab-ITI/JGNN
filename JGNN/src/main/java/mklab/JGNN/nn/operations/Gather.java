@@ -32,9 +32,9 @@ public class Gather extends NNOperation {
 		if(inputId==0)
 			return null;
 		Tensor index = inputs.get(0);
-		Matrix H = (Matrix) inputs.get(1);
-		Matrix errorMatrix = (Matrix)error;
-		Matrix derivative = (Matrix)H.zeroCopy();
+		Matrix H = inputs.get(1).cast(Matrix.class);
+		Matrix errorMatrix = error.cast(Matrix.class);
+		Matrix derivative = H.zeroCopy().cast(Matrix.class);
 		for(int i=0;i<index.size();i++) {
 			int pos = (int)index.get(i);
 			for(int j=0;j<H.getCols();j++) 

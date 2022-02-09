@@ -9,11 +9,30 @@ import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.tensor.DenseTensor;
 
 public class Sum extends NNOperation {
+	private boolean colMode;
+	public Sum() {
+		this(false);
+	}
+	public Sum(boolean colMode) {
+		super();
+		this.colMode = colMode;
+	}
+	
 	@Override
-	protected Tensor forward(List<Tensor> inputs) {
+	public Tensor forward(List<Tensor> inputs) {
 		if(inputs.size()!=1)
 			throw new IllegalArgumentException();
-		if(inputs.get(0) instanceof Matrix) {
+		if(colMode && inputs.get(0) instanceof Matrix) {
+			Matrix matrix = (Matrix) inputs.get(0);
+			Tensor ret = new DenseTensor(matrix.getCols());
+			for(Entry<Long, Long> entry : matrix.getNonZeroEntries()) {
+				long row = entry.getKey();
+				long col = entry.getValue();
+				ret.put(col, ret.get(col) + matrix.get(row, col));
+			}
+			return ret;
+		}
+		else if(!colMode && inputs.get(0) instanceof Matrix) {
 			Matrix matrix = (Matrix) inputs.get(0);
 			Tensor ret = new DenseTensor(matrix.getRows());
 			for(Entry<Long, Long> entry : matrix.getNonZeroEntries()) {
@@ -32,7 +51,17 @@ public class Sum extends NNOperation {
 	}
 	@Override
 	protected Tensor partial(int inputId, List<Tensor> inputs, Tensor output, Tensor error) {
-		if(inputs.get(0) instanceof Matrix) {
+		if(colMode && inputs.get(0) instanceof Matrix) {
+			Matrix matrix = (Matrix) inputs.get(0);
+			Matrix ret = (Matrix) matrix.zeroCopy();
+			for(Entry<Long, Long> entry : matrix.getNonZeroEntries()) {
+				long row = entry.getKey();
+				long col = entry.getValue();
+				ret.put(col, col, ret.get(row, col)+error.get(col));
+			}
+			return ret;
+		}
+		else if(!colMode && inputs.get(0) instanceof Matrix) {
 			Matrix matrix = (Matrix) inputs.get(0);
 			Matrix ret = (Matrix) matrix.zeroCopy();
 			for(Entry<Long, Long> entry : matrix.getNonZeroEntries()) {

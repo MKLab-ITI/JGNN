@@ -61,6 +61,9 @@ public class TransposedMatrix extends Matrix {
 	public TransposedMatrix(Matrix matrix) {
 		super(matrix.getCols(), matrix.getRows());
 		this.matrix = matrix;
+		setDimensionName(matrix.getDimensionName());
+		setRowName(matrix.getColName());
+		setColName(matrix.getRowName());
 	}
 
 	@Override

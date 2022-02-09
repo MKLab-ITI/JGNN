@@ -7,7 +7,8 @@ import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.NNOperation;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.ColumnRepetition;
-import mklab.JGNN.nn.pooling.SumT;
+import mklab.JGNN.core.matrix.RowRepetition;
+import mklab.JGNN.nn.pooling.Sum;
 
 /**
  * Implements a {@link NNOperation} that adds its two inputs.
@@ -26,10 +27,10 @@ public class Add extends NNOperation {
 		if(input1.size()==1)
 			return input0.add(input1.toDouble());
 		if(input0 instanceof Matrix && !(input1 instanceof Matrix)) 
-			input1 = new ColumnRepetition(((Matrix)input0).getRows(), input1);
-		Tensor product = input0.copy();
-		product.selfAdd(input1);
-		return product;
+			input1 = ((Matrix)input0).getCols()!=input1.size() ? 
+					new RowRepetition(input1, ((Matrix)input0).getCols()) :
+						new ColumnRepetition(((Matrix)input0).getRows(), input1);
+		return input0.add(input1);
 	}
 	@Override
 	protected Tensor partial(int inputId, List<Tensor> inputs, Tensor output, Tensor error) {
@@ -42,7 +43,7 @@ public class Add extends NNOperation {
 			return Tensor.fromDouble(val);
 		}
 		if(inputId==1 && input0 instanceof Matrix && !(input1 instanceof Matrix)) 
-			return new SumT().forward(Arrays.asList(error));
+			return new Sum(((Matrix)input0).getCols()==input1.size()).forward(Arrays.asList(error));
 		return error;
 	}
 }

@@ -28,7 +28,8 @@ public class WrapRows extends Matrix {
 		super(rows.size(), rows.get(0).size());
 		this.rows = rows;
 		for(Tensor col : rows)
-			col.assertSize(rows.get(0).size());
+			col.assertMatching(rows.get(0));
+		setRowName(rows.get(0).getDimensionName());
 	}
 	@Override
 	public Iterable<Entry<Long, Long>> getNonZeroEntries() {

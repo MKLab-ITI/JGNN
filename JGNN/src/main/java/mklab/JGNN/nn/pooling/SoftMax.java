@@ -7,19 +7,19 @@ import mklab.JGNN.core.NNOperation;
 import mklab.JGNN.core.Tensor;
 
 public class SoftMax extends NNOperation {
-	private boolean normalizeRows;
+	private boolean colMode;
 	public SoftMax() {
 		this(false);
 	}
-	public SoftMax(boolean normalizeRows) {
+	public SoftMax(boolean colMode) {
 		super();
-		this.normalizeRows = normalizeRows;
+		this.colMode = colMode;
 	}
 	@Override
 	protected Tensor forward(List<Tensor> inputs) {
 		if(inputs.size()!=1)
 			throw new IllegalArgumentException();
-		if(normalizeRows && inputs.get(0) instanceof Matrix) {
+		if(colMode && inputs.get(0) instanceof Matrix) {
 			Matrix ret = (Matrix)inputs.get(0).zeroCopy();
 			for(long i=0;i<ret.size();i++) 
 				ret.put(i, Math.exp(inputs.get(0).get(i)));
@@ -33,7 +33,7 @@ public class SoftMax extends NNOperation {
 			}
 			return ret;
 		}
-		else if(!normalizeRows && inputs.get(0) instanceof Matrix) {
+		else if(!colMode && inputs.get(0) instanceof Matrix) {
 			Matrix ret = (Matrix)inputs.get(0).zeroCopy();
 			for(long i=0;i<ret.size();i++) 
 				ret.put(i, Math.exp(inputs.get(0).get(i)));
@@ -59,7 +59,7 @@ public class SoftMax extends NNOperation {
 	}
 	@Override
 	protected Tensor partial(int inputId, List<Tensor> inputs, Tensor output, Tensor error) {
-		if(normalizeRows && inputs.get(0) instanceof Matrix) {
+		if(colMode && inputs.get(0) instanceof Matrix) {
 			Matrix matrix = (Matrix) output;
 			Matrix errorMatrix = (Matrix) error;
 			Matrix ret = (Matrix) matrix.zeroCopy();
@@ -74,7 +74,7 @@ public class SoftMax extends NNOperation {
 			}
 			return ret;
 		}
-		else if(!normalizeRows && inputs.get(0) instanceof Matrix) {
+		else if(!colMode && inputs.get(0) instanceof Matrix) {
 			Matrix matrix = (Matrix) output;
 			Matrix errorMatrix = (Matrix) error;
 			Matrix ret = (Matrix) matrix.zeroCopy();

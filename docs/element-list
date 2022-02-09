@@ -7,7 +7,9 @@ mklab.JGNN.core.tensor
 mklab.JGNN.core.util
 mklab.JGNN.data
 mklab.JGNN.data.datasets
-mklab.JGNN.examples
+mklab.JGNN.examples.classification
+mklab.JGNN.examples.nodeClassification
+mklab.JGNN.examples.primitives
 mklab.JGNN.measures
 mklab.JGNN.models.relational
 mklab.JGNN.nn.activations

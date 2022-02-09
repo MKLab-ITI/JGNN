@@ -25,6 +25,7 @@ public class Parameter extends NNOperation {
 	}
 	@Override
 	protected void trainParameters(Optimizer optimizer, Tensor error) {
+		//System.out.println(error.norm());
 		optimizer.update(tensor, error);
 	}
 	@Override
