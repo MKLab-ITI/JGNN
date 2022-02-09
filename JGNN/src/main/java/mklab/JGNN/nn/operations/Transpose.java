@@ -7,7 +7,7 @@ import mklab.JGNN.core.NNOperation;
 import mklab.JGNN.core.Tensor;
 
 /**
- * Implements a {@link NNOperation} that outputs the natural logarithm of its single input.
+ * Implements a {@link NNOperation} that performs matrix transposition.
  * 
  * @author Emmanouil Krasanakis
  */

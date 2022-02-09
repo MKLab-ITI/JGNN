@@ -352,6 +352,10 @@ public class ModelBuilder {
 			arg0 = splt[3];
 			arg1 = splt[4];
 		}
+		else if(splt[2].equals("transpose")) {
+			component = new Transpose();
+			arg0 = splt[3];
+		}
 		else if(splt[3].equals("|")) {
 			component = new Concat();
 			arg0 = splt[2];
