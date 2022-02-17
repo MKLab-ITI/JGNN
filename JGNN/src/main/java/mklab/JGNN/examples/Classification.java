@@ -11,7 +11,6 @@ import mklab.JGNN.core.ModelBuilder;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.DenseMatrix;
 import mklab.JGNN.core.matrix.WrapCols;
-import mklab.JGNN.core.tensor.DenseTensor;
 import mklab.JGNN.data.IdConverter;
 import mklab.JGNN.data.datasets.Dataset;
 import mklab.JGNN.data.datasets.Datasets;

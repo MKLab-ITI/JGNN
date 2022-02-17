@@ -13,9 +13,19 @@ public class Uniform implements Distribution {
 	private double to;
 	private Random randomGenerator;
 	private static double sqrt12 = Math.sqrt(12);
+	
+	/**
+	 * Instantiates a uniform distribution that samples values from the range [0,1].
+	 */
 	public Uniform() {
 		this(0, 1);
 	}
+	
+	/**
+	 * Instantiates a uniform distribution that samples values from the given range [from, to].
+	 * @param from The minimum value of the distribution.
+	 * @param to The maximum value of the distribution.
+	 */
 	public Uniform(double from, double to) {
 		setRange(from, to);
 		randomGenerator = null;
@@ -57,14 +67,17 @@ public class Uniform implements Distribution {
 		to = currentMean + nextRange;
 		return this;
 	}
+	
 	@Override
 	public double getMean() {
 		return (to+from)/2;
 	}
+	
 	@Override
 	public double getDeviation() {
 		return (from-to)/sqrt12;
 	}
+	
 	@Override
 	public double sample() {
 		if(randomGenerator==null)
