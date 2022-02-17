@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.Model;
 import mklab.JGNN.core.ModelBuilder;
+import mklab.JGNN.core.ModelTraining;
 import mklab.JGNN.core.Tensor;
+import mklab.JGNN.core.ThreadPool;
 import mklab.JGNN.core.matrix.DenseMatrix;
 import mklab.JGNN.core.matrix.WrapCols;
 import mklab.JGNN.data.IdConverter;
@@ -18,7 +21,7 @@ import mklab.JGNN.nn.optimizers.BatchOptimizer;
 import mklab.JGNN.nn.optimizers.GradientDescent;
 import mklab.JGNN.nn.optimizers.Regularization;
 
-public class Classification {
+public class LogisticRegression {
 
 	public static void main(String[] args) {
 		Dataset dataset = new Datasets.Lymphography();
@@ -32,42 +35,38 @@ public class Classification {
 		
 		long numFeatures = features.getRows();
 		long numClasses = labels.getRows();
-		int dims = 2;
 		ModelBuilder modelBuilder = new ModelBuilder()
 				.var("x")
-				.param("w1", new DenseMatrix(numClasses, numFeatures).setToRandom().selfAdd(-0.5).selfMultiply(Math.sqrt(1./dims)))
+				.param("w1", new DenseMatrix(numClasses, numFeatures).setToRandom().selfAdd(-0.5).selfMultiply(1./Math.sqrt(numFeatures+numClasses)))
 				.operation("yhat = sigmoid(w1@x)")
 				.out("yhat")
 				.print();
 		
-		BatchOptimizer optimizer = new BatchOptimizer(new Regularization(new GradientDescent(0.1), 0.001));
-		Model model = modelBuilder.getModel();
 		ArrayList<Long> nodeIds = dataset.nodes().getIds();
-		Collections.shuffle(nodeIds);
+		Collections.shuffle(nodeIds, new Random(100));
 		List<Long> trainIds = nodeIds.subList(nodeIds.size()/5, nodeIds.size());
 		List<Long> testIds = nodeIds.subList(0, nodeIds.size()/5);
-		Matrix trainFeatures = new WrapCols(features.accessColumns(trainIds));
-		Matrix trainLabels = new WrapCols(labels.accessColumns(trainIds));
-		System.out.println("Train features: "+trainFeatures.describe());
 		
-		for(int epoch=0;epoch<150;epoch++) {
-			System.out.print("Epoch "+epoch);
-			Tensor errors = 
-					model.trainL2(optimizer, Arrays.asList(trainFeatures), Arrays.asList(trainLabels))
-					.get(0)
-					.subtract(trainLabels);
-			
-			double acc = 0;
-			for(Long node : testIds) {
-				Matrix nodeFeatures = features.accessCol(node).asColumn();
-				Matrix nodeLabels = labels.accessCol(node).asColumn();
-				Tensor output = modelBuilder.getModel().predict(nodeFeatures).get(0);
-				acc += (output.argmax()==nodeLabels.argmax()?1:0);
-			}
-			optimizer.updateAll();
-			System.out.print("\t error "+errors.abs().sum()/trainLabels.size());
-			System.out.println("\t accuracy "+acc/testIds.size());
+		
+		long tic = System.currentTimeMillis();
+		Model model = new ModelTraining()
+				.setOptimizer(new Regularization(new GradientDescent(0.1), 0.001))
+				.setEpochs(150)
+				.setNumBatches(10)
+				.setParallelization(true)
+				.setLoss(ModelTraining.Loss.L2)
+				.train(modelBuilder.getModel(), features, labels, trainIds);
+		long toc = System.currentTimeMillis();
+
+		double acc = 0;
+		for(Long node : testIds) {
+			Matrix nodeFeatures = features.accessCol(node).asColumn();
+			Matrix nodeLabels = labels.accessCol(node).asColumn();
+			Tensor output = model.predict(nodeFeatures).get(0);
+			acc += (output.argmax()==nodeLabels.argmax()?1:0);
 		}
+		System.out.println("Acc\t "+acc/testIds.size());
+		System.out.println("Time\t "+(toc-tic)/1000.);
 	}
 
 }

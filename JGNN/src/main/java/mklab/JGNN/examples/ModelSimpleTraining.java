@@ -2,13 +2,10 @@ package mklab.JGNN.examples;
 
 import java.util.Arrays;
 
-import mklab.JGNN.core.Model;
 import mklab.JGNN.core.ModelBuilder;
 import mklab.JGNN.core.Optimizer;
 import mklab.JGNN.core.Tensor;
-import mklab.JGNN.core.matrix.DenseMatrix;
 import mklab.JGNN.core.tensor.DenseTensor;
-import mklab.JGNN.nn.inputs.Variable;
 import mklab.JGNN.nn.optimizers.Adam;
 
 public class ModelSimpleTraining {
@@ -28,6 +25,6 @@ public class ModelSimpleTraining {
 		for(int i=0;i<200;i++)
 			modelBuilder.getModel().trainTowardsZero(optimizer, Arrays.asList(new DenseTensor(1,2,3,4,5), new DenseTensor(3, 5, 7, 9, 11)));
 		//run the wrapped model and obtain an internal variable prediction
-		System.out.println(modelBuilder.runModel(Tensor.fromDouble(2), Tensor.fromDouble(0)).get("yhat").getPrediction());
+		System.out.println(modelBuilder.runModel(Tensor.fromDouble(2.3), Tensor.fromDouble(0)).get("yhat").getPrediction());
 	}
 }

@@ -23,6 +23,7 @@ import mklab.JGNN.nn.operations.Log;
 import mklab.JGNN.nn.operations.MatMul;
 import mklab.JGNN.nn.operations.Multiply;
 import mklab.JGNN.nn.operations.Repeat;
+import mklab.JGNN.nn.operations.Transpose;
 import mklab.JGNN.nn.pooling.SoftMax;
 import mklab.JGNN.nn.pooling.Sum;
 
@@ -319,6 +320,10 @@ public class ModelBuilder {
 			component = new Repeat();
 			arg0 = splt[3];
 			arg1 = splt[4];
+		}
+		else if(splt[2].equals("transpose")) {
+			component = new Transpose();
+			arg0 = splt[3];
 		}
 		else if(splt[3].equals("|")) {
 			component = new Concat();

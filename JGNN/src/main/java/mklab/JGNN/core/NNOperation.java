@@ -36,9 +36,10 @@ public abstract class NNOperation {
 	private HashMap<Integer, ThreadData> data = new HashMap<Integer, ThreadData>();
 	
 	protected ThreadData data() {
-		ThreadData ret = data.get(ThreadPool.getCurrentThreadId());
+		int threadId = ThreadPool.getCurrentThreadId();
+		ThreadData ret = data.get(threadId);
 		if(ret==null) 
-			data.put(ThreadPool.getCurrentThreadId(), ret = new ThreadData());
+			data.put(threadId, ret = new ThreadData());
 		return ret;
 	}
 	

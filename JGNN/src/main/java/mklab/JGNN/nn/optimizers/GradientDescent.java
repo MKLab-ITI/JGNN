@@ -36,8 +36,9 @@ public class GradientDescent implements Optimizer {
 	@Override
 	public void update(Tensor value, Tensor gradient) {
 		synchronized(value) {
-			individualLearningRates.put(value, individualLearningRates.getOrDefault(value, learningRate)*degradation);
-			value.selfAdd(gradient.multiply(-individualLearningRates.get(value)));
+			if(degradation!=1)
+				individualLearningRates.put(value, individualLearningRates.getOrDefault(value, learningRate)*degradation);
+			value.selfAdd(gradient.multiply(-individualLearningRates.getOrDefault(value, learningRate)));
 		}
 	}
 	@Override
