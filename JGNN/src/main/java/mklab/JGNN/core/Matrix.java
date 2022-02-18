@@ -156,10 +156,10 @@ public abstract class Matrix extends Tensor {
 		return cols;
 	}
 	/**
-	 * Retrieves the values stored at matrix elements.
+	 * Retrieves the value stored at a matrix element.
 	 * @param row The element's row.
 	 * @param col The element's column.
-	 * @return The value corresponding t element (row, col).
+	 * @return The value corresponding to the element (row, col).
 	 */
 	public final double get(long row, long col) {
 		if(row<0 || col<0 || row>=rows || col>=cols)
@@ -184,7 +184,7 @@ public abstract class Matrix extends Tensor {
 	 * However, related methods can help avoid explicit transposition without allocating more
 	 * memory.
 	 * @return A transposed copy of the matrix.
-	 * @see #matmul(Matrix)
+	 * @see #matmul(Matrix, boolean, boolean)
 	 * @see #asTransposed()
 	 */
 	public final Matrix transposed() {
@@ -239,9 +239,12 @@ public abstract class Matrix extends Tensor {
 	}
 
 	/**
-	 * Can be used to perform fast computation of the matrix multiplications <code>this*with</code>,
-	 * <code>this.transposed()*with</code>, <code>this*with.transposed()</code>, 
-	 * <code>this.transposed()*with.transposed</code> while avoiding the overhead of calling
+	 * Can be used to perform fast computation of the matrix multiplications 
+	 * <br><code>this*with</code>,
+	 * <br><code>this.transposed()*with</code>
+	 * <br><code>this*with.transposed()</code>, 
+	 * <br><code>this.transposed()*with.transposed()</code>
+	 * <br>while avoiding the overhead of calling
 	 * {@link #transposed()}. In this first of those cases, this operation
 	 * becomes equivalent to {@link #matmul(Matrix)}.
 	 * 
@@ -389,7 +392,7 @@ public abstract class Matrix extends Tensor {
 	 * also edits the original matrix.
 	 * No new memory is allocated for matrix values.
 	 * @param row The given row.
-	 * @return A {@link AccessRow} instance of the corresponding row.
+	 * @return An {@link AccessRow} instance of the corresponding row.
 	 * @see #accessCol(long)
 	 * @see #accessRows()
 	 * @see #accessRows(long...)
@@ -404,7 +407,7 @@ public abstract class Matrix extends Tensor {
 	 * also edits the original matrix.
 	 * No new memory is allocated for matrix values.
 	 * @param col The given column.
-	 * @return A {@link AccessCol} of the corresponding column.
+	 * @return An {@link AccessCol} of the corresponding column.
 	 * @see #accessRow(long)
 	 * @see #accessColumns()
 	 * @see #accessColumns(long...)
@@ -440,7 +443,7 @@ public abstract class Matrix extends Tensor {
 	 * Organizes matrix rows to a list of tensors that share entries.
 	 * This operation does not allocate memory for matrix elements and editing 
 	 * tensor elements edits the original matrix's elements.
-	 * @return A list of {@link AccessRow}.
+	 * @return A list of {@link AccessRow} instances.
 	 * @see #accessRow(long)
 	 * @see #accessRows(long...)
 	 * @see #accessRows(Tensor)
@@ -457,7 +460,7 @@ public abstract class Matrix extends Tensor {
 	 * Organizes specific matrix columns to a list of tensors that share entries.
 	 * This operation does not allocate memory for matrix elements and editing 
 	 * tensor elements edits the original matrix's elements.
-	 * @return A list of {@link AccessCol}.
+	 * @return A list of {@link AccessCol} instances.
 	 * @see #accessCol(long)
 	 * @see #accessColumns(long...)
 	 * @see #accessColumns(Tensor)
@@ -476,8 +479,7 @@ public abstract class Matrix extends Tensor {
 	 * This operation does not allocate memory for matrix elements and editing 
 	 * tensor elements edits the original matrix's elements.
 	 * @param rows An array of rows to access.
-	 * @return A list of {@link AccessRow}.
-	 * @return A list of {@link AccessRow}.
+	 * @return A list of {@link AccessRow} instances.
 	 * @see #accessRow(long)
 	 * @see #accessRows()
 	 * @see #accessRows(Tensor)
@@ -495,8 +497,7 @@ public abstract class Matrix extends Tensor {
 	 * This operation does not allocate memory for matrix elements and editing 
 	 * tensor elements edits the original matrix's elements.
 	 * @param cols An array of columns to access.
-	 * @return A list of {@link AccessCol}.
-	 * @return A list of {@link AccessCol}.
+	 * @return A list of {@link AccessCol} instances.
 	 * @see #accessCol(long)
 	 * @see #accessColumns()
 	 * @see #accessColumns(Tensor)
@@ -515,8 +516,7 @@ public abstract class Matrix extends Tensor {
 	 * This operation does not allocate memory for matrix elements and editing 
 	 * tensor elements edits the original matrix's elements.
 	 * @param rows A tensor whose values hold the rows to access.
-	 * @return A list of {@link AccessRow}.
-	 * @return A list of {@link AccessRow}.
+	 * @return A list of {@link AccessRow} instances.
 	 * @see #accessRow(long)
 	 * @see #accessRows(long...)
 	 * @see #accessRows()
@@ -534,8 +534,7 @@ public abstract class Matrix extends Tensor {
 	 * This operation does not allocate memory for matrix elements and editing 
 	 * tensor elements edits the original matrix's elements.
 	 * @param cols A tensor whose values hold the columns to access.
-	 * @return A list of {@link AccessCol}.
-	 * @return A list of {@link AccessCol}.
+	 * @return A list of {@link AccessCol} instances.
 	 * @see #accessCol(long)
 	 * @see #accessColumns(long...)
 	 * @see #accessColumns()
@@ -554,7 +553,7 @@ public abstract class Matrix extends Tensor {
 	 * This operation does not allocate memory for matrix elements and editing 
 	 * tensor elements edits the original matrix's elements.
 	 * @param rowIds The rows to access.
-	 * @return A list of {@link AccessRow}.
+	 * @return A list of {@link AccessRow} instances.
 	 * @see #accessRow(long)
 	 * @see #accessRows(long...)
 	 * @see #accessRows(Tensor)
@@ -573,7 +572,7 @@ public abstract class Matrix extends Tensor {
 	 * This operation does not allocate memory for matrix elements and editing 
 	 * tensor elements edits the original matrix's elements.
 	 * @param colIds The columns to access.
-	 * @return A list of {@link AccessCol}.
+	 * @return A list of {@link AccessCol} instances.
 	 * @see #accessCol(long)
 	 * @see #accessColumns(long...)
 	 * @see #accessColumns(Tensor)

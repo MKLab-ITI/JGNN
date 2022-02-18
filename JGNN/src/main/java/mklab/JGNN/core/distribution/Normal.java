@@ -13,10 +13,18 @@ public class Normal implements Distribution {
 	private double std;
 	private Random randomGenerator;
 	
+	/**
+	 * Instantiates a normal distribution with zero mean and standard deviation equal to 1.
+	 */
 	public Normal() {
 		this(0, 1);
 	}
-		
+	
+	/**
+	 * Instantiates a normal distribution with a given mean and standard deviation.
+	 * @param mean The distibution's mean.
+	 * @param std The distribution's standard deviation.
+	 */
 	public Normal(double mean, double std) {
 		this.mean = mean;
 		this.std = std;
@@ -45,6 +53,7 @@ public class Normal implements Distribution {
 	public double getMean() {
 		return mean;
 	}
+	
 	@Override
 	public double getDeviation() {
 		return std;

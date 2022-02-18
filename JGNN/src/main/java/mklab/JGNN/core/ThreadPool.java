@@ -17,15 +17,17 @@ public class ThreadPool {
 	private HashSet<Integer> usedIds = new HashSet<Integer>();
 	private ThreadPoolExecutor executor;
 	private int maxThreads;
+
 	private static ThreadPool instance = new ThreadPool(Runtime.getRuntime().availableProcessors());
 	public static ThreadPool getInstance() {
 		return instance; 
 	}
+	
 	protected ThreadPool(int maxThreads) {
 		this.maxThreads = maxThreads;
 		executor = null;
 	}
-	public int getUnusedId() {
+	protected int getUnusedId() {
 		for(int i=0;i<maxThreads;i++)
 			if(!usedIds.contains(i))
 				return i;
@@ -54,10 +56,17 @@ public class ThreadPool {
 			executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(maxThreads);
 		executor.submit(thread);
 	}
+	/**
+	 * Retrieves a unique integer indicating the currently running thread.
+	 * @return An integer id.
+	 */
 	public static Integer getCurrentThreadId() {
 		Integer ret = getInstance().threadIds.get(Thread.currentThread());
 		return ret==null?-1:(int)ret;
 	}
+	/**
+	 * Waits until all threads in the pool have finished.
+	 */
 	public void waitForConclusion() {
 		executor.shutdown();
 		try {
