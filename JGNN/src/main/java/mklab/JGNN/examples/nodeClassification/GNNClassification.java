@@ -59,15 +59,14 @@ public class GNNClassification {
 				.constant("x", features)
 				.param("w2", new DenseMatrix(numHidden, numClasses)
 						.setRowName("hidden").setColName("labels")
-						.setToRandom(new Uniform().setMean(0).setDeviation(Math.sqrt(24)/Math.sqrt(numFeatures))))
+						.setToRandom(new Uniform().setMean(0).setDeviation(1/Math.sqrt(numFeatures))))
 				.param("w1", new DenseMatrix(numFeatures, numHidden)
 						.setRowName("features").setColName("hidden")
-						.setToRandom(new Uniform().setMean(0).setDeviation(Math.sqrt(24)/Math.sqrt(numHidden))))
+						.setToRandom(new Uniform().setMean(0).setDeviation(1/Math.sqrt(numHidden))))
 				.param("b2", new DenseTensor(numClasses))
 				.param("b1", new DenseTensor(numHidden))
-				.operation("h = relu(A@x@w1+b1)")
-				.operation("yhat = softmax(A@h@w2+b2, col)")
-				//.operation("yhat = A@x@w1")
+				.operation("h = relu(A@x@w1)")
+				.operation("yhat = softmax(A@h@w2, col)")
 				.operation("node_yhat = yhat[nodes]")
 				.out("node_yhat")
 				.print();
@@ -82,8 +81,9 @@ public class GNNClassification {
 		Model model = new ModelTraining()
 				.setOptimizer(new Regularization(new Adam(0.01), 0.0005))
 				.setEpochs(300)
-				.setNumBatches(1)
-				.setParallelization(false)
+				.setNumBatches(10)
+				.setParallelization(true)
+				.setStochasticGradientDescent(true)
 				.setLoss(ModelTraining.Loss.CrossEntropy)
 				.train(modelBuilder.getModel(), nodeIdMatrix, labels, trainIds);
 		long toc = System.currentTimeMillis();
@@ -95,6 +95,6 @@ public class GNNClassification {
 			acc += output.cast(Matrix.class).accessRow(node).argmax()==nodeLabels.argmax()?1:0;
 		}
 		System.out.println("Acc\t "+acc/testIds.size());
-		System.out.println("Time\t "+(toc-tic)/1000.);
+		System.out.println("Training time\t "+(toc-tic)/1000.);
 	}
 }

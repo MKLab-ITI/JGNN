@@ -22,6 +22,7 @@ public class ModelTraining {
 	private int epochs = 150;
 	private boolean paralellization = true;
 	private Loss loss;
+	private boolean stochasticGradientDescent = false;
 	
 	public ModelTraining() {
 	}
@@ -45,6 +46,10 @@ public class ModelTraining {
 		this.epochs = epochs;
 		return this;
 	}
+	public ModelTraining setStochasticGradientDescent(boolean stochasticGradientDescent) {
+		this.stochasticGradientDescent = stochasticGradientDescent;
+		return this;
+	}
 	
 	/**
 	 * Trains a {@link Model} instance based on current settings.
@@ -57,9 +62,12 @@ public class ModelTraining {
 	 */
 	public Model train(Model model, Matrix features, Matrix labels, List<Long> trainingSamples) {
 		for(int epoch=0;epoch<epochs;epoch++) {
-			Collections.shuffle(trainingSamples, new Random(epoch));
+			if(!stochasticGradientDescent)
+				Collections.shuffle(trainingSamples, new Random(epoch));
 			double[] batchLosses = new double[numBatches];
 			for(int batch=0;batch<numBatches;batch++) {
+				if(stochasticGradientDescent)
+					Collections.shuffle(trainingSamples, new Random(epoch));
 				int start = (trainingSamples.size() / numBatches)*batch;
 				int end = Math.min(trainingSamples.size(), start+(trainingSamples.size() / numBatches));
 				int batchId = batch;

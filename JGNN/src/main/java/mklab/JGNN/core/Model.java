@@ -196,11 +196,7 @@ public class Model {
 		ArrayList<Tensor> outputs = predict(inputs);
 		double loss = 0;
 		for(int i=0;i<outputs.size();i++) {
-			Tensor diff = outputs.get(i);
-			for(long pos : diff.getNonZeroElements())
-				loss += Math.abs(diff.get(pos));
-			for(long pos : diff.getNonZeroElements()) 
-				diff.put(pos, outputs.get(i).get(pos));
+			Tensor diff = outputs.get(i).abs();
 			this.outputs.get(i).forceBackpropagate(optimizer, diff);
 		}
 		return loss; 
