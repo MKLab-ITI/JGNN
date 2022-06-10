@@ -21,18 +21,11 @@ For quick installation of the latest working version of the library, you can inc
 
 # :fire: Features
 * Cross-platform support (written in native java)
-<<<<<<< HEAD
 * Lightweight
 * Speed ups and minimal memory footprint with direct memory access
 * Parallelized batching
-=======
-<<<<<<< HEAD
 * Reduced memory consumption and allocation speed ups
 * Minimal impact to application size
-=======
-* Speed ups with direct memory access and parallelized batching
->>>>>>> ae673405caf7fc82e7232e07d46b43eec2c6a0a0
->>>>>>> 85b52b3fbc118f24fefe9b28444e0b39cbb6543e
 
 # :link: Material
 * [Javadoc](https://maniospas.github.io/JGNN/)
