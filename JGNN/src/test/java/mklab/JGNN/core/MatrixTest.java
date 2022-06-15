@@ -8,8 +8,6 @@ import java.util.NoSuchElementException;
 import org.junit.Assert;
 import org.junit.Test;
 
-import mklab.JGNN.core.Matrix;
-import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.DenseMatrix;
 import mklab.JGNN.core.matrix.SparseMatrix;
 import mklab.JGNN.core.matrix.SparseSymmetric;
@@ -17,7 +15,6 @@ import mklab.JGNN.core.matrix.WrapCols;
 import mklab.JGNN.core.matrix.WrapRows;
 import mklab.JGNN.core.tensor.DenseTensor;
 import mklab.JGNN.core.tensor.SparseTensor;
-import mklab.JGNN.core.util.Range;
 import mklab.JGNN.core.util.Range2D;
 
 public class MatrixTest {
@@ -114,10 +111,13 @@ public class MatrixTest {
 	public void testMatrixMultiplication() {
 		for(Matrix matrix1 : allMatrixTypes(6)) 
 			for(Matrix matrix2 : allMatrixTypes(6))
-				if(matrix1.isMatching(matrix2)) {
-					long row = matrix1.getRows()-1;
-					long col = matrix1.getCols()-1;
-					Assert.assertEquals(0.25, ((Matrix)matrix1.put(row,col,0.5).multiply(matrix2.put(row,col,0.5))).get(row,col), 0);
+				if(matrix1.isMatching(matrix2) && matrix1.getRows()>2 && matrix1.getCols()>2) {
+					matrix1.put(0, 1, 2);
+					matrix2.put(2, 1, 3);
+					Assert.assertEquals(6, matrix1.matmul(matrix2.asTransposed()).get(0,2), 0);
+					Assert.assertEquals(0, matrix1.matmul(matrix2.asTransposed()).get(2,0), 0);
+					Assert.assertEquals(6, matrix1.matmul(matrix2, false, true).get(0,2), 0);
+					Assert.assertEquals(0, matrix1.matmul(matrix2, false, true).get(2,0), 0);
 				}
 	}
 	@Test

@@ -37,10 +37,15 @@ public abstract class NNOperation {
 	
 	protected ThreadData data() {
 		int threadId = ThreadPool.getCurrentThreadId();
-		ThreadData ret = data.get(threadId);
-		if(ret==null) 
-			data.put(threadId, ret = new ThreadData());
-		return ret;
+		ThreadData ret;
+		synchronized(data) {
+			ret = data.get(threadId);
+		}
+		if(ret==null) {
+			synchronized(data) {
+				data.put(threadId, ret = new ThreadData());
+			}
+		}return ret;
 	}
 	
 	public void setDescription(String description) {
@@ -49,7 +54,7 @@ public abstract class NNOperation {
 	
 	public String describe() {
 		return this.getClass()+": "
-					+(description!=null?description:this.hashCode())+" = "
+					+(description!=null?description:("#"+this.hashCode()))+" = "
 					+(data().lastOutput!=null?data().lastOutput.describe():"null");
 	}
 	public String view() {
@@ -103,9 +108,13 @@ public abstract class NNOperation {
 			ArrayList<Tensor> lastInputs = new ArrayList<Tensor>();
 			for(NNOperation input : inputs)
 				lastInputs.add(input.runPrediction());
-			//System.out.println("Predicting... "+this.getClass());
-			//for(Tensor input : lastInputs)
-			//	System.out.println("\t"+input.describe());
+			/*System.out.println("Predicting... "+this.getClass());
+			for(Tensor input : lastInputs)
+				System.out.println("\t"+input.describe());
+			if(data()!=data)
+				System.out.println(data+" -> "+data());*/
+			if(data()!=data)
+				throw new RuntimeException("Thread data object should not change within the same thread");
 			data.lastOutput = forward(lastInputs);
 			data.tapeError = null;
 			data.countTapeSources = 0;

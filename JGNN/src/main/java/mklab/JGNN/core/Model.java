@@ -2,11 +2,14 @@ package mklab.JGNN.core;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import mklab.JGNN.core.tensor.RepeatTensor;
 import mklab.JGNN.core.util.Loss;
+import mklab.JGNN.nn.inputs.Parameter;
 import mklab.JGNN.nn.inputs.Variable;
+import mklab.JGNN.nn.operations.Dropout;
 
 /**
  * This class is a way to organize {@link NNOperation} trees into trainable machine
@@ -21,6 +24,48 @@ public class Model {
 	private ArrayList<NNOperation> outputs = new ArrayList<NNOperation>();
 	
 	public Model() {
+	}
+	
+	public ArrayList<Parameter> getParameters(){
+		ArrayList<Parameter> parameters = new ArrayList<Parameter>();
+		ArrayList<NNOperation> pending = new ArrayList<NNOperation>();
+		HashSet<NNOperation> visited = new HashSet<NNOperation>();
+		for(NNOperation output : outputs) {
+			visited.add(output);
+			pending.add(output);
+		}
+		while(!pending.isEmpty()) {
+			NNOperation operation = pending.remove(pending.size()-1);
+			if(operation instanceof Parameter)
+				parameters.add((Parameter) operation);
+			for(NNOperation input : operation.getInputs()) 
+				if(!visited.contains(input)){
+					visited.add(input);
+					pending.add(input);
+				}
+		}
+		return parameters;
+	}
+	
+
+	public Model setTraining(boolean training){
+		ArrayList<NNOperation> pending = new ArrayList<NNOperation>();
+		HashSet<NNOperation> visited = new HashSet<NNOperation>();
+		for(NNOperation output : outputs) {
+			visited.add(output);
+			pending.add(output);
+		}
+		while(!pending.isEmpty()) {
+			NNOperation operation = pending.remove(pending.size()-1);
+			if(operation instanceof Dropout)
+				((Dropout) operation).setEnabled(training);
+			for(NNOperation input : operation.getInputs()) 
+				if(!visited.contains(input)){
+					visited.add(input);
+					pending.add(input);
+				}
+		}
+		return this;
 	}
 	
 	/**
@@ -123,11 +168,13 @@ public class Model {
 			throw new IllegalArgumentException("Incompatible input size");
 		if(desiredOutputs.size() != this.outputs.size())
 			throw new IllegalArgumentException("Incompatible output size");
+		setTraining(true);
 		ArrayList<Tensor> outputs = predict(inputs);
 		for(int i=0;i<outputs.size();i++) {
 			Tensor diff = outputs.get(i).multiply(-1).selfAdd(desiredOutputs.get(i)).selfMultiply(-1);
 			this.outputs.get(i).forceBackpropagate(optimizer, diff);
 		}
+		setTraining(false);
 		return outputs;
 	}
 	
@@ -170,6 +217,7 @@ public class Model {
 			throw new IllegalArgumentException("Incompatible number of inputs: "+inputs.size()+" given but "+this.inputs.size()+" expected");
 		if(desiredOutputs.size() != this.outputs.size())
 			throw new IllegalArgumentException("Incompatible number of outputs: "+desiredOutputs.size()+" given but "+this.outputs.size()+" expected");
+		setTraining(true);
 		ArrayList<Tensor> outputs = predict(inputs);
 		for(int i=0;i<outputs.size();i++) {
 			Tensor diff = outputs.get(i).zeroCopy();
@@ -177,6 +225,7 @@ public class Model {
 				diff.put(pos, weights.get(i).get(pos)*Loss.crossEntropyDerivative(outputs.get(i).get(pos), desiredOutputs.get(i).get(pos)));
 			this.outputs.get(i).forceBackpropagate(optimizer, diff);
 		}
+		setTraining(false);
 		return outputs;
 	}
 	
@@ -193,12 +242,14 @@ public class Model {
 	public double trainTowardsZero(Optimizer optimizer, List<Tensor> inputs) {
 		if(inputs.size() != this.inputs.size())
 			throw new IllegalArgumentException("Incompatible number of inputs: "+inputs.size()+" but "+this.inputs.size()+" expected");
+		setTraining(true);
 		ArrayList<Tensor> outputs = predict(inputs);
 		double loss = 0;
 		for(int i=0;i<outputs.size();i++) {
 			Tensor diff = outputs.get(i).abs();
 			this.outputs.get(i).forceBackpropagate(optimizer, diff);
 		}
+		setTraining(false);
 		return loss; 
 	}
 }

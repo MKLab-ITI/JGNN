@@ -17,6 +17,7 @@ public class ThreadPool {
 	private HashSet<Integer> usedIds = new HashSet<Integer>();
 	private ThreadPoolExecutor executor;
 	private int maxThreads;
+	private int lastThreadId = 0;
 
 	private static ThreadPool instance = new ThreadPool(Runtime.getRuntime().availableProcessors());
 	public static ThreadPool getInstance() {
@@ -31,7 +32,7 @@ public class ThreadPool {
 		for(int i=0;i<maxThreads;i++)
 			if(!usedIds.contains(i))
 				return i;
-		return -1;//new RuntimeException("Could not retrieve an unused thread id");
+		return -1;//new RuntimeException("Could not retrieve an unused thread id");*/
 	}
 	public synchronized void submit(Runnable runnable) {
 		Thread thread = new Thread() {

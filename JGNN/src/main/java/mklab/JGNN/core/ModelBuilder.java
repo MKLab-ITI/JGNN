@@ -1,7 +1,6 @@
 package mklab.JGNN.core;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,6 +18,7 @@ import mklab.JGNN.nn.inputs.Variable;
 import mklab.JGNN.nn.operations.Add;
 import mklab.JGNN.nn.operations.Complement;
 import mklab.JGNN.nn.operations.Concat;
+import mklab.JGNN.nn.operations.Dropout;
 import mklab.JGNN.nn.operations.Gather;
 import mklab.JGNN.nn.operations.Log;
 import mklab.JGNN.nn.operations.MatMul;
@@ -76,6 +76,14 @@ public class ModelBuilder {
 		return this;
 	}
 	
+	public ModelBuilder param(String name, double regularization, Tensor value) {
+		assertValidName(name);
+		NNOperation variable = new Parameter(value, regularization);
+		components.put(name, variable);
+		variable.setDescription(name);
+		return this;
+	}
+	
 	public ModelBuilder param(String name, Tensor value) {
 		assertValidName(name);
 		NNOperation variable = new Parameter(value);
@@ -84,9 +92,14 @@ public class ModelBuilder {
 		return this;
 	}
 	
+	public ModelBuilder constant(String name, double value) {
+		return constant(name, Tensor.fromDouble(value));
+	}
+	
 	public ModelBuilder constant(String name, Tensor value) {
 		if(components.containsKey(name)) {
 			((Constant)components.get(name)).setTo(value);
+			((Constant)components.get(name)).setDescription(name);
 			return this;
 		}
 		assertValidName(name);
@@ -349,6 +362,11 @@ public class ModelBuilder {
 		}
 		else if(splt[2].equals("repeat")) {
 			component = new Repeat();
+			arg0 = splt[3];
+			arg1 = splt[4];
+		}
+		else if(splt[2].equals("dropout")) {
+			component = new Dropout();
 			arg0 = splt[3];
 			arg1 = splt[4];
 		}

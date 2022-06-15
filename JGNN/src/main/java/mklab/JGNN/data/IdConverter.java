@@ -57,10 +57,12 @@ public class IdConverter {
 	public Matrix oneHot(HashMap<Long, String> nodeLabels) {
 		IdConverter encoder = new IdConverter();
 		for(String label : nodeLabels.values())
-			encoder.getOrCreateId(label);
+			if(label!=null)
+				encoder.getOrCreateId(label);
 		Matrix encoding = new SparseMatrix(nodeLabels.size(), encoder.size());
 		for(long i=0;i<size();i++)
-			encoding.put(i, encoder.getId(nodeLabels.get(i)), 1);
+			if(nodeLabels.get(i)!=null)
+				encoding.put(i, encoder.getId(nodeLabels.get(i)), 1);
 		return encoding;
 	}
 	public Matrix oneHot(Tensor nodeLabels) {

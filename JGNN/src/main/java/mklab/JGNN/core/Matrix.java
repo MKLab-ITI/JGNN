@@ -144,6 +144,8 @@ public abstract class Matrix extends Tensor {
 	/**
 	 * Retrieves the number of rows of a matrix.
 	 * @return The number of rows.
+	 * @see #getCols()
+	 * @see #getDimensionSize(String)
 	 */
 	public final long getRows() {
 		return rows;
@@ -151,9 +153,34 @@ public abstract class Matrix extends Tensor {
 	/**
 	 * Retrieves the number of columns of a matrix.
 	 * @return The number of columns.
+	 * @see #getRows()
+	 * @see #getDimensionSize(String)
 	 */
 	public final long getCols() {
 		return cols;
+	}
+	/**
+	 * Retrieves the value of the dimension with the given name.
+	 * @param name The given name.
+	 * @return Either the number of rows or the number of cols, depending on which dimension 
+	 * 	the given name matches,
+	 * @throws RuntimeException if both matrix dimensions have the same name or if the given 
+	 *	name is not a matrix dimension.
+	 *@see #getRows()
+	 *@see #getCols()
+	 *@see #setDimensionName(String, String)
+	 *@see #setColName(String)
+	 *@see #setRowName(String)
+	 */
+	public final long getDimensionSize(String name) {
+		if(rowName!=null && colName!=null && rowName.equals(colName))
+			throw new RuntimeException("Cannot call getDimension for the same row and col "
+					+ "dimention names in "+describe());
+		if(rowName!=null && name.equals(rowName))
+			return getRows();
+		if(colName!=null && name.equals(colName))
+			return getCols();
+		throw new RuntimeException("Both matrix dimensions have the same name "+name);
 	}
 	/**
 	 * Retrieves the value stored at a matrix element.
@@ -221,7 +248,7 @@ public abstract class Matrix extends Tensor {
 	 * 
 	 * @param with The matrix to multiply with.
 	 * @return A matrix that stores the outcome of the multiplication.
-	 * @see #matmul(Matrix)
+	 * @see #matmul(Matrix, boolean, boolean)
 	 */
 	public final Matrix matmul(Matrix with) {
 		if(cols!=with.getRows())
@@ -232,8 +259,10 @@ public abstract class Matrix extends Tensor {
 		for(Entry<Long, Long> element : getNonZeroEntries()) {
 			long row = element.getKey();
 			long col = element.getValue();
-			for(long col2=0;col2<with.getCols();col2++) 
+			for(long col2=0;col2<with.getCols();col2++) {
 				ret.put(row, col2, ret.get(row, col2) + get(row, col)*with.get(col, col2));
+				//System.out.println(row+ " "+ col+" "+ ret.get(row, col2));
+			}
 		}
 		return ret.setRowName(getRowName()).setColName(with.getColName());
 	}
@@ -319,19 +348,6 @@ public abstract class Matrix extends Tensor {
 		return true;
 	}
 	
-	/*@Override
-	public String toString() {
-		String ret = "";
-		for(long row=0;row<rows;row++) {
-			if(cols>0)
-				ret += get(row, 0);
-			for(long col=1;col<cols;col++) 
-				ret += ","+get(row, col);
-			ret += "\n";
-		}
-		return "[\n"+ret+"]";
-	}*/
-	
 	@Override
 	public String describe() {
 		return getClass().getSimpleName()+" ("+(rowName==null?"":(rowName+" "))+rows+","+(colName==null?"":(" "+colName+" "))+cols+")";
@@ -416,20 +432,33 @@ public abstract class Matrix extends Tensor {
 	public Tensor accessCol(long col) {
 		return new AccessCol(this, col);
 	}
-	
+	/*
 	@Override
 	public String toString() {
 		StringBuilder res = new StringBuilder();
-		for(int row=0;row<rows;row++) {
+		for(long row=0;row<rows;row++) {
 			res.append("[");
-			for(int col=0;col<cols;col++) {
+			for(long col=0;col<cols;col++) {
 				if(col!=0)
 					res.append(",");
 				res.append(get(row, col));
 			}
 			res.append("]");
 		}
-		return res.toString();
+		return ""+res.toString();
+	}*/
+	
+	@Override
+	public String toString() {
+		String ret = "";
+		for(long row=0;row<rows;row++) {
+			if(cols>0)
+				ret += get(row, 0);
+			for(long col=1;col<cols;col++) 
+				ret += ","+get(row, col);
+			ret += "\n";
+		}
+		return "[\n"+ret+"]";
 	}
 	
 	/*public final static Matrix fromColumns(List<Tensor> tensors) {
@@ -629,13 +658,13 @@ public abstract class Matrix extends Tensor {
 	 * @return A {@link DenseMatrix} instance.
 	 */
 	public DenseMatrix toDense() {
-		return (DenseMatrix)new DenseMatrix(getRows(), getCols()).selfAdd(this);
+		return (DenseMatrix)new DenseMatrix(getRows(), getCols()).selfAdd(this).setDimensionName(this);
 	}
 	/**
 	 * Creates a copy of the matrix organized as a sparse matrix.
 	 * @return A {@link SparseMatrix} instance.
 	 */
 	public SparseMatrix toSparse() {
-		return (SparseMatrix)new SparseMatrix(getRows(), getCols()).selfAdd(this);
+		return (SparseMatrix)new SparseMatrix(getRows(), getCols()).selfAdd(this).setDimensionName(this);
 	}
 }

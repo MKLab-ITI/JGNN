@@ -2,10 +2,12 @@ package mklab.JGNN.core;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
 import mklab.JGNN.core.matrix.WrapRows;
+import mklab.JGNN.nn.inputs.Parameter;
 import mklab.JGNN.nn.optimizers.BatchOptimizer;
 
 /**
@@ -19,10 +21,11 @@ public class ModelTraining {
 	public enum Loss {L2, CrossEntropy};
 	private BatchOptimizer optimizer;
 	private int numBatches = 1;
-	private int epochs = 150;
-	private boolean paralellization = true;
-	private Loss loss;
+	private int epochs = 300;
+	private int patience = Integer.MAX_VALUE;
+	private boolean paralellization = false;
 	private boolean stochasticGradientDescent = false;
+	private Loss loss;
 	
 	public ModelTraining() {
 	}
@@ -38,16 +41,17 @@ public class ModelTraining {
 		this.numBatches = numBatches;
 		return this;
 	}
-	public ModelTraining setParallelization(boolean paralellization) {
+	public ModelTraining setParallelizedStochasticGradientDescent(boolean paralellization) {
 		this.paralellization = paralellization;
+		this.stochasticGradientDescent = paralellization;
 		return this;
 	}
 	public ModelTraining setEpochs(int epochs) {
 		this.epochs = epochs;
 		return this;
 	}
-	public ModelTraining setStochasticGradientDescent(boolean stochasticGradientDescent) {
-		this.stochasticGradientDescent = stochasticGradientDescent;
+	public ModelTraining setPatience(int patience) {
+		this.patience = patience;
 		return this;
 	}
 	
@@ -60,7 +64,14 @@ public class ModelTraining {
 	 * @param trainingSamples Which columns to select for training.
 	 * @return The trained <code>model</code> (the same instance as the first argument).
 	 */
-	public Model train(Model model, Matrix features, Matrix labels, List<Long> trainingSamples) {
+	public Model train(Model model, 
+			Matrix features, 
+			Matrix labels, 
+			List<Long> trainingSamples,
+			List<Long> validationSamples) {
+		double minLoss = Double.POSITIVE_INFINITY;
+		HashMap<Parameter, Tensor> minLossParameters = new HashMap<Parameter, Tensor>();
+		int currentPatience = patience;
 		for(int epoch=0;epoch<epochs;epoch++) {
 			if(!stochasticGradientDescent)
 				Collections.shuffle(trainingSamples, new Random(epoch));
@@ -83,8 +94,10 @@ public class ModelTraining {
 							outputs = model.trainCrossEntropy(optimizer, Arrays.asList(trainFeatures), Arrays.asList(trainLabels));
 						else
 							throw new RuntimeException("Unimplemented loss method "+loss);
-						optimizer.updateAll();
-						batchLosses[batchId] = outputs.get(0).multiply(-1).cast(Matrix.class).selfAdd(trainLabels).selfAbs().norm();
+						if(stochasticGradientDescent)
+							optimizer.updateAll();
+						if(validationSamples==null)
+							batchLosses[batchId] = outputs.get(0).multiply(-1).cast(Matrix.class).selfAdd(trainLabels).selfAbs().norm();
 					}
 				};
 				if(paralellization)
@@ -94,11 +107,31 @@ public class ModelTraining {
 			}
 			if(paralellization)
 				ThreadPool.getInstance().waitForConclusion();
+			if(!stochasticGradientDescent)
+				optimizer.updateAll();
 			double totalLoss = 0;
-			for(double batchLoss : batchLosses)
-				totalLoss += batchLoss/numBatches;
+			if(validationSamples==null)
+				for(double batchLoss : batchLosses)
+					totalLoss += batchLoss/numBatches;
+			else {
+				Matrix validationFeatures = new WrapRows(features.accessRows(validationSamples));
+				Matrix validationLabels = new WrapRows(labels.accessRows(validationSamples));
+				List<Tensor> outputs = model.predict(Arrays.asList(validationFeatures));
+				totalLoss = outputs.get(0).multiply(-1).cast(Matrix.class).selfAdd(validationLabels).selfAbs().norm();
+			}
+			if(totalLoss<minLoss) {
+				currentPatience = patience;
+				minLoss = totalLoss;
+				for(Parameter parameter : model.getParameters())
+					minLossParameters.put(parameter, parameter.getPrediction());
+			}
+			currentPatience -= 1;
+			if(currentPatience==0)
+				break;
 			System.out.println("Epoch "+epoch+" with avg loss "+totalLoss);
 		}
+		for(Parameter parameter : model.getParameters())
+			parameter.set(minLossParameters.get(parameter));
 		return model;
 	}
 }
