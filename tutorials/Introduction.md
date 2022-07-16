@@ -68,7 +68,8 @@ by writting:
 System.out.println(modelBuilder.getExecutionGraphDot());
 ```
 
-For example, copying-and-pasting the graph description to [GraphvizOnline](https://dreampuf.github.io/GraphvizOnline/) creates the following execution graph:
+For example, copying-and-pasting the graph description to [GraphvizOnline](https://dreampuf.github.io/GraphvizOnline/) creates the following visualization
+of the execution graph:
 
 ![Example execution graph](graphviz.png)
 
