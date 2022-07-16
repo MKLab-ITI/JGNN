@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Stack;
 
+import mklab.JGNN.core.matrix.DenseMatrix;
 import mklab.JGNN.core.tensor.DenseTensor;
 import mklab.JGNN.nn.activations.LRelu;
 import mklab.JGNN.nn.activations.PRelu;
@@ -40,6 +41,7 @@ public class ModelBuilder {
 	private String routing = "";
 	private Model model = null;
 	private HashMap<String, NNOperation> components = new HashMap<String, NNOperation>();
+	private HashMap<String, Double> configurations = new HashMap<String, Double>();
 	private int tmpVariableIdentifier = 0;
 	public ModelBuilder() {
 		this(new Model());
@@ -53,12 +55,14 @@ public class ModelBuilder {
 	protected void assertValidName(String name) {
 		if(name==null || name.isEmpty())
 			throw new IllegalArgumentException("Invalid component name");
+		if(configurations.containsKey(name)) 
+			throw new IllegalArgumentException("Component name "+name+" already in use as a configuration");
 		if(components.containsKey(name)) 
 			throw new IllegalArgumentException("Component name "+name+" already in use by another model component");
 	}
 	protected void assertExists(String name) {
 		if(!components.containsKey(name))
-			throw new IllegalArgumentException("Component name "+name+" not declared");
+			throw new IllegalArgumentException("Component name "+name+" not declared (maybe it is a configuration)");
 	}
 	
 	public ModelBuilder var(String name) {
@@ -82,6 +86,27 @@ public class ModelBuilder {
 		components.put(name, variable);
 		variable.setDescription(name);
 		return this;
+	}
+	
+	public ModelBuilder config(String name, double value) {
+		configurations.put(name, value);
+		return this;
+	}
+	
+	protected double parseConfigValue(String text) {
+		if(configurations.containsKey(text))
+			return configurations.get(text);
+		return Double.parseDouble(text);
+	}
+	
+	protected boolean isDouble(String text) {
+		try {
+			Double.parseDouble(text);
+			return true;
+		}
+		catch(Exception e) {
+			return false;
+		}
 	}
 	
 	public ModelBuilder param(String name, Tensor value) {
@@ -180,7 +205,11 @@ public class ModelBuilder {
 							if(!args.isEmpty())
 								args += " , ";
 							String arg = subop.toString().trim();
-							if(components.containsKey(arg) || arg.equals("col") || arg.equals("row")) 
+							if(components.containsKey(arg)
+									|| configurations.containsKey(arg) 
+									|| (newDesc.endsWith(" matrix ") && isDouble(arg)) 
+									|| (newDesc.endsWith(" vector ") && isDouble(arg)) 
+									|| arg.equals("col") || arg.equals("row")) 
 								args += arg;
 							else {
 								String tmpName = "_tmp"+tmpVariableIdentifier;
@@ -259,6 +288,7 @@ public class ModelBuilder {
 			}
 		}
 		
+		String prevRouting = routing;
 		routing += desc + "\n";
 		desc = desc.replace("(", "").replace(")", "").replace(",", "")+" ";
 		
@@ -270,17 +300,17 @@ public class ModelBuilder {
 		assertValidName(name);
 		NNOperation component;
 		if(splt.length==3) {
-			double val = Double.parseDouble(splt[2]);
-			constant(name, Tensor.fromDouble(val));
+			try {
+				double val = Double.parseDouble(splt[2]);
+				constant(name, Tensor.fromDouble(val));
+			}
+			catch(NumberFormatException e) {
+				throw new RuntimeException("Symbol "+splt[2]+" not defined.");
+			}
 			return this;
 		}
 		else if(splt[3].equals("+")) {
 			component = new Add();
-			arg0 = splt[2];
-			arg1 = splt[4];
-		}
-		else if(splt[3].equals("x")) {
-			component = new Repeat();
 			arg0 = splt[2];
 			arg1 = splt[4];
 		}
@@ -325,6 +355,18 @@ public class ModelBuilder {
 			}
 			component = new Max(mode);
 			arg0 = splt[3];
+		}
+		else if(splt[2].equals("matrix")) {
+			param(name, new DenseMatrix((long)parseConfigValue(splt[3]), (long)parseConfigValue(splt[4]))
+					.setDimensionName(isDouble(splt[3])?null:splt[3], isDouble(splt[4])?null:splt[4]));
+			routing = prevRouting;
+			return this;
+		}
+		else if(splt[2].equals("vector")) {
+			param(name, new DenseTensor((long)parseConfigValue(splt[3]))
+					.setDimensionName(isDouble(splt[3])?null:splt[3]));
+			routing = prevRouting;
+			return this;
 		}
 		else if(splt[2].equals("relu")) {
 			component = new Relu();
@@ -394,6 +436,11 @@ public class ModelBuilder {
 			arg0 = splt[4];
 			arg1 = splt[2];
 		}
+		else if(splt[3].equals("x")) {
+			component = new Repeat();
+			arg0 = splt[2];
+			arg1 = splt[4];
+		}
 		else
 			throw new RuntimeException("Invalid operation: "+desc);
 
@@ -454,6 +501,9 @@ public class ModelBuilder {
 		return routing;
 	}
 	public ModelBuilder print() {
+		for(NNOperation component : components.values())
+			if(component instanceof Parameter)
+				System.out.println(component.describe());
 		System.out.println(describe());
 		return this;
 	}

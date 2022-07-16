@@ -21,6 +21,7 @@ public class ColumnRepetition extends Matrix {
 	public ColumnRepetition(long times, Tensor column) {
 		super(times, column.size());
 		this.column = column;
+		this.setDimensionName(null, column.getDimensionName());
 	}
 	public Tensor getColumn() {
 		return column;

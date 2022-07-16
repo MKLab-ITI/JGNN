@@ -33,6 +33,13 @@ public class Parameter extends NNOperation {
 		this.tensor = tensor;
 		return this;
 	}
+	/**
+	 * Gets sets the parameter's value tensor 
+	 * @return The current value {@link Tensor}.
+	 */
+	public Tensor get() {
+		return this.tensor;
+	}
 	@Override
 	public NNOperation addInput(NNOperation inputComponent) {
 		throw new RuntimeException("Parameter can not have inputs");

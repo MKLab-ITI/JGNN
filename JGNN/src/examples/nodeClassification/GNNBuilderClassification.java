@@ -6,13 +6,12 @@ import java.util.List;
 import java.util.Random;
 import java.util.Map.Entry;
 
+import mklab.JGNN.builders.GCNBuilder;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.Model;
 import mklab.JGNN.core.ModelBuilder;
 import mklab.JGNN.core.ModelTraining;
 import mklab.JGNN.core.Tensor;
-import mklab.JGNN.core.distribution.Uniform;
-import mklab.JGNN.core.matrix.DenseMatrix;
 import mklab.JGNN.core.matrix.SparseMatrix;
 import mklab.JGNN.core.matrix.WrapCols;
 import mklab.JGNN.core.tensor.DenseTensor;
@@ -22,7 +21,7 @@ import mklab.JGNN.data.datasets.Dataset;
 import mklab.JGNN.data.datasets.Datasets;
 import mklab.JGNN.nn.optimizers.Adam;
 
-public class GNNClassification {
+public class GNNBuilderClassification {
 
 	public static void main(String[] args) throws Exception {
 		Dataset dataset = new Datasets.Cora();
@@ -56,34 +55,25 @@ public class GNNClassification {
 		System.out.println("Labels\t: "+labels.describe());
 		System.out.println("Features: "+features.describe());
 		
-		
-		
-		long numFeatures = features.getCols();
-		long numClasses = labels.getCols();
-		long numHidden = 32;
-		
-		ModelBuilder modelBuilder = new ModelBuilder()
-				.var("nodes")
-				.constant("A", adjacency)
-				.constant("x", features)
-				.param("w2", 0.0005, new DenseMatrix(numHidden, numClasses)
-						.setRowName("hidden").setColName("labels")
-						.setToRandom(new Uniform().setMean(0).setDeviation(1/Math.sqrt(numFeatures))))
-				.param("w1", 0.0005, new DenseMatrix(numFeatures, numHidden)
-						.setRowName("features").setColName("hidden")
-						.setToRandom(new Uniform().setMean(0).setDeviation(1/Math.sqrt(numHidden))))
-				.param("b2", new DenseTensor(numClasses).setDimensionName("labels"))
-				.param("b1", new DenseTensor(numHidden).setDimensionName("hidden"))
-				.operation("h = dropout(relu(A@x@w1+b1), 0.5)")
-				.operation("yhat = softmax(A@h@w2+b2, col)")
-				.operation("node_yhat = yhat[nodes]")
-				.out("node_yhat")
+		ModelBuilder modelBuilder = new GCNBuilder(new Model(), adjacency, features)
+				.addGCNLayer("H{l+1}=relu(H{l}@W{l}+b{l})", 32)
+				.addGCNLayer("H{l+1}=relu(H{l}@W{l}+b{l})", 32)
+				.addGCNLayer("H{l+1}=relu(A@H{l}@W{l}+H2@B{l}+b{l})", 32)
+				.addGCNLayer("H{l+1}=relu(A@H{l}@W{l}+H2@B{l}+b{l})", 32)
+				.addGCNLayer("H{l+1}=relu(A@H{l}@W{l}+H2@B{l}+b{l})", 32)
+				.addGCNLayer("H{l+1}=relu(A@H{l}@W{l}+H2@B{l}+b{l})", 32)
+				.addGCNLayer("H{l+1}=relu(A@H{l}@W{l}+H2@B{l}+b{l})", 32)
+				.addGCNLayer("H{l+1}=relu(A@H{l}@W{l}+H2@B{l}+b{l})", 32)
+				.addGCNLayer("H{l+1}=relu(A@H{l}@W{l}+H2@B{l}+b{l})", 32)
+				.addGCNLayer("H{l+1}=relu(A@H{l}@W{l}+H2@B{l}+b{l})", 32)
+				.addGCNLayer("H{l+1}=relu(A@H{l}@W{l}+H2@B{l}+b{l})", 32)
+				.multiclass(labels.getDimensionSize("labels"))
 				.print();
 
 		Matrix nodeIdMatrix = new WrapCols(new DenseTensor(new Range(0, nodes.size())));
 		Model model = new ModelTraining()
 				.setOptimizer(new Adam(0.01))
-				.setEpochs(3000)
+				.setEpochs(50)
 				.setPatience(100)
 				.setLoss(ModelTraining.Loss.CrossEntropy)
 				.train(modelBuilder.getModel(), nodeIdMatrix, labels, trainIds, validationIds);

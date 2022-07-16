@@ -101,24 +101,29 @@ Operation | Type | Comments
 `Matrix external(Tensor horizontal, Tensor vertical)` | static method | External product of two tensors. Is a dense matrix.
 `Matrix laplacian()` | in-place arithmetic | The symmetrically normalized Laplacian.
 `Matrix setToLaplacian()` | in-place arithmetic | The symmetrically normalized Laplacian.
+`Matrix setMainDiagonal(double value)` | in-place arithmetic | Sets diagonal elements.
+`Matrix setDiagonal(long diagonal, double value)` | in-place arithmetic | Sets diagonal elements.
 `Matrix put(long row, long col, double value)` | element access | NaN values throw exceptions. Is in-place.
 `Iterable<Entry<Long, Long>> getNonZeroEntries()` | element access | Similar to getNonZeroElements() but iterates through (row, col) pairs.
 
 
 ## Named dimensions
 In addition to other oeprations, there exists a type of in-place arithmetic operations that do not affect tensor or matrix values but are only
-responsible for dimension names. These are purely decorative and only aim to improve debugging by throwing errors for incompatible non-null
-names. For example, adding two tensors with dimension
+responsible for naming dimensions. These are purely decorative and only aim to improve debugging by throwing errors for incompatible non-null names. For example, adding two matrices with different
+dimension names will result in an error. Likewise, the inner dimension names during matrix multiplication
+should agree.
 
 Operation | Type | Comments
 --- | --- | ---
 `Tensor setDimensionName(String name)` | arithmetic | For naming tensor dimensions (of the 1D space tensors lie in).
  `Tensor setRowName(String rowName)` | arithmetic | For naming what kind of information matrix rows hold (e.g. `"samples"`).
  `Tensor setColName(String colName)` | arithmetic | For naming what kind of information matrix columns hold (e.g. `"features"`).
- `Tensor setDimensionName(String rowName, String colName)` | arithmetic | As a shorthand of running `setRowName(rowName).setColName(colName)`.
+ `Tensor setDimensionName(String rowName, String colName)` | arithmetic | A shorthand of calling `setRowName(rowName).setColName(colName)`.
  
  
-Arithmetic operations, *including* matrix multiplication automatically infer what dimension names in the result they can
-to make sure that only compatible data types are compared. Dimension names can be freely changed on operation names *without*
+When they can, arithmetic operations, *including* matrix multiplication and copying,
+automatically infer dimension names in the result
+to make sure that only compatible data types are compared.
+Dimension names can be freely changed for any data Tensor object *without*
 backtracking changes (even for see-through data types, shuch as asTransposed()).
  

@@ -16,7 +16,7 @@ This is implemented by common mathematical operations, which are presented in th
 can be added to inputs of other operations through the `addInput(NNOperation)` method of the latter. Starting points
 of operations are variables, constants and parameters, whose differences will be discussed later.
 
-:bulb: The hustle of learning to write expressions is removed with [Symbolic model definition](#symbolic-model-definition).
+:bulb: The hustle of learning to write expressions is removed with [symbolic model definition](#symbolic-model-definition).
 You can safely skip to that segment to learn how to write machine learning models without the tedious definitions of intermediate steps explained here.
 
 |Operator| Constructor | Number of inputs  |
@@ -34,6 +34,7 @@ You can safely skip to that segment to learn how to write machine learning model
 | sigmoid | mklab.JGNN.nn.activations.Sigmoid() | 1 |
 | lrelu | mklab.JGNN.nn.activations.LRelu() | 2 |
 | prelu | mklab.JGNN.nn.activations.PRelu() | 2 |
+| dropout | mklab.JGNN.nn.activations.Dropout() | 2 |
 
 :warning: In principle, the `addInput` should be called a number of times equal to the number of operator arguments for each operator.
 It is defined for the sake of convenience, for example to initialize operators at different parts of the code than the one linking them.
@@ -41,7 +42,7 @@ It is defined for the sake of convenience, for example to initialize operators a
 :warning: Detailed error checking of JGNN operations is under development.
 
 For example, the expression *y=log(2x+1)* can be constructed with the following code - a more consise way to do this is presented in 
-[Symbolic Model Definition](#symbolic-model-definition):
+[symbolic model definition](#symbolic-model-definition):
 
 ```java
 	Variable x = new Variable();
@@ -77,7 +78,11 @@ Obtaining the last value of intermediate (i.e. non-ouput) operations *after* the
 
 
 ## Symbolic model definition
-
+JGNN supports the definition of models from high-level expressions.
+This involves using a builder pattern to 
+declare input variables, constants, parameters, output
+variables, and forward assignment operations. For example, the following
+code declares a linear model.
 
 ```java
 ModelBuilder modelBuilder = new ModelBuilder()

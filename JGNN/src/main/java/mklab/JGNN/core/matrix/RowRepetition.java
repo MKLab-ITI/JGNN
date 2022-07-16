@@ -21,6 +21,7 @@ public class RowRepetition extends Matrix {
 	public RowRepetition(Tensor row, long times) {
 		super(row.size(), times);
 		this.row = row;
+		this.setDimensionName(row.getDimensionName(), null);
 	}
 	@Override
 	public Matrix zeroCopy(long rows, long cols) {

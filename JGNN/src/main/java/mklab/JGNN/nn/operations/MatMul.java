@@ -32,4 +32,8 @@ public class MatMul extends NNOperation {
 			errorMatrix = W.matmul(errorMatrix, true, false);
 		return errorMatrix;
 	}
+	@Override
+	public double getNonLinearity(int inputId, double inputMass, double outputNonLinearity) {
+		return outputNonLinearity * inputMass;
+	}
 }

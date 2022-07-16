@@ -59,6 +59,10 @@ public class Multiply extends NNOperation {
 			}
 		}
 		else
-			throw new RuntimeException("Multiply take exactly 2 arguments");
+			throw new RuntimeException("Multiply takes exactly 2 arguments");
+	}
+	@Override
+	public double getNonLinearity(int inputId, double inputMass, double outputNonLinearity) {
+		return outputNonLinearity * inputMass;
 	}
 }

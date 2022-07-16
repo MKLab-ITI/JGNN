@@ -69,6 +69,7 @@ public class ModelTraining {
 			Matrix labels, 
 			List<Long> trainingSamples,
 			List<Long> validationSamples) {
+		// ACTUL TRAINING
 		double minLoss = Double.POSITIVE_INFINITY;
 		HashMap<Parameter, Tensor> minLossParameters = new HashMap<Parameter, Tensor>();
 		int currentPatience = patience;
@@ -82,8 +83,10 @@ public class ModelTraining {
 				int start = (trainingSamples.size() / numBatches)*batch;
 				int end = Math.min(trainingSamples.size(), start+(trainingSamples.size() / numBatches));
 				int batchId = batch;
-				Matrix trainFeatures = new WrapRows(features.accessRows(trainingSamples.subList(start, end)));
+				Matrix trainFeatures = new WrapRows(features.accessRows(trainingSamples.subList(start, end)))
+						.setDimensionName(features.getRowName(), features.getColName());
 				Matrix trainLabels = new WrapRows(labels.accessRows(trainingSamples.subList(start, end)));
+						//.setDimensionName(labels.getRowName(), labels.getColName());
 				Runnable batchCode = new Runnable() {
 					@Override
 					public void run() {

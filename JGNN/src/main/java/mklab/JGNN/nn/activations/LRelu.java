@@ -4,6 +4,7 @@ import java.util.List;
 
 import mklab.JGNN.core.NNOperation;
 import mklab.JGNN.core.Tensor;
+import mklab.JGNN.nn.inputs.Constant;
 
 /**
  * Implements a {@link NNOperation} that performs a leaky relu operation, where the first argument is a tensor on which
@@ -41,4 +42,10 @@ public class LRelu extends NNOperation {
 		}
 		return ret;
 	}
+	@Override
+	public double getNonLinearity(int inputId, double inputMass, double outputNonLinearity) {
+		double slope = ((Constant)getInputs().get(1)).get().toDouble();
+		return outputNonLinearity*Math.sqrt(2./(1+(slope*slope)));
+	}
+	
 }

@@ -7,6 +7,7 @@ import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.NNOperation;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.ColumnRepetition;
+import mklab.JGNN.nn.inputs.Constant;
 
 public class PRelu extends NNOperation {
 	@Override
@@ -61,5 +62,10 @@ public class PRelu extends NNOperation {
 		else
 			throw new RuntimeException("prelu takes exactly 2 arguments");
 		return ret;
+	}
+	
+	@Override
+	public double getNonLinearity(int inputId, double inputMass, double outputNonLinearity) {
+		return outputNonLinearity*Math.sqrt(2);//TODO: check for this function
 	}
 }

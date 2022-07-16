@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import mklab.JGNN.core.matrix.SparseMatrix;
 import mklab.JGNN.core.util.Sort;
 import mklab.JGNN.data.IdConverter;
 import net.lingala.zip4j.ZipFile;
@@ -242,5 +243,4 @@ public class Dataset {
 			throw new RuntimeException("Dataset "+toString()+" does not comprise interactions");
 		return interactions;
 	}
-	
 }

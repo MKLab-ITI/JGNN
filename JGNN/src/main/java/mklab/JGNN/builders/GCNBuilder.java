@@ -37,18 +37,18 @@ public class GCNBuilder extends ModelBuilder {
 	public GCNBuilder(Model model, Matrix adjacencyMatrix, Matrix nodeFeatures, long embeddingDims) {
 		super(model);
 		this.adjacencyMatrix = adjacencyMatrix;
-		constant("W", adjacencyMatrix);
+		constant("A", adjacencyMatrix);
 		currentLayer = 0;
 		if(embeddingDims!=0 && nodeFeatures!=null) {
 			Matrix H0 = (Matrix) new DenseMatrix(adjacencyMatrix.getRows(), embeddingDims).setToRandom().setToNormalized();
 			param("H0", H0);
-			param("features", nodeFeatures);
+			constant("features", nodeFeatures);
 			currentLayerInputDims = nodeFeatures.getCols()+embeddingDims;
 			operation("H1 = features | H0");
 			currentLayer = 1;
 		}
 		else if(nodeFeatures!=null) {
-			param("H0", nodeFeatures);
+			constant("H0", nodeFeatures);
 			currentLayerInputDims = nodeFeatures.getCols();
 		}
 		else if(embeddingDims!=0) {
@@ -93,13 +93,13 @@ public class GCNBuilder extends ModelBuilder {
 				addGCNLayer(subformula, outputDims);
 			return this;
 		}
-		if(formula.contains("B{l}"))
+		if(formula.contains("B{l}") || formula.contains("B"+currentLayer))
 			param("B"+currentLayer, init(currentLayerInputDims, outputDims));
-		if(formula.contains("W{l}"))
+		if(formula.contains("W{l}") || formula.contains("W"+currentLayer))
 			param("W"+currentLayer, init(currentLayerInputDims, outputDims));
-		if(formula.contains("R{l}"))
+		if(formula.contains("R{l}") || formula.contains("R"+currentLayer))
 			param("R"+currentLayer, init(currentLayerInputDims, outputDims));
-		if(formula.contains("b{l}"))
+		if(formula.contains("b{l}") || formula.contains("b"+currentLayer))
 			param("b"+currentLayer, init(outputDims));
 		layerFromFormula(formula, outputDims);
 		return this;
@@ -121,8 +121,8 @@ public class GCNBuilder extends ModelBuilder {
 	
 	public GCNBuilder multiclass(long numOutputs) {
 		var("u");
-		addGCNLayer("H{l+1} = W{l}@H{l}", numOutputs);
-		layerOperation("prediction = max(H{l}[u])");
+		addGCNLayer("H{l+1} = H{l}@W{l}", numOutputs);
+		layerOperation("prediction = softmax(H{l}[u], col)");
 		out("prediction");
 		return this;
 	}

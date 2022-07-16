@@ -2,6 +2,7 @@ package mklab.JGNN.core;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -26,6 +27,24 @@ public class Model {
 	public Model() {
 	}
 	
+	public ArrayList<NNOperation> getDepthLastOperations(){
+		ArrayList<NNOperation> operations = new ArrayList<NNOperation>();
+		ArrayList<NNOperation> pending = new ArrayList<NNOperation>();
+		HashMap<NNOperation, Integer> visits = new HashMap<NNOperation, Integer>();
+		for(NNOperation output : outputs) 
+			pending.add(output);
+		while(!pending.isEmpty()) {
+			NNOperation operation = pending.remove(pending.size()-1);
+			visits.put(operation, visits.getOrDefault(operation, 0)+1);
+			if(operation.getOutputs().size()<=visits.get(operation)) {
+				operations.add(operation);
+				for(NNOperation input : operation.getInputs()) 
+					pending.add(input);
+			}
+		}
+		return operations;
+	}
+	
 	public ArrayList<Parameter> getParameters(){
 		ArrayList<Parameter> parameters = new ArrayList<Parameter>();
 		ArrayList<NNOperation> pending = new ArrayList<NNOperation>();
@@ -36,7 +55,7 @@ public class Model {
 		}
 		while(!pending.isEmpty()) {
 			NNOperation operation = pending.remove(pending.size()-1);
-			if(operation instanceof Parameter)
+			if(operation instanceof Parameter && !(operation instanceof Variable))
 				parameters.add((Parameter) operation);
 			for(NNOperation input : operation.getInputs()) 
 				if(!visited.contains(input)){

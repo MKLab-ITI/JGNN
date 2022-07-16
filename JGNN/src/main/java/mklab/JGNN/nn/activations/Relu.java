@@ -35,4 +35,8 @@ public class Relu extends NNOperation {
 		}
 		return ret;
 	}
+	@Override
+	public double getNonLinearity(int inputId, double inputMass, double outputNonLinearity) {
+		return Math.sqrt(2)*outputNonLinearity;
+	}
 }

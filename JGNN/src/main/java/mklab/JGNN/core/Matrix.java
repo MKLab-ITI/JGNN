@@ -180,7 +180,7 @@ public abstract class Matrix extends Tensor {
 			return getRows();
 		if(colName!=null && name.equals(colName))
 			return getCols();
-		throw new RuntimeException("Both matrix dimensions have the same name "+name);
+		throw new RuntimeException("No named dimensions in "+name);
 	}
 	/**
 	 * Retrieves the value stored at a matrix element.
@@ -243,6 +243,7 @@ public abstract class Matrix extends Tensor {
 		}
 		return ret;
 	}
+	private int parallelizedMultiplication = 0;
 	/**
 	 * Performs the matrix multiplication of <code>this*with</code> and the recipient.
 	 * 
@@ -253,15 +254,47 @@ public abstract class Matrix extends Tensor {
 	public final Matrix matmul(Matrix with) {
 		if(cols!=with.getRows())
 			throw new IllegalArgumentException("Mismatched matrix sizes between "+describe()+" and "+with.describe());
-		if(colName!=null && with.getRowName()!=null && colName!=with.getRowName())
+		if(colName!=null && with.getRowName()!=null && !colName.equals(with.getRowName()))
 			throw new IllegalArgumentException("Mismatched matrix dimension names between "+describe()+" and "+with.describe());
 		Matrix ret = determineZeroCopy(with, getRows(), with.getCols());
-		for(Entry<Long, Long> element : getNonZeroEntries()) {
-			long row = element.getKey();
-			long col = element.getValue();
-			for(long col2=0;col2<with.getCols();col2++) {
-				ret.put(row, col2, ret.get(row, col2) + get(row, col)*with.get(col, col2));
-				//System.out.println(row+ " "+ col+" "+ ret.get(row, col2));
+		if(parallelizedMultiplication>1) {
+			ArrayList<Entry<Long, Long>> entries = new ArrayList<Entry<Long, Long>>();
+			for(Entry<Long, Long> element : getNonZeroEntries()) 
+				entries.add(element);
+			Thread[] threads = new Thread[parallelizedMultiplication];
+			for(int i=0;i<threads.length;i++) {
+				int threadId = i;
+				threads[i] = new Thread() {
+					@Override
+					public void run() {
+						int start = threadId*entries.size()/threads.length;
+						int end = (threadId+1)*entries.size()/threads.length;
+						for(int entry=start;entry<end;entry++) {
+							Entry<Long, Long> element = entries.get(entry);
+							long row = element.getKey();
+							long col = element.getValue();
+							for(long col2=0;col2<with.getCols();col2++) 
+								ret.put(row, col2, ret.get(row, col2) + get(row, col)*with.get(col, col2));
+						}
+					}
+				};
+			}
+			for(Thread thread : threads)
+				thread.start();
+			for(Thread thread : threads)
+				try {
+					thread.join();
+				}
+				catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+		}
+		else {
+			for(Entry<Long, Long> element : getNonZeroEntries()) {
+				long row = element.getKey();
+				long col = element.getValue();
+				for(long col2=0;col2<with.getCols();col2++) 
+					ret.put(row, col2, ret.get(row, col2) + get(row, col)*with.get(col, col2));
 			}
 		}
 		return ret.setRowName(getRowName()).setColName(with.getColName());
@@ -289,14 +322,52 @@ public abstract class Matrix extends Tensor {
 			throw new IllegalArgumentException("Mismatched matrix sizes");
 		if((transposeSelf?rowName:colName)!=null &&
 				(transposeWith?with.getColName():with.getRowName())!=null &&
-				(transposeSelf?rowName:colName)!=(transposeWith?with.getColName():with.getRowName()))
+				!(transposeSelf?rowName:colName).equals(transposeWith?with.getColName():with.getRowName()))
 			throw new IllegalArgumentException("Mismatched matrix dimension names");
 		Matrix ret = determineZeroCopy(with, transposeSelf?cols:rows, transposeWith?with.getRows():with.getCols());
-		for(Entry<Long, Long> element : getNonZeroEntries()) {
-			long row = transposeSelf?element.getValue():element.getKey();
-			long col = transposeSelf?element.getKey():element.getValue();
-			for(long col2=0;col2<(transposeWith?with.getRows():with.getCols());col2++) 
-				ret.put(row, col2, ret.get(row, col2) + get(element.getKey(),element.getValue())*with.get(transposeWith?col2:col, transposeWith?col:col2));
+		
+		if(parallelizedMultiplication>1) {
+			ArrayList<Entry<Long, Long>> entries = new ArrayList<Entry<Long, Long>>();
+			for(Entry<Long, Long> element : getNonZeroEntries()) 
+				entries.add(element);
+			Thread[] threads = new Thread[parallelizedMultiplication];
+			for(int i=0;i<threads.length;i++) {
+				int threadId = i;
+				threads[i] = new Thread() {
+					@Override
+					public void run() {
+						int start = threadId*entries.size()/threads.length;
+						int end = (threadId+1)*entries.size()/threads.length;
+						for(int entry=start;entry<end;entry++) {
+							Entry<Long, Long> element = entries.get(entry);
+							long row = transposeSelf?element.getValue():element.getKey();
+							long col = transposeSelf?element.getKey():element.getValue();
+							for(long col2=0;col2<(transposeWith?with.getRows():with.getCols());col2++) { 
+								double val = get(element.getKey(),element.getValue())*with.get(transposeWith?col2:col, transposeWith?col:col2);
+								ret.put(row, col2, val + ret.get(row, col2));
+								
+							}
+						}
+					}
+				};
+			}
+			for(Thread thread : threads)
+				thread.start();
+			for(Thread thread : threads)
+				try {
+					thread.join();
+				}
+				catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+		}
+		else {
+			for(Entry<Long, Long> element : getNonZeroEntries()) {
+				long row = transposeSelf?element.getValue():element.getKey();
+				long col = transposeSelf?element.getKey():element.getValue();
+				for(long col2=0;col2<(transposeWith?with.getRows():with.getCols());col2++) 
+					ret.put(row, col2, ret.get(row, col2) + get(element.getKey(),element.getValue())*with.get(transposeWith?col2:col, transposeWith?col:col2));
+			}
 		}
 		return ret.setRowName(transposeSelf?getColName():getRowName()).setColName(transposeWith?with.getRowName():with.getColName());
 	}
@@ -338,12 +409,12 @@ public abstract class Matrix extends Tensor {
 			else
 				return super.isMatching(other);
 		}
-		else if(rows!=other.cast(Matrix.class).rows || cols!=other.cast(Matrix.class).cols)
-			return false;
 		Matrix otherMatrix = other.cast(Matrix.class);
-		if(rowName!=null && otherMatrix.rowName!=null && rowName != otherMatrix.rowName)
+		if(rows!=otherMatrix.rows || cols!=otherMatrix.cols)
 			return false;
-		if(colName!=null && otherMatrix.colName!=null && colName != otherMatrix.colName)
+		if(rowName!=null && otherMatrix.rowName!=null && !rowName.equals(otherMatrix.rowName))
+			return false;
+		if(colName!=null && otherMatrix.colName!=null && !colName.equals(otherMatrix.colName))
 			return false;
 		return true;
 	}
@@ -377,6 +448,37 @@ public abstract class Matrix extends Tensor {
 	public Matrix laplacian() {
 		return ((Matrix)copy()).setToLaplacian();
 	}
+
+	/**
+	 * Sets the matrix's specified main diagonal elements to a given value value.
+	 * @param value The value to set to the diagonal's elements.
+	 * @return <code>this</code> Matrix instance.
+	 * @see #setDiagonal(long, double)
+	 */
+	public Matrix setMainDiagonal(double value) {
+		return setDiagonal(0, value);
+	}
+	
+	/**
+	 * Sets the matrix's specified diagonal elements to a given value.
+	 * @param diagonal Which diagonal to set. 0 is the main diagonal
+	 * @param value The value to set to the diagonal's elements.
+	 * @return <code>this</code> Matrix instance.
+	 * @see #setMainDiagonal(double)
+	 */
+	public Matrix setDiagonal(long diagonal, double value) {
+		if(cols>rows) {
+			for(long col=Math.max(0, diagonal);col<Math.min(cols, cols+diagonal);col++)
+				if(col<rows)
+					put(col, col, value);
+		}
+		else {
+			for(long row=Math.max(0, diagonal);row<Math.min(rows, rows+diagonal);row++)
+				if(row<cols)
+					put(row, row, value);
+		}
+		return this;
+	}
 	
 	/**
 	 * Sets the Matrix to its normalized Laplacian transformation by appropriately adjusting its element values.
@@ -404,11 +506,31 @@ public abstract class Matrix extends Tensor {
 	}
 	
 	/**
+	 * Retrieves either the given row or column as a trensor.
+	 * @param index The dimension index to access.
+	 * @param name The dimension's name.
+	 * @return Either a {@link AccessRow} or a {@link AccessCol} at the given index.
+	 * @see #accessRow(long)
+	 * @see #accessCol(long)
+	 */
+	public Tensor accessDim(long index, String name) {
+		if(rowName!=null && colName!=null && rowName.equals(colName))
+			throw new RuntimeException("Cannot call accessDim for the same row and col "
+					+ "dimension names in "+describe());
+		if(rowName!=null && name.equals(rowName))
+			return accessRow(index);
+		if(colName!=null && name.equals(colName))
+			return accessCol(index);
+		throw new RuntimeException("No named dimensions in "+name);
+	}
+	
+	/**
 	 * Retrieves the given row as a tensor. Editing the result
 	 * also edits the original matrix.
 	 * No new memory is allocated for matrix values.
 	 * @param row The given row.
 	 * @return An {@link AccessRow} instance of the corresponding row.
+	 * @see #accessDim(long, String)
 	 * @see #accessCol(long)
 	 * @see #accessRows()
 	 * @see #accessRows(long...)
@@ -424,6 +546,7 @@ public abstract class Matrix extends Tensor {
 	 * No new memory is allocated for matrix values.
 	 * @param col The given column.
 	 * @return An {@link AccessCol} of the corresponding column.
+	 * @see #accessDim(long, String)
 	 * @see #accessRow(long)
 	 * @see #accessColumns()
 	 * @see #accessColumns(long...)

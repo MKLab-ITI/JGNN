@@ -87,6 +87,11 @@ BatchOptimizer batchOptimizer = new BatchOptimizer(batchOptimizer);
 :bulb: **Always** use batch optimizers for complicated models, as more than one gradient paths may arrive
 at trainable variables and they need to perform simultaneous updates.
 
+:bulb: Instead of adding a universal regularizer, you can instead set a regularization constant
+to model variables by inserting it just after their name in the `param` method. This forces
+L2 regularization to be applied during all gradient calculations.
+
+
 We finally perform training over a total of 150 epochs. For each of these, we obtain the model held by the model builder
 and call its `Model.trainSampleDifference` method to train it with a provided optimizer, list of of inputs variable
 values and list of output variable values (these lists comprise only one matrix each). This method returns the original

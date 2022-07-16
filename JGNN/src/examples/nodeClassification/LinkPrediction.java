@@ -33,8 +33,8 @@ public class LinkPrediction {
 		
 		Matrix adjacency = new SparseMatrix(nodes.size(), nodes.size());
 		for(Entry<Long, Long> interaction : dataset.getInteractions()) {
-			adjacency.put(interaction.getKey(), interaction.getValue());
-			adjacency.put(interaction.getValue(), interaction.getKey());
+			adjacency.put(interaction.getKey(), interaction.getValue(), 1);
+			adjacency.put(interaction.getValue(), interaction.getKey(), 1);
 		}
 		for(Long node : nodes.getIds())
 			adjacency.put(node, node, 1);

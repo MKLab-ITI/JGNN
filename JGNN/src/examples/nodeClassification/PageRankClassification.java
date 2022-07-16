@@ -18,7 +18,7 @@ import mklab.JGNN.data.datasets.Datasets;
 public class PageRankClassification {
 
 	public static void main(String[] args) throws Exception {
-		Dataset dataset = new Datasets.CiteSeer();
+		Dataset dataset = new Datasets.Cora();
 		IdConverter nodes = dataset.nodes();
 		
 		ArrayList<Long> nodeIds = dataset.nodes().getIds();
@@ -40,8 +40,6 @@ public class PageRankClassification {
 			adjacency.put(interaction.getKey(), interaction.getValue(), 1);
 			adjacency.put(interaction.getValue(), interaction.getKey(), 1);
 		}
-		for(Long node : nodes.getIds())
-			adjacency.put(node, node, 1);
 		adjacency.setToLaplacian().setDimensionName("nodes", "nodes");
 		
 		System.out.println("Labels   : "+labels.describe());

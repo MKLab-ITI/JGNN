@@ -6,9 +6,9 @@ Graph Neural Networks (GNNs) have seen a dramatic increase in popularity
 thanks to their ability to understand relations between graph nodes.
 This library aims to provide GNN capabilities to native Java applications, 
 for example to perform machine learning on Android. It does so by avoiding
-c-based machine learning libraries, such as [TensorFlow Lite](https://www.tensorflow.org/lite),
-that are often designed with pure performance in mind but which often require
-specific hardware to run, such as GPUs, and drastically increase the size of
+c-based machine learning libraries, such as [TensorFlow Lite](https://www.tensorflow.org/lite).
+The latter are often designed with pure performance in mind but often require
+specific hardware to run, such as GPUs, drastically increase the size of
 deployed applications.
 
 
@@ -21,28 +21,19 @@ For quick installation of the latest working version of the library, you can inc
 
 # :fire: Features
 * Cross-platform support (written in native java)
-<<<<<<< HEAD
 * Lightweight
 * Speed ups and minimal memory footprint with direct memory access
 * Parallelized batching
-=======
-<<<<<<< HEAD
-* Reduced memory consumption and allocation speed ups
-* Minimal impact to application size
-=======
-* Speed ups with direct memory access and parallelized batching
->>>>>>> ae673405caf7fc82e7232e07d46b43eec2c6a0a0
->>>>>>> 85b52b3fbc118f24fefe9b28444e0b39cbb6543e
 
 # :link: Material
 * [Javadoc](https://maniospas.github.io/JGNN/)
-* [Introduction to JGNN primitives](tutorials/Primitives.md) A collection of vector and matrix primitives support low-level arithmetic operations, in-place version of the same operations and both sparse and dense memory structures. The can also support applications outside the scope of the library. This tutorial covers the use of machine learning primitives.
-* [Introduction to models and builders](tutorials/Models.md) Learning tasks can be automated by defining symbolic pipelines. This tutorial covers tools that can be used to create trainable machine learning models, including builders that can build those tools from  simple String expressions.
-* [Introduction to benchmarking] A collection of publically available datasets that can be automatically downloaded and imported from respective external sources to facilitate benchmarking tasks. 
+* [Primitives](tutorials/Primitives.md)
+* [Models and symbolic builders](tutorials/Models.md)
+* [Benchmarking]
 
 # :thumbsup: Contributing
-Feel free to contribute in any way, for example through the [issue tracker]() or by participating in [discussions]().
-Please check out the [contribution guidelines](CONTRIBUTING.md) to bring modifications to the code base.
+Feel free to contribute in any way, for example through the [issue tracker](https://github.com/MKLab-ITI/JGNN/issues).
+Please check out the [contribution guidelines](CONTRIBUTING.md) to bring modifications to thecode base.
  
 # :notebook: Citation
 TBD

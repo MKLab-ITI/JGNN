@@ -52,11 +52,25 @@ public abstract class NNOperation {
 		this.description = description;
 	}
 	
+	/**
+	 * Retrieves an concise description of the operation that shows metadata
+	 * and potential data descriptions processed by the current thread.
+	 * @return A <code>String</code> description.
+	 * @see #setDescription(String)
+	 * @see #view()
+	 */
 	public String describe() {
 		return this.getClass()+": "
 					+(description!=null?description:("#"+this.hashCode()))+" = "
 					+(data().lastOutput!=null?data().lastOutput.describe():"null");
 	}
+	
+	/**
+	 * Retrieves a string that views internal data being processed by the current thread,
+	 * including gradients. This may
+	 * @return A <code>String</code> view.
+	 * @see #describe()
+	 */
 	public String view() {
 		return this.getClass()+": "
 					+describe()+" "
@@ -64,17 +78,44 @@ public abstract class NNOperation {
 					+" Delta"+(data().tapeError!=null?data().tapeError.toString():"null");
 	}
 	protected NNOperation() {}
-
+	
+	/**
+	 * Retrieves a list of input operations within a model's execution graph.
+	 * @return A list of {@link NNOperation}s.
+	 */
 	public ArrayList<NNOperation> getInputs() {
 		return inputs;
 	}
 	
+	/**
+	 * Retrieves a list of output operations within a model's execution graph.
+	 * @return A list of {@link NNOperation}s.
+	 */
 	public ArrayList<NNOperation> getOutputs() {
 		return outputs;
 	}
 	
+	/**
+	 * Checks whether the operation yields a constant output.
+	 * @return A <code>boolean</code> value.
+	 */
 	public boolean isConstant() {
+		// TODO: automatically check inputs in the future
 		return false;
+	}
+	
+	/**
+	 * Retrieves the degree of non-linearity of the operation
+	 * to be used by {@link mklab.JGNN.initializers.VariancePreservingInitializer}.
+	 * Default is one for operations like addition, multiplication, and matrix multiplication,
+	 * and is different only for activation functions.
+	 * @param inputId The input for which the non-linearity is calculated.
+	 * @param inputMass The fraction of (matrix) parameters affecting the calculation coming from the respective input.
+	 * @param outputNonLinearity The output's non-linearity gain.
+	 * @return <code>double</code> describing the non-linearity.
+	 */
+	public double getNonLinearity(int inputId, double inputMass, double outputNonLinearity) {
+		return outputNonLinearity;
 	}
 	
 	public final void clearPrediction() {
