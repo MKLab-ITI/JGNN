@@ -70,7 +70,7 @@ System.out.println(modelBuilder.getExecutionGraphDot());
 
 For example, copying-and-pasting the graph description to [GraphvizOnline](https://dreampuf.github.io/GraphvizOnline/) creates the following execution graph:
 
-![Example execution graph](graphviz.png =250x)
+![Example execution graph](graphviz.png)
 
 # Training
 To train the model, we first set up a training-test split of node identifiers. We also use the `WrapCols`
