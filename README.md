@@ -22,7 +22,7 @@ For quick installation of the latest working version of the library, you can inc
 # :fire: Features
 * Cross-platform support (written in native java)
 * Lightweight
-* Speed ups and minimal memory footprint with direct memory access
+* Speed ups and minimal memory footprints
 * Parallelized batching
 
 # :link: Material
