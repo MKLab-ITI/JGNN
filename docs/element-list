@@ -1,3 +1,4 @@
+classification
 mklab.JGNN
 mklab.JGNN.builders
 mklab.JGNN.core
@@ -7,9 +8,7 @@ mklab.JGNN.core.tensor
 mklab.JGNN.core.util
 mklab.JGNN.data
 mklab.JGNN.data.datasets
-mklab.JGNN.examples.classification
-mklab.JGNN.examples.nodeClassification
-mklab.JGNN.examples.primitives
+mklab.JGNN.initializers
 mklab.JGNN.measures
 mklab.JGNN.models.relational
 mklab.JGNN.nn.activations
@@ -17,3 +16,5 @@ mklab.JGNN.nn.inputs
 mklab.JGNN.nn.operations
 mklab.JGNN.nn.optimizers
 mklab.JGNN.nn.pooling
+nodeClassification
+primitives
