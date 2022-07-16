@@ -34,7 +34,7 @@ public class GNNBuilderClassification {
 		List<Long> testIds = nodeIds.subList(0, nodeIds.size()/5);
 		
 		Matrix labels = nodes
-				.oneHot(dataset.labels())
+				.oneHot(dataset.getLabels())
 				.setDimensionName("nodes", "labels");
 		//Matrix features = nodes.oneHot(dataset.features());
 		Matrix features = labels

@@ -30,8 +30,8 @@ public class LogisticRegressionExample {
 	public static void main(String[] args) {
 		Dataset dataset = new Datasets.Lymphography();
 		IdConverter nodes = dataset.nodes();
-		Matrix labels = nodes.oneHot(dataset.labels()).setDimensionName("samples", "labels");
-		Matrix features = nodes.oneHot(dataset.features()).setDimensionName("samples", "features");
+		Matrix labels = nodes.oneHot(dataset.getLabels()).setDimensionName("samples", "labels");
+		Matrix features = nodes.oneHot(dataset.getFeatures()).setDimensionName("samples", "features");
 		
 		System.out.println("Nodes\t: "+dataset.nodes().size());
 		System.out.println("Labels\t: "+labels.describe());

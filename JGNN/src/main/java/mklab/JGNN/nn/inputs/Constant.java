@@ -10,6 +10,10 @@ import mklab.JGNN.core.Tensor;
  * @author Emmanouil Krasanakis
  */
 public class Constant extends Parameter {
+	/**
+	 * Creates a constant holding a tensor.
+	 * @param tensor The held tensor.
+	 */
 	public Constant(Tensor tensor) {
 		super(tensor);
 	}
@@ -19,8 +23,5 @@ public class Constant extends Parameter {
 	}
 	@Override
 	protected void trainParameters(Optimizer optimizer, Tensor error) {
-	}
-	public void setTo(Tensor value) {
-		this.tensor = value;
 	}
 }

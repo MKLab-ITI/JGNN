@@ -52,6 +52,9 @@ public abstract class NNOperation {
 		this.description = description;
 	}
 	
+	public String getDescription() {
+		return description;
+	}
 	/**
 	 * Retrieves an concise description of the operation that shows metadata
 	 * and potential data descriptions processed by the current thread.

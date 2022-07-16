@@ -35,6 +35,7 @@ public abstract class VariancePreservingInitializer extends ModelInitializer {
 		for(NNOperation operation : depthFirst) {
 			if(operation instanceof Parameter 
 					&& !(operation instanceof Variable)
+					&& !operation.isConstant()
 					&& ((Parameter)operation).get() instanceof Matrix)
 				countEventualParameters.put(operation, 1);
 			if(operation.getNonLinearity(0, 1, 1)!=1)
@@ -49,7 +50,9 @@ public abstract class VariancePreservingInitializer extends ModelInitializer {
 		
 		HashMap<NNOperation, Double> gains = new HashMap<NNOperation, Double>();
 		for(NNOperation operation : model.getDepthLastOperations()) {
-			if(operation instanceof Parameter && !(operation instanceof Variable)) {
+			if(operation instanceof Parameter 
+					&& !operation.isConstant()
+					&& !(operation instanceof Variable)) {
 				Parameter parameter = (Parameter)operation;
 				if(parameter.get() instanceof Matrix) {
 					Matrix mat = parameter.get().cast(Matrix.class);
@@ -67,7 +70,7 @@ public abstract class VariancePreservingInitializer extends ModelInitializer {
 						/ (double)countEventualParameters.get(operation);
 				NNOperation input = operation.getInputs().get(i);
 				gains.put(input, gains.getOrDefault(input, 0.)+operation.getNonLinearity(i, inputMass, gains.getOrDefault(operation, 1.)));
-				System.out.println(input.describe());
+				//System.out.println(input.describe());
 			}
 			
 		}

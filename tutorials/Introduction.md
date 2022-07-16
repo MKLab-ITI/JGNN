@@ -15,23 +15,19 @@ makes these matrices sparse, although this is not explicitly defined. These matr
 be programmatically generated in either sparse or dense form (according to memory vs speed
 considerations) using primitive operations.
 
-Loaded features and labels are organized into `Matrix` instances. Originally, `IdConverter.oneHot`
-constructs martices whose rows correspond to different nodes. However, inputting these in our
-specific algorithm definition requires a transposition, so that columns are made to correspond
-to nodes instead. To do this fastly, we use the `Matrix.asTransposed` method, which creates
-a see-through interface that directly accesses the original matrix elements without allocating 
-them anew.
-
+Loaded features and labels are organized into `Matrix` instances. We also set dimension names
+to force the library to check for logical integrity when performing operations (`null` names
+can match anything), for example during matrix addition or multiplication.
 
 ```java
 Dataset dataset = new Datasets.Lymphography();
 IdConverter nodeIdConverter = dataset.nodes();
-Matrix labels = nodeIdConverter.oneHot(dataset.labels()).asTransposed();
-Matrix features = nodeIdConverter.oneHot(dataset.features()).asTransposed();
+Matrix labels = nodeIdConverter.oneHot(dataset.labels()).setDimensionName("samples", "features");
+Matrix features = nodeIdConverter.oneHot(dataset.features()).setDimensionName("samples", "classes");
 ```
 
-:bulb: To maintain the same naming convention between traditional and graph neural networks, data samples
-are refferred to as *nodes* .
+:bulb: To maintain the same naming convention between traditional and graph neural networks, 
+data samples are refferred to as *nodes* .
 
 # Model definition
 We then store the number of features and class labels that will help us define our model. It
@@ -44,22 +40,37 @@ long numFeatures = features.getRows();
 long numClasses = labels.getRows();
 ```
 
-We then define a model using the library's symbolic definition builder class `ModelBuilder`. This
-has three important methods: `var` to define model input variables, `param` to define learnable
-parameters, `operation` to define symbolic operations and `out` to define output variables.
-Most operations of this class return the builder's instance, so that models are incrementally constructed.
+We define a model using the library's symbolic definition builder class `ModelBuilder`. This
+has four important methods: `var` to define model input variables, `config` to define
+hyperparameters used for matrix and vector construction,
+`operation` to define symbolic operations and learnable parameters,
+and `out` to define output variables.
+These operations return the builder's instance, so that models can be incrementally constructed.
 For our example, we explicitly define a logistic regression model that performs a linear transformation
-without bias of inputs *x* using a learnable transformation matrix *w1* and obtaining outputs *yhat*.
-More operations can be handled by the library and can be found in the (introduction to models and builders)(#Models.md).
+without bias of inputs *x* using a learnable transformation matrix *w1* and parameter *b1* 
+and obtaining outputs *yhat*. Notably, matrices and vectors are directly defined during sumbolic
+definition via hyperparameter configurations.
 
 ```java
 ModelBuilder modelBuilder = new ModelBuilder()
-		.var("x")
-		.param("w1", new DenseMatrix(numClasses, numFeatures).setToRandom().selfAdd(-0.5).selfMultiply(Math.sqrt(1./dims)))
-		.operation("yhat = sigmoid(w1@x)")
-		.out("yhat")
-		.print();
+	.config("features", numFeatures)
+	.config("classes", numClasses)
+	.var("x")
+	.operation("h = relu(x@matrix(features, 64)+vector(64))")
+	.operation("yhat = sigmoid(h@matrix(64, classes)+vector(classes))")
+	.out("yhat");
 ```
+
+To help check the architecture, you can expert its execution graph in *.dot* format
+by writting:
+
+```java
+System.out.println(modelBuilder.getExecutionGraphDot());
+```
+
+For example, copying-and-pasting the graph description to [GraphvizOnline](https://dreampuf.github.io/GraphvizOnline/) creates the following execution graph:
+
+![Example execution graph](graphviz.png)
 
 # Training
 To train the model, we first set up a training-test split of node identifiers. We also use the `WrapCols`
@@ -76,8 +87,7 @@ Matrix trainLabels = new WrapCols(labels.accessColumns(trainIds));
 ```
 
 We then create a new optimizer that performs gradient descent with learning rate 0.1 
-and L2 regularization of parameters with weight 0.001. We also set up a batch optimizer, which accumulates
-gradients and only updates them when its `BatchOptimizer.updateAll()` method is called.
+and L2 regularization of parameters with weight 0.001. We also set up a batch optimizer, which accumulates gradients and only updates them when its `BatchOptimizer.updateAll()` method is called.
 
 ```java
 Optimizer optimizer = new Regularization(new GradientDescent(0.1), 0.001);

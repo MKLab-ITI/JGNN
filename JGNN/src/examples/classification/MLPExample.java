@@ -29,8 +29,8 @@ public class MLPExample {
 	public static void main(String[] args) {
 		Dataset dataset = new Datasets.Lymphography();
 		IdConverter nodes = dataset.nodes();
-		Matrix labels = nodes.setDimensionName("nodes", "labels").oneHot(dataset.labels());
-		Matrix features = nodes.setDimensionName("nodes", "features").oneHot(dataset.features());
+		Matrix labels = nodes.setDimensionName("nodes", "labels").oneHot(dataset.getLabels());
+		Matrix features = nodes.setDimensionName("nodes", "features").oneHot(dataset.getFeatures());
 		
 		System.out.println("Nodes\t: "+dataset.nodes().size());
 		System.out.println("Labels\t: "+labels.describe());
@@ -42,10 +42,11 @@ public class MLPExample {
 				.config("features", numFeatures)
 				.config("classes", numClasses)
 				.var("x")
-				.operation("h = relu(x@matrix(features, 64)+vector(64))\n"
-						 + "yhat = sigmoid(h@matrix(64, classes)+vector(classes))")
+				.operation("h = relu(x@matrix(features, 64)+vector(64))")
+				.operation("yhat = sigmoid(h@matrix(64, classes)+vector(classes))")
 				.out("yhat")
 				.print();
+		System.out.println(modelBuilder.getExecutionGraphDot());
 		
 		ArrayList<Long> nodeIds = dataset.nodes().getIds();
 		Collections.shuffle(nodeIds, new Random(100));

@@ -28,7 +28,7 @@ public class LinkPrediction {
 	public static void main(String[] args) throws Exception {
 		Dataset dataset = new Datasets.CiteSeer();
 		IdConverter nodes = dataset.nodes();
-		Matrix labels = nodes.oneHot(dataset.labels());
+		Matrix labels = nodes.oneHot(dataset.getLabels());
 		Matrix features = labels.toDense().cast(Matrix.class);
 		
 		Matrix adjacency = new SparseMatrix(nodes.size(), nodes.size());

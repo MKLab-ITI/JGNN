@@ -790,4 +790,15 @@ public abstract class Matrix extends Tensor {
 	public SparseMatrix toSparse() {
 		return (SparseMatrix)new SparseMatrix(getRows(), getCols()).selfAdd(this).setDimensionName(this);
 	}
+	/**
+	 * Creates a sparse unit matrix.
+	 * @param dims The dimensions of the unit matrix.
+	 * @return A sparse matrix.
+	 */
+	public static SparseMatrix eye(long dims) {
+		SparseMatrix matrix = new SparseMatrix(dims, dims);
+		for(long pos=0;pos<dims;pos++)
+			matrix.put(pos, pos, 1);
+		return matrix;
+	}
 }

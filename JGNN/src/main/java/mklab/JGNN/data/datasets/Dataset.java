@@ -52,7 +52,7 @@ public class Dataset {
 		return nodeIds;
 	}
 
-	public HashMap<Long, String> labels() {
+	public HashMap<Long, String> getLabels() {
 		return nodeLabels;
 	}
 	
@@ -62,18 +62,28 @@ public class Dataset {
 		return nodeLabels.get(node);
 	}
 	
-	public ArrayList<String> getFeatures(long node) {
+	/**
+	 * Retrieves the features of a single node.
+	 * @param node
+	 * @return
+	 */
+	public ArrayList<String> getNodeFeatures(long node) {
 		if(nodeFeatures.isEmpty())
 			throw new RuntimeException("Dataset "+toString()+" does not comprise node features");
 		return nodeFeatures.get(node);
 	}
 	
-	public ArrayList<HashMap<Long, String>> features() {
+	/**
+	 * Retrieves a list of maps from nodes to feature values. Each tensor
+	 * corresponds to a different feature.
+	 * @return A list of hashmaps from node identifiers to string values.
+	 */
+	public ArrayList<HashMap<Long, String>> getFeatures() {
 		ArrayList<HashMap<Long, String>> ret = new ArrayList<HashMap<Long, String>>();
 		for(int i=0;i<numFeatures;i++) {
 			HashMap<Long, String> feature = new HashMap<Long, String>();
 			for(Long node : nodeIds.getIds())
-				feature.put(node, getFeatures(node).get(i));
+				feature.put(node, getNodeFeatures(node).get(i));
 			ret.add(feature);
 		}
 		return ret;

@@ -52,6 +52,9 @@ public class ModelBuilder {
 	public Model getModel() {
 		return model;
 	}
+	public boolean hasComponent(String name) {
+		return components.containsKey(name);
+	}
 	protected void assertValidName(String name) {
 		if(name==null || name.isEmpty())
 			throw new IllegalArgumentException("Invalid component name");
@@ -123,7 +126,7 @@ public class ModelBuilder {
 	
 	public ModelBuilder constant(String name, Tensor value) {
 		if(components.containsKey(name)) {
-			((Constant)components.get(name)).setTo(value);
+			((Constant)components.get(name)).set(value);
 			((Constant)components.get(name)).setDescription(name);
 			return this;
 		}
@@ -498,9 +501,64 @@ public class ModelBuilder {
 	}
 	
 	public String describe() {
+		getModel();
 		return routing;
 	}
+	public String getExecutionGraphDot() {
+		getModel();
+		String ret = "//Can visualize at: https://dreampuf.github.io/GraphvizOnline";
+		ret+="\ndigraph operations {";
+		for(NNOperation component : components.values()) {
+			for(NNOperation input : component.getInputs())
+				ret+="\n   "+input.getDescription()+" -> "+component.getDescription();
+		}
+		for(NNOperation component : components.values()) 
+			if(model.getOutputs().contains(component)) {
+				ret+="\n   "+component.getDescription()+"[shape=doublecircle]";
+			}
+			else if(component instanceof Variable)
+				ret+="\n   "+component.getDescription()+"[color=red,shape=doublecircle]";
+			else if(component instanceof Constant) {
+				if(((Constant)component).get().size()==1) {
+					ret+="\n   "+component.getDescription()
+					+"[shape=rectangle,color=red,label=\""
+						+component.getDescription()+" = "+((Parameter)component).get().toDouble()+"\"]";
+				}
+				else if(component.getDescription().startsWith("_")){
+					ret+="\n   "+component.getDescription()
+					+"[shape=rectangle,color=red,label=\""
+							+((Parameter)component).get().describe()+"\"]";
+				}
+				else
+					ret+="\n   "+component.getDescription()
+					+"[shape=rectangle,color=red,label=\""
+						+component.getDescription()+" = "+((Parameter)component).get().describe()+"\"]";
+			
+			}
+			else if(component instanceof Parameter) {
+				//ret+="\n   "+component.getDescription()+"[color=green]";
+				if(component.getDescription().startsWith("_")){
+					ret+="\n   "+component.getDescription()
+					+"[shape=rectangle,color=green,label=\""
+							+((Parameter)component).get().describe()+"\"]";
+				}
+				else
+					ret+="\n   "+component.getDescription()
+					+"[shape=rectangle,color=green,label=\""
+						+component.getDescription()+" = "+((Parameter)component).get().describe()+"\"]";
+			
+			}
+			else if(component.getDescription().startsWith("_")){
+				ret+="\n   "+component.getDescription()+"[label="+component.getClass().getSimpleName()+"]";
+			}
+			else
+				ret+="\n   "+component.getDescription()+"[label=\""+component.getClass().getSimpleName()+" ("+component.getDescription()+")\"]";
+			
+		ret += "\n}";
+		return ret;
+	}
 	public ModelBuilder print() {
+		getModel();
 		for(NNOperation component : components.values())
 			if(component instanceof Parameter)
 				System.out.println(component.describe());
@@ -508,6 +566,7 @@ public class ModelBuilder {
 		return this;
 	}
 	public ModelBuilder printState() {
+		getModel();
 		for(NNOperation component : components.values())
 			System.out.println(component.view());
 		return this;
