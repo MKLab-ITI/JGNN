@@ -360,13 +360,16 @@ public class ModelBuilder {
 			arg0 = splt[3];
 		}
 		else if(splt[2].equals("matrix")) {
-			param(name, new DenseMatrix((long)parseConfigValue(splt[3]), (long)parseConfigValue(splt[4]))
+			param(name, splt.length>5?parseConfigValue(splt[5]):0.,
+					new DenseMatrix((long)parseConfigValue(splt[3]), (long)parseConfigValue(splt[4]))
 					.setDimensionName(isDouble(splt[3])?null:splt[3], isDouble(splt[4])?null:splt[4]));
 			routing = prevRouting;
 			return this;
 		}
 		else if(splt[2].equals("vector")) {
-			param(name, new DenseTensor((long)parseConfigValue(splt[3]))
+			param(name, 
+					splt.length>4?parseConfigValue(splt[4]):0.,
+					new DenseTensor((long)parseConfigValue(splt[3]))
 					.setDimensionName(isDouble(splt[3])?null:splt[3]));
 			routing = prevRouting;
 			return this;

@@ -58,7 +58,7 @@ public class MLPExample {
 		Model model = new ModelTraining()
 				.setOptimizer(new GradientDescent(0.01))
 				.setEpochs(3000)
-				.setPatience(100)
+				.setPatience(300)
 				.setNumBatches(10)
 				.setParallelizedStochasticGradientDescent(true)
 				.setLoss(ModelTraining.Loss.CrossEntropy)

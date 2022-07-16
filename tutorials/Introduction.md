@@ -8,6 +8,8 @@ This tutorial covers the following topics:
 3. [Training](#training)
 4. [Testing](#testing)
 
+Code snippets are organized into an [Introduction.java](JGNN/src/examples/Introduction.java) file.
+
 # Dataset loading
 First, we load the dataset (it is automatically downloaded) and use the `IdConverter` class
 to transform its labels and features into matrices. To save memory space, the library implicitly
@@ -22,8 +24,8 @@ can match anything), for example during matrix addition or multiplication.
 ```java
 Dataset dataset = new Datasets.Lymphography();
 IdConverter nodeIdConverter = dataset.nodes();
-Matrix labels = nodeIdConverter.oneHot(dataset.labels()).setDimensionName("samples", "features");
-Matrix features = nodeIdConverter.oneHot(dataset.features()).setDimensionName("samples", "classes");
+Matrix labels = nodeIdConverter.oneHot(dataset.getLabels()).setDimensionName("samples", "classes");
+Matrix features = nodeIdConverter.oneHot(dataset.getFeatures()).setDimensionName("samples", "features");
 ```
 
 :bulb: To maintain the same naming convention between traditional and graph neural networks, 
@@ -36,32 +38,35 @@ store up to integers, but this conversion allows us to handle large sparce matri
 same interfaces.
 
 ```java
-long numFeatures = features.getRows();
-long numClasses = labels.getRows();
+long numFeatures = features.getCols();
+long numClasses = labels.getCols();
 ```
 
-We define a model using the library's symbolic definition builder class `ModelBuilder`. This
-has four important methods: `var` to define model input variables, `config` to define
+We define a model using the library's symbolic builder class. This
+has four important methods: a) `var` to define model input variables, b) `config` to define
 hyperparameters used for matrix and vector construction,
-`operation` to define symbolic operations and learnable parameters,
-and `out` to define output variables.
-These operations return the builder's instance, so that models can be incrementally constructed.
-For our example, we explicitly define a logistic regression model that performs a linear transformation
-without bias of inputs *x* using a learnable transformation matrix *w1* and parameter *b1* 
-and obtaining outputs *yhat*. Notably, matrices and vectors are directly defined during sumbolic
-definition via hyperparameter configurations.
+c) `operation` to define symbolic operations and learnable parameters,
+and d) `out` to define output variables. Later on, we can just retrieve the defined model at anytime
+using the builders `getModel()` method.
+Most operations return the builder's instance, so that models can be incrementally constructed.
+For our example, we explicitly define a two-layer perceptron.
+Notably, learnable matrices and vectors can be defined symoblically (it is possible to 
+manual define them too, but this way is faster). The number of
+hidden dimensions (64 right now) could also have been set as a hyperparameter. `@` corresponds
+to matrix multiplication.
 
 ```java
 ModelBuilder modelBuilder = new ModelBuilder()
 	.config("features", numFeatures)
 	.config("classes", numClasses)
+	.config("regularize", 1.E-5)
 	.var("x")
-	.operation("h = relu(x@matrix(features, 64)+vector(64))")
+	.operation("h = relu(x@matrix(features, 64, regularize)+vector(64))")
 	.operation("yhat = sigmoid(h@matrix(64, classes)+vector(classes))")
 	.out("yhat");
 ```
 
-To help check the architecture, you can expert its execution graph in *.dot* format
+To help check the architecture, you can extract its execution graph in *.dot* format
 by writting:
 
 ```java
@@ -74,68 +79,69 @@ of the execution graph:
 ![Example execution graph](graphviz.png)
 
 # Training
-To train the model, we first set up a training-test split of node identifiers. We also use the `WrapCols`
-subclass and the `Matrix.accessColumns` methods to access the features and labels of specifically the
-training nodes without needing to re-allocate anything, i.e. the data split is lightweight.
+To train the model, we first set up a 50-25-25 training-validation-test split of data.
 
 ```java
 ArrayList<Long> nodeIds = dataset.nodes().getIds();
 Collections.shuffle(nodeIds);
-List<Long> trainIds = nodeIds.subList(nodeIds.size()/5, nodeIds.size());
-List<Long> testIds = nodeIds.subList(0, nodeIds.size()/5);
-Matrix trainFeatures = new WrapCols(features.accessColumns(trainIds));
-Matrix trainLabels = new WrapCols(labels.accessColumns(trainIds));
+List<Long> trainIds = nodeIds.subList(nodeIds.size()/2, nodeIds.size());
+List<Long> validationIds = nodeIds.subList(nodeIds.size()/4, nodeIds.size()/2);
+List<Long> testIds = nodeIds.subList(0, nodeIds.size()/2);
 ```
 
-We then create a new optimizer that performs gradient descent with learning rate 0.1 
-and L2 regularization of parameters with weight 0.001. We also set up a batch optimizer, which accumulates gradients and only updates them when its `BatchOptimizer.updateAll()` method is called.
+Before training the model, we initialize its parameters using the Xavier normalizer. 
+The library's implementation
+automatically determines non-linearity weights. For example, you don't need to determine 
+different types of normalization for each neural network layer. Initialization can be
+achieved per:
 
 ```java
-Optimizer optimizer = new Regularization(new GradientDescent(0.1), 0.001);
-BatchOptimizer batchOptimizer = new BatchOptimizer(batchOptimizer);
+Model model = new XavierNormal().apply(modelBuilder.getModel());
 ```
 
-:bulb: **Always** use batch optimizers for complicated models, as more than one gradient paths may arrive
-at trainable variables and they need to perform simultaneous updates.
+We finally create an Adam optimizer with learning rate 0.01 and
+use this to define an experiment setting that runs parallelized
+stochastic gradient descent (remember that this is still native Java!)
+on a cross-entropy loss.
+We set training to use a patience strategy for early stopping if
+validation loss has not decreased for 100 epochs. Defining this 
+training strategy can done per:
 
-:bulb: Instead of adding a universal regularizer, you can instead set a regularization constant
-to model variables by inserting it just after their name in the `param` method. This forces
-L2 regularization to be applied during all gradient calculations.
-
-
-We finally perform training over a total of 150 epochs. For each of these, we obtain the model held by the model builder
-and call its `Model.trainSampleDifference` method to train it with a provided optimizer, list of of inputs variable
-values and list of output variable values (these lists comprise only one matrix each). This method returns the original
-predictions as a list. Batching and parallelized batch training are covered in [introduction to models and builders](Models.md).
-
-:bulb: The order of input and output list elements, if more than one need to be provided or retrieved, corresponds to
-their definition order in the model builder.
 
 ```java
-Model model = modelBuilder.getModel();
-for(int epoch=0;epoch<150;epoch++) {
-	Tensor yhat = model.trainSampleDifference(batchOptimizer, Arrays.asList(features), Arrays.asList(labels)).get(0);
-	Tensor errors = yhat.subtract(labels);
-	batchOptimizer.updateAll();
-	print("Epoch "+epoch+" error "+errors.abs().sum()/trainIds.size())
-}
+Optimizer optimizer = new Adam(0.1);
+
+ModelTraining trainer = new ModelTraining()
+	.setOptimizer(optimizer)
+	.setEpochs(3000)
+	.setPatience(100)
+	.setNumBatches(10)
+	.setParallelizedStochasticGradientDescent(true)
+	.setLoss(ModelTraining.Loss.CrossEntropy);
 ```
+
+Finally, the model can be easily trained per:
+
+```java
+model = trainer.train(model, features, labels, trainIds, validationIds);
+```
+
+Real-world settings can further separate rows of testIds first, but we don't do this
+in this example for the sake of simplicity.
+
 
 # Testing
-We finally report training accuracy on the test set. We demonstrate how single-node (single-sample) predictions can be
-made and measure the accuracy of those. To do this, we use `Matrix.accessCol` to obtain specific matrix columns from node
-features as tensors and `Tensor.asColumn` to convert the obtained tensors into a column representation. Column representations
-are matrices and hence can pass through the model's defined matrix multiplication. We finally use `argmax` to convert one-hot 
-prediction encodings to label ids. Overall, this sample code achieves 82.8% accuracy (results may vary a little between experiment
-runs due to random splitting).
+We finally report training accuracy on the test set. We demonstrate how single-sample predictions can be
+made and measure the accuracy of those. To do this, we use `Matrix.accessRow` to obtain specific matrix rows from node features as tensors and `Tensor.asRow` to convert the obtained tensors into a row representation. Row representations
+are matrices and hence can pass through the model's matrix multiplication. We finally use `argmax` to convert one-hot prediction encodings to label ids.
 
 ```java
 double acc = 0;
-for(Integer node : testIds) {
-	Matrix nodeFeatures = features.accessCol(node).asColumn();
-	Matrix nodeLabels = labels.accessCol(node).asColumn();
-	Tensor output = modelBuilder.getModel().predict(nodeFeatures).get(0);
+for(Long node : testIds) {
+	Matrix nodeFeatures = features.accessRow(node).asRow();
+	Matrix nodeLabels = labels.accessRow(node).asRow();
+	Tensor output = model.predict(nodeFeatures).get(0);
 	acc += (output.argmax()==nodeLabels.argmax()?1:0);
 }
-System.out.println("Accuracy "+acc/testIds.size());
+System.out.println("Acc\t "+acc/testIds.size());
 ```
