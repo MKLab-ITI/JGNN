@@ -8,7 +8,7 @@ This tutorial covers the following topics:
 3. [Training](#training)
 4. [Testing](#testing)
 
-Code snippets are organized into an [Introduction.java](JGNN/src/examples/Introduction.java) file.
+Code snippets are organized into an [Introduction.java](../JGNN/src/examples/Introduction.java) file.
 
 # Dataset loading
 First, we load the dataset (it is automatically downloaded) and use the `IdConverter` class
@@ -49,7 +49,8 @@ c) `operation` to define symbolic operations and learnable parameters,
 and d) `out` to define output variables. Later on, we can just retrieve the defined model at anytime
 using the builders `getModel()` method.
 Most operations return the builder's instance, so that models can be incrementally constructed.
-For our example, we explicitly define a two-layer perceptron.
+For our example, we explicitly define a two-layer perceptron, with a relu hidden layer and 
+a column-wide softmax activation.
 Notably, learnable matrices and vectors can be defined symoblically (it is possible to 
 manual define them too, but this way is faster). The number of
 hidden dimensions (64 right now) could also have been set as a hyperparameter. `@` corresponds
@@ -62,7 +63,7 @@ ModelBuilder modelBuilder = new ModelBuilder()
 	.config("regularize", 1.E-5)
 	.var("x")
 	.operation("h = relu(x@matrix(features, 64, regularize)+vector(64))")
-	.operation("yhat = sigmoid(h@matrix(64, classes)+vector(classes))")
+	.operation("yhat = softmax(h@matrix(64, classes)+vector(classes), row)")
 	.out("yhat");
 ```
 
@@ -100,9 +101,7 @@ Model model = new XavierNormal().apply(modelBuilder.getModel());
 ```
 
 We finally create an Adam optimizer with learning rate 0.01 and
-use this to define an experiment setting that runs parallelized
-stochastic gradient descent (remember that this is still native Java!)
-on a cross-entropy loss.
+use this to define an experiment setting on a cross-entropy loss.
 We set training to use a patience strategy for early stopping if
 validation loss has not decreased for 100 epochs. Defining this 
 training strategy can done per:
@@ -115,8 +114,6 @@ ModelTraining trainer = new ModelTraining()
 	.setOptimizer(optimizer)
 	.setEpochs(3000)
 	.setPatience(100)
-	.setNumBatches(10)
-	.setParallelizedStochasticGradientDescent(true)
 	.setLoss(ModelTraining.Loss.CrossEntropy);
 ```
 

@@ -321,9 +321,9 @@ public class ModelBuilder {
 			boolean mode = false;
 			if(splt.length>4) {
 				String modeText = splt[4].trim();
-				if(modeText.equals("row"))
+				if(modeText.equals("col"))
 					mode = false;
-				else if(modeText.equals("col"))
+				else if(modeText.equals("row"))
 					mode = true;
 				else
 					throw new RuntimeException("Invalid argument "+modeText+" to softmax");

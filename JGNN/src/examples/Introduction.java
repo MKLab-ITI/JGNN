@@ -33,7 +33,7 @@ public class Introduction {
 				.config("regularize", 1.E-5)
 				.var("x")
 				.operation("h = relu(x@matrix(features, 64, regularize)+vector(64))")
-				.operation("yhat = sigmoid(h@matrix(64, classes)+vector(classes))")
+				.operation("yhat = softmax(h@matrix(64, classes)+vector(classes), row)")
 				.out("yhat");
 		
 		System.out.println(modelBuilder.getExecutionGraphDot());
