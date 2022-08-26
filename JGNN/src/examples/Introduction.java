@@ -4,16 +4,18 @@ import java.util.List;
 import java.util.Random;
 
 import mklab.JGNN.core.Matrix;
-import mklab.JGNN.core.Model;
-import mklab.JGNN.core.ModelBuilder;
-import mklab.JGNN.core.ModelTraining;
-import mklab.JGNN.core.Optimizer;
+import mklab.JGNN.nn.Model;
+import mklab.JGNN.nn.ModelBuilder;
+import mklab.JGNN.nn.ModelTraining;
+import mklab.JGNN.nn.Optimizer;
+import mklab.JGNN.core.Slice;
 import mklab.JGNN.core.Tensor;
+import mklab.JGNN.core.loss.BinaryCrossEntropy;
 import mklab.JGNN.core.matrix.WrapRows;
 import mklab.JGNN.data.IdConverter;
 import mklab.JGNN.data.datasets.Dataset;
 import mklab.JGNN.data.datasets.Datasets;
-import mklab.JGNN.initializers.XavierNormal;
+import mklab.JGNN.nn.initializers.XavierNormal;
 import mklab.JGNN.nn.optimizers.Adam;
 
 public class Introduction {
@@ -26,6 +28,15 @@ public class Introduction {
 
 		long numFeatures = features.getCols();
 		long numClasses = labels.getCols();
+
+		Slice nodeIds = dataset.nodes().getIds().shuffle();
+		ModelTraining trainer = new ModelTraining()
+			.setOptimizer(new Adam(0.1))
+			.setEpochs(3000)
+			.setPatience(100)
+			.setNumBatches(10)
+			.setParallelizedStochasticGradientDescent(true)
+			.setLoss(new BinaryCrossEntropy());
 		
 		ModelBuilder modelBuilder = new ModelBuilder()
 				.config("features", numFeatures)
@@ -37,35 +48,21 @@ public class Introduction {
 				.out("yhat");
 		
 		System.out.println(modelBuilder.getExecutionGraphDot());
-		
-		ArrayList<Long> nodeIds = dataset.nodes().getIds();
-		Collections.shuffle(nodeIds);
-		List<Long> trainIds = nodeIds.subList(nodeIds.size()/2, nodeIds.size());
-		List<Long> validationIds = nodeIds.subList(nodeIds.size()/4, nodeIds.size()/2);
-		List<Long> testIds = nodeIds.subList(0, nodeIds.size()/4);
-		
-		Model model = new XavierNormal().apply(modelBuilder.getModel());
-		
-		Optimizer optimizer = new Adam(0.1);
-
-		ModelTraining trainer = new ModelTraining()
-			.setOptimizer(optimizer)
-			.setEpochs(3000)
-			.setPatience(100)
-			.setNumBatches(10)
-			.setParallelizedStochasticGradientDescent(true)
-			.setLoss(ModelTraining.Loss.CrossEntropy);
-		
-		model = trainer.train(model, features, labels, trainIds, validationIds);
+		Model model = modelBuilder
+				.getModel()
+				.init(new XavierNormal())
+				.train(trainer, features, labels, 
+						nodeIds.range(0, 0.5), 
+						nodeIds.range(0.5, 0.75));
 		
 		double acc = 0;
-		for(Long node : testIds) {
+		for(Long node : nodeIds.range(0.75, 1)) {
 			Matrix nodeFeatures = features.accessRow(node).asRow();
 			Matrix nodeLabels = labels.accessRow(node).asRow();
 			Tensor output = model.predict(nodeFeatures).get(0);
 			acc += (output.argmax()==nodeLabels.argmax()?1:0);
 		}
-		System.out.println("Acc\t "+acc/testIds.size());
+		System.out.println("Acc\t "+acc/nodeIds.range(0.75, 1).size());
 		
 	}
 

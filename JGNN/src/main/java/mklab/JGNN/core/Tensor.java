@@ -358,6 +358,47 @@ public abstract class Tensor implements Iterable<Long> {
 		return res;
 	}
 	/**
+	 * Computes the logarithm of tensor elements.
+	 * @return A new Tensor that stores the outcome of finding the logarithm of the absolute of each element.
+	 */
+	public final Tensor log() {
+		Tensor res = zeroCopy();
+		for(long i : getNonZeroElements())
+			res.put(i, Math.log(Math.abs(get(i))));
+		return res;
+	}
+	/**
+	 * Performs in-memory set of each element to the logarithm of its absolute value.
+	 * @return <code>this</code> Tensor instance.
+	 */
+	public final Tensor selfLog() {
+		Tensor res = this;
+		for(long i : getNonZeroElements())
+			res.put(i, Math.log(Math.abs(get(i))));
+		return res;
+	}
+
+	/**
+	 * Computes the negative of tensor elements.
+	 * @return A new Tensor that stores the outcome of finding the negative of each element.
+	 */
+	public final Tensor negative() {
+		Tensor res = zeroCopy();
+		for(long i : getNonZeroElements())
+			res.put(i, -get(i));
+		return res;
+	}
+	/**
+	 * Performs in-memory set of each element to the negative of itself.
+	 * @return <code>this</code> Tensor instance.
+	 */
+	public final Tensor selfNegative() {
+		Tensor res = this;
+		for(long i : getNonZeroElements())
+			res.put(i, -get(i));
+		return res;
+	}
+	/**
 	 * Computes the absolute value of tensor elements.
 	 * @return A new Tensor that stores the outcome of finding the absolute value of each element.
 	 */

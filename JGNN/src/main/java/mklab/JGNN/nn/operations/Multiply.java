@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import mklab.JGNN.core.Matrix;
-import mklab.JGNN.core.NNOperation;
+import mklab.JGNN.nn.NNOperation;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.ColumnRepetition;
 import mklab.JGNN.nn.pooling.Sum;

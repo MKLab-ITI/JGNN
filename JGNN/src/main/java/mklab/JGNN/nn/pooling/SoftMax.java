@@ -3,7 +3,7 @@ package mklab.JGNN.nn.pooling;
 import java.util.List;
 
 import mklab.JGNN.core.Matrix;
-import mklab.JGNN.core.NNOperation;
+import mklab.JGNN.nn.NNOperation;
 import mklab.JGNN.core.Tensor;
 
 public class SoftMax extends NNOperation {
@@ -17,6 +17,59 @@ public class SoftMax extends NNOperation {
 	}
 	@Override
 	protected Tensor forward(List<Tensor> inputs) {
+		if(inputs.size()!=1)
+			throw new IllegalArgumentException();
+		/*if(colMode && inputs.get(0) instanceof Matrix) {
+			Matrix matrix = inputs.get(0).cast(Matrix.class);
+			Matrix ret = matrix.zeroCopy().cast(Matrix.class);
+			for(long row=0;row<ret.getRows();row++) {
+				double max = Double.NEGATIVE_INFINITY;
+				for(long col=0;col<matrix.getCols();col++) 
+					max = Math.max(max, matrix.get(row, col));
+				double sum = 0;
+				for(long col=0;col<matrix.getCols();col++) {
+					double element = Math.exp(matrix.get(row, col)-max);
+					ret.put(row, col, element);
+					sum += element;
+				}
+				if(sum!=0)
+					for(long col=0;col<ret.getCols();col++)
+						ret.put(row, col, ret.get(row, col)/sum);
+			}
+			return ret;
+		}
+		else if(!colMode && inputs.get(0) instanceof Matrix) {
+			Matrix matrix = inputs.get(0).cast(Matrix.class);
+			Matrix ret = (Matrix)inputs.get(0).zeroCopy();
+			for(long col=0;col<ret.getCols();col++) {
+				double max = Double.NEGATIVE_INFINITY;
+				for(long row=0;row<ret.getRows();row++)
+					max = Math.max(max, matrix.get(row, col));
+				double sum = 0;
+				for(long row=0;row<ret.getRows();row++) {
+					double element = Math.exp(matrix.get(row, col)-max);
+					ret.put(row, col, element);
+					sum += element;
+				}
+				if(sum!=0)
+					for(long row=0;row<ret.getRows();row++)
+						ret.put(row, col, ret.get(row, col)/sum);
+			}
+			return ret;
+		}
+		else {
+			Tensor ret = inputs.get(0).zeroCopy();
+			double max = Double.NEGATIVE_INFINITY;
+			for(long i=0;i<ret.size();i++) 
+				max = Math.max(max, ret.get(i));
+			double sum = 0;
+			for(long i=0;i<ret.size();i++) {
+				double element = Math.exp(inputs.get(0).get(i)-max);
+				ret.put(i, element);
+				sum += element;
+			}
+			return ret.selfMultiply(1./sum);
+		}*/
 		if(inputs.size()!=1)
 			throw new IllegalArgumentException();
 		if(colMode && inputs.get(0) instanceof Matrix) {

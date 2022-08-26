@@ -3,11 +3,14 @@ package mklab.JGNN.data;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
 import mklab.JGNN.core.Matrix;
+import mklab.JGNN.core.Slice;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.SparseMatrix;
 import mklab.JGNN.core.tensor.DenseTensor;
+import mklab.JGNN.core.util.Range;
 import mklab.JGNN.nn.operations.Concat;
 
 /**
@@ -19,6 +22,7 @@ public class IdConverter {
 	protected HashMap<Long, Object> inverse = new HashMap<Long, Object>();
 	protected String nodeDimensionName;
 	protected String featureDimensionName;
+	private Slice idSlice = null;
 	/**
 	 * Instantiates an empty converter to be filled with {@link #getOrCreateId(Object)}.
 	 */
@@ -56,6 +60,7 @@ public class IdConverter {
 		if(ret==null) {
 			ids.put(object, ret = (long)ids.size());
 			inverse.put(ret, object);
+			idSlice = null;
 		}
 		return ret;
 	}
@@ -93,11 +98,26 @@ public class IdConverter {
 		return ids.containsKey(object);
 	}
 	/**
-	 * Returns a list of all registered identifiers.
-	 * @return A list of <code>long</code> identifiers.
+	 * Returns a slice of all registered identifiers.
+	 * The slice is persistent across multiple calls to this method, but is 
+	 * instantiated anew after {@link #getOrCreateId(Object)} registers a new
+	 * object (but not if it retrieves an existing object). 
+	 * 
+	 * @return A {@link Slice}.
 	 */
-	public ArrayList<Long> getIds() {
-		return new ArrayList<Long>(ids.values());
+	public Slice getIds() {
+		if(idSlice==null)
+			idSlice = new Slice(new Range(0, ids.size()));
+		return idSlice;
+	}
+	public Matrix oneHotFromBinary(ArrayList<HashMap<Long, String>> nodeFeatures) {
+		IdConverter encoder = new IdConverter();
+		Matrix features = new SparseMatrix(size(), nodeFeatures.size());
+		for(int feature=0;feature<nodeFeatures.size();feature++)
+			for(Entry<Long, String> values : nodeFeatures.get(feature).entrySet()) {
+				features.put(values.getKey(), feature, Double.parseDouble(values.getValue()));
+			}
+		return features;
 	}
 	public Matrix oneHot(ArrayList<HashMap<Long, String>> nodeFeatures) {
 		Matrix features = null;
@@ -112,14 +132,14 @@ public class IdConverter {
 		for(String label : nodeLabels.values())
 			if(label!=null)
 				encoder.getOrCreateId(label);
-		Matrix encoding = new SparseMatrix(nodeLabels.size(), encoder.size());
+		Matrix encoding = new SparseMatrix(size(), encoder.size());
 		for(long i=0;i<size();i++)
 			if(nodeLabels.get(i)!=null)
 				encoding.put(i, encoder.getId(nodeLabels.get(i)), 1);
 		return encoding.setDimensionName(nodeDimensionName, featureDimensionName);
 	}
 	public Matrix oneHot(Tensor nodeLabels) {
-		Matrix encoding = new SparseMatrix(nodeLabels.size(), 2);
+		Matrix encoding = new SparseMatrix(size(), 2);
 		for(long i=0;i<size();i++)
 			encoding.put(i, (long)nodeLabels.get(i), 1);
 		return encoding.setDimensionName(nodeDimensionName, featureDimensionName);

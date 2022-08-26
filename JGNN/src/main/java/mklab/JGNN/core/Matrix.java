@@ -584,6 +584,17 @@ public abstract class Matrix extends Tensor {
 		return "[\n"+ret+"]";
 	}
 	
+
+	public String toNonZeroString() {
+		String ret = "";
+		for(Entry<Long, Long> element : getNonZeroEntries()) {
+			double value = get(element.getKey(), element.getValue());
+			if(value!=0)
+				ret += element.getKey()+", "+element.getValue()+": "+value+"\n";
+		}
+		return ret;
+	}
+	
 	/*public final static Matrix fromColumns(List<Tensor> tensors) {
 		Matrix ret = new SparseMatrix(tensors.get(0).size(), tensors.size());
 		for(int col=0;col<tensors.size();col++) 

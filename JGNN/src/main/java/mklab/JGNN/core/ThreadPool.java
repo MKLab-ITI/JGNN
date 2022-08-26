@@ -17,7 +17,6 @@ public class ThreadPool {
 	private HashSet<Integer> usedIds = new HashSet<Integer>();
 	private ThreadPoolExecutor executor;
 	private int maxThreads;
-	private int lastThreadId = 0;
 
 	private static ThreadPool instance = new ThreadPool(Runtime.getRuntime().availableProcessors());
 	public static ThreadPool getInstance() {

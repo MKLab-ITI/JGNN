@@ -1,6 +1,6 @@
 package mklab.JGNN.nn.optimizers;
 
-import mklab.JGNN.core.Optimizer;
+import mklab.JGNN.nn.Optimizer;
 import mklab.JGNN.core.Tensor;
 
 /**

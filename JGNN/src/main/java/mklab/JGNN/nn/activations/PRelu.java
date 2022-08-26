@@ -4,10 +4,9 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import mklab.JGNN.core.Matrix;
-import mklab.JGNN.core.NNOperation;
+import mklab.JGNN.nn.NNOperation;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.ColumnRepetition;
-import mklab.JGNN.nn.inputs.Constant;
 
 public class PRelu extends NNOperation {
 	@Override

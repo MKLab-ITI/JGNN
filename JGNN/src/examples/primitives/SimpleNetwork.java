@@ -3,8 +3,9 @@ package primitives;
 import java.util.Arrays;
 
 import mklab.JGNN.core.Matrix;
-import mklab.JGNN.core.ModelBuilder;
+import mklab.JGNN.nn.ModelBuilder;
 import mklab.JGNN.core.Tensor;
+import mklab.JGNN.core.loss.BinaryCrossEntropy;
 import mklab.JGNN.core.matrix.DenseMatrix;
 import mklab.JGNN.core.tensor.DenseTensor;
 import mklab.JGNN.nn.optimizers.Adam;
@@ -32,7 +33,7 @@ public class SimpleNetwork {
 		// when no output is passed to training, the output is considered to be an error
 		for(int i=0;i<10000;i++) {
 			for(int j=0;j<10;j++)
-				modelBuilder.getModel().trainL2(optimizer, 
+				modelBuilder.getModel().train(new BinaryCrossEntropy(), optimizer, 
 						Arrays.asList(Matrix.fromDouble(x1.get(j))), 
 						Arrays.asList(Matrix.fromDouble(y.get(j))));
 			optimizer.updateAll();

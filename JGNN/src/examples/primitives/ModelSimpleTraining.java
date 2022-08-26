@@ -2,8 +2,8 @@ package primitives;
 
 import java.util.Arrays;
 
-import mklab.JGNN.core.ModelBuilder;
-import mklab.JGNN.core.Optimizer;
+import mklab.JGNN.nn.ModelBuilder;
+import mklab.JGNN.nn.Optimizer;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.tensor.DenseTensor;
 import mklab.JGNN.nn.optimizers.Adam;

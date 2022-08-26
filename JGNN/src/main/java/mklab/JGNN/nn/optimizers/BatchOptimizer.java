@@ -3,7 +3,7 @@ package mklab.JGNN.nn.optimizers;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import mklab.JGNN.core.Optimizer;
+import mklab.JGNN.nn.Optimizer;
 import mklab.JGNN.core.Tensor;
 
 /**

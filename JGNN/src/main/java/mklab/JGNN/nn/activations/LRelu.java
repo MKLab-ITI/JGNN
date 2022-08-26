@@ -2,9 +2,10 @@ package mklab.JGNN.nn.activations;
 
 import java.util.List;
 
-import mklab.JGNN.core.NNOperation;
 import mklab.JGNN.core.Tensor;
+import mklab.JGNN.nn.NNOperation;
 import mklab.JGNN.nn.inputs.Constant;
+
 
 /**
  * Implements a {@link NNOperation} that performs a leaky relu operation, where the first argument is a tensor on which

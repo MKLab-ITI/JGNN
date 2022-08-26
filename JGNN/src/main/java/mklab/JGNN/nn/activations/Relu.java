@@ -2,7 +2,7 @@ package mklab.JGNN.nn.activations;
 
 import java.util.List;
 
-import mklab.JGNN.core.NNOperation;
+import mklab.JGNN.nn.NNOperation;
 import mklab.JGNN.core.Tensor;
 
 /**

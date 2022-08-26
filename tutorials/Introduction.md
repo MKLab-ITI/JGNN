@@ -58,53 +58,46 @@ to matrix multiplication.
 
 ```java
 ModelBuilder modelBuilder = new ModelBuilder()
-	.config("features", numFeatures)
-	.config("classes", numClasses)
-	.config("regularize", 1.E-5)
+	.config("feats", numFeatures)
+	.config("labels", numClasses)
+	.config("reg", 1.E-5)
 	.var("x")
-	.operation("h = relu(x@matrix(features, 64, regularize)+vector(64))")
-	.operation("yhat = softmax(h@matrix(64, classes)+vector(classes), row)")
+	.operation("h = relu(x@matrix(feats, 64, reg)+vector(64))")
+	.operation("yhat = softmax(h@matrix(64, labels)+vector(labels), row)")
 	.out("yhat");
 ```
 
-To help check the architecture, you can extract its execution graph in *.dot* format
+To check up on the architecture, you can extract its execution graph in *.dot* format
 by writting:
 
 ```java
 System.out.println(modelBuilder.getExecutionGraphDot());
 ```
 
-For example, copying-and-pasting the graph description to [GraphvizOnline](https://dreampuf.github.io/GraphvizOnline/) creates the following visualization
+For example, copying-and-pasting the outputted description to [GraphvizOnline](https://dreampuf.github.io/GraphvizOnline/) creates the following visualization
 of the execution graph:
 
 ![Example execution graph](graphviz.png)
 
 # Training
-To train the model, we first set up a 50-25-25 training-validation-test split of data.
+To train the model, we first set up 50-25-25 training-validation-test data slices.
+These basically handle shuffled sample identifiers. You can use integers instead of
+doubles in the `range` method to reference a fixed position in slices instead of
+a fraction of total size.
 
 ```java
-ArrayList<Long> nodeIds = dataset.nodes().getIds();
-Collections.shuffle(nodeIds);
-List<Long> trainIds = nodeIds.subList(nodeIds.size()/2, nodeIds.size());
-List<Long> validationIds = nodeIds.subList(nodeIds.size()/4, nodeIds.size()/2);
-List<Long> testIds = nodeIds.subList(0, nodeIds.size()/2);
+Slice samples = dataset.nodes().getIds().shuffle();
+Slice train = samples.range(0, 0.5);
+Slice valid = samples.range(0.5, 0.75);
+Slice test = samples.range(0.75, 0.25);
 ```
 
-Before training the model, we initialize its parameters using the Xavier normalizer. 
-The library's implementation
-automatically determines non-linearity weights. For example, you don't need to determine 
-different types of normalization for each neural network layer. Initialization can be
-achieved per:
-
-```java
-Model model = new XavierNormal().apply(modelBuilder.getModel());
-```
-
-We finally create an Adam optimizer with learning rate 0.01 and
-use this to define an experiment setting on a cross-entropy loss.
+We also create a treaning strategy that makes use of an Adam optimizer 
+with learning rate 0.01 and defines an experiment setting on a minimizing the 
+categorical cross-entropy loss.
 We set training to use a patience strategy for early stopping if
 validation loss has not decreased for 100 epochs. Defining this 
-training strategy can done per:
+whole training strategy can be achieved per:
 
 
 ```java
@@ -112,18 +105,24 @@ Optimizer optimizer = new Adam(0.1);
 
 ModelTraining trainer = new ModelTraining()
 	.setOptimizer(optimizer)
+	.setLoss(ModelTraining.Loss.CrossEntropy)
 	.setEpochs(3000)
-	.setPatience(100)
-	.setLoss(ModelTraining.Loss.CrossEntropy);
+	.setPatience(100);
 ```
 
-Finally, the model can be easily trained per:
+Finally, we train the model under this strategy.
+This consists of initializing its parameters and calling the optimizer.
+The library's implementation of initialization automatically determines non-linearity 
+for parameters and you don't need to determine different types of normalization for each 
+neural layer. Here, we create a `new XavierNormal()` initializer and train the model:
 
 ```java
-model = trainer.train(model, features, labels, trainIds, validationIds);
+model
+	.init(new XavierNormal())
+	.train(optimizer, features, labels, train, valid);
 ```
 
-Real-world settings can further separate rows of testIds first, but we don't do this
+Real-world settings can further separate rows of the test set first, but we don't do this
 in this example for the sake of simplicity.
 
 
@@ -134,7 +133,7 @@ are matrices and hence can pass through the model's matrix multiplication. We fi
 
 ```java
 double acc = 0;
-for(Long node : testIds) {
+for(Long node : test) {
 	Matrix nodeFeatures = features.accessRow(node).asRow();
 	Matrix nodeLabels = labels.accessRow(node).asRow();
 	Tensor output = model.predict(nodeFeatures).get(0);

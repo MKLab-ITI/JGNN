@@ -2,10 +2,9 @@ package mklab.JGNN.nn.activations;
 
 import java.util.List;
 
-import mklab.JGNN.core.NNOperation;
+import mklab.JGNN.nn.NNOperation;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.util.Loss;
-import mklab.JGNN.nn.inputs.Constant;
 
 /**
  * Implements a {@link NNOperation} that performs a sigmoid transformation of its single input.

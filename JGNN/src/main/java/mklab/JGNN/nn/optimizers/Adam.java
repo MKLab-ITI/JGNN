@@ -2,7 +2,7 @@ package mklab.JGNN.nn.optimizers;
 
 import java.util.HashMap;
 
-import mklab.JGNN.core.Optimizer;
+import mklab.JGNN.nn.Optimizer;
 import mklab.JGNN.core.Tensor;
 
 /**
@@ -74,23 +74,26 @@ public class Adam implements Optimizer {
 	@Override
 	public void update(Tensor value, Tensor gradient) {
 		synchronized(value) {
-			if(!m.containsKey(value))
-				m.put(value, value.zeroCopy());
-			if(!v.containsKey(value))
-				v.put(value, value.zeroCopy());
+			Tensor mValue = m.get(value);
+			Tensor vValue = v.get(value);
+			if(mValue==null) {
+				m.put(value, mValue=value.zeroCopy());
+				v.put(value, vValue=value.zeroCopy());
+			}
 			//Tensor val = value.copy().setToNormalized();
 			if(NDmode)
 				gradient = gradient.subtract(value.multiply(gradient.dot(value)));
-			
 			b1t.put(value, b1t.getOrDefault(value, 1.)*b1);
 			b2t.put(value, b2t.getOrDefault(value, 1.)*b2);
 			
-			m.get(value).selfMultiply(b1).selfAdd(gradient.multiply(1-b1));
-			v.get(value).selfMultiply(b2).selfAdd(gradient.multiply(gradient).selfMultiply(1-b2));
+			mValue.selfMultiply(b1).selfAdd(gradient.multiply(1-b1));
+			vValue.selfMultiply(b2).selfAdd(gradient.multiply(gradient).selfMultiply(1-b2));
 			
-			Tensor mHat = m.get(value).multiply(1./(1-b1t.get(value)));
-			Tensor vHat = m.get(value).multiply(1./(1-b2t.get(value)));
-			value.selfAdd(mHat.selfMultiply(-learningRate).selfMultiply(vHat.selfSqrt().selfAdd(espilon).selfInverse()));
+			Tensor mHat = mValue.multiply(1./(1-b1t.get(value)));
+			Tensor vHat = vValue.multiply(1./(1-b2t.get(value)));
+			value.selfAdd(mHat
+					.selfMultiply(-learningRate)
+					.selfMultiply(vHat.selfAdd(espilon).selfSqrt().selfInverse()));
 			if(NDmode)
 				value.setToNormalized();
 		}

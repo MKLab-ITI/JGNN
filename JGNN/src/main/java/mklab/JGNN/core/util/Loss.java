@@ -104,6 +104,24 @@ public interface Loss {
 		return -label/(output+1.E-12) + (1-label)/(1-output+1.E-12);
 	}
 	
+
+	/**
+	 * The derivative of the {@link #crossEntropyCategorical(double, double)} loss. To avoid producing invalid
+	 * values, an eps of 1.E-12 is used to constraint the cross entropy in the range [-12, 12], which results
+	 * to this derivative being constrained in the range [-1.E12, 1.E12].
+	 * @param output The output of a prediction task. Should lie in the range [0,1]
+	 * @param label The desired label of the prediction task. Should assume binary values 0 or 1
+	 * @return The cross entropy derivative's value.
+	 * @throws IllegalArgumentException If outputs out of the range [0,1] or labels are non-binary.
+	 */
+	public static double crossEntropyDerivativeCategorical(double output, double label) {
+		if(label!=0 && label!=1)
+			throw new IllegalArgumentException("Only binary labels are allowed for computing the cross entropy loss");
+		if(output<0 || output>1)
+			throw new IllegalArgumentException("The predicted output passed on to cross entropy should lie in the range [0,1]");
+		return -label/(output+1.E-12);
+	}
+	
 	/**
 	 * The derivative of <code>crossEntropy(sigmoid(x), label)</code> with respect to x. This function can avoid
 	 * using an eps and is hence more precise than the expression

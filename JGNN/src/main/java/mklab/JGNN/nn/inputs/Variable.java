@@ -1,7 +1,7 @@
 package mklab.JGNN.nn.inputs;
 
-import mklab.JGNN.core.NNOperation;
-import mklab.JGNN.core.Optimizer;
+import mklab.JGNN.nn.NNOperation;
+import mklab.JGNN.nn.Optimizer;
 import mklab.JGNN.core.Tensor;
 
 /**

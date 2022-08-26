@@ -83,7 +83,8 @@ public class Dataset {
 		for(int i=0;i<numFeatures;i++) {
 			HashMap<Long, String> feature = new HashMap<Long, String>();
 			for(Long node : nodeIds.getIds())
-				feature.put(node, getNodeFeatures(node).get(i));
+				if(getNodeFeatures(node)!=null)
+					feature.put(node, getNodeFeatures(node).get(i));
 			ret.add(feature);
 		}
 		return ret;
@@ -164,12 +165,15 @@ public class Dataset {
 				String[] splt = line.split(delimiter);
 				if(splt.length<2)
 					continue;
-				setLabel(nodeColumn==-1?"Node "+nodeIds.size():splt[nodeColumn], splt[labelColumn]);
+				if(labelColumn<0)
+					labelColumn = splt.length + labelColumn;
+				String nodeName = nodeColumn==-1?"Node "+nodeIds.size():splt[nodeColumn];
+				setLabel(nodeName, splt[labelColumn]);
 				ArrayList<String> features = new ArrayList<String>();
 				for(int i=0;i<splt.length;i++)
 					if(i!=nodeColumn && i!=labelColumn)
 						features.add(splt[i]);
-				setFeatures(nodeColumn==-1?"Node "+(nodeIds.size()-1):splt[nodeColumn], features);
+				setFeatures(nodeName, features);
 			}
 			labelReader.close();
 		}

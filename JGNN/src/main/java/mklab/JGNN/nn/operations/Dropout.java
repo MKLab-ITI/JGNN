@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import mklab.JGNN.core.Matrix;
-import mklab.JGNN.core.NNOperation;
+import mklab.JGNN.nn.NNOperation;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.ColumnRepetition;
 
@@ -34,10 +34,11 @@ public class Dropout extends NNOperation {
 			throw new IllegalArgumentException();
 		if(!enabled || value==0)
 			return inputs.get(0);
+		Tensor input = inputs.get(0);
 		Tensor ret = inputs.get(0).zeroCopy();
-		for(long pos : inputs.get(0).getNonZeroElements())
+		for(long pos : input.getNonZeroElements())
 			if(Math.random()<value)
-				ret.put(pos, value/value);
+				ret.put(pos, input.get(pos)/value);
 		return ret;
 	}
 
@@ -47,12 +48,17 @@ public class Dropout extends NNOperation {
 			return null;
 		if(!enabled)
 			return error;
-		Tensor ret = error.zeroCopy();
 		double value = inputs.get(1).toDouble();
+		Tensor ret = output.zeroCopy();
 		for(long pos : output.getNonZeroElements())
 			if(output.get(pos)!=0)
 				ret.put(pos, error.get(pos)*value);
 		return ret;
+	}
+	
+	@Override
+	public boolean isConstant() {
+		return getInputs().get(0).isConstant();
 	}
 	
 }

@@ -65,4 +65,8 @@ public class WrapRows extends Matrix {
 	public Iterator<Long> traverseNonZeroElements() {
 		return new Range(0, size());
 	}
+	@Override
+	public Tensor accessRow(long row) {
+		return rows.get((int) row);
+	}
 }

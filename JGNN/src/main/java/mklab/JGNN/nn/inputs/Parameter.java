@@ -2,8 +2,8 @@ package mklab.JGNN.nn.inputs;
 
 import java.util.List;
 
-import mklab.JGNN.core.NNOperation;
-import mklab.JGNN.core.Optimizer;
+import mklab.JGNN.nn.NNOperation;
+import mklab.JGNN.nn.Optimizer;
 import mklab.JGNN.core.Tensor;
 
 /**
@@ -46,7 +46,7 @@ public class Parameter extends NNOperation {
 	}
 	@Override
 	protected void trainParameters(Optimizer optimizer, Tensor error) {
-		//System.out.println(error.norm());
+		//System.out.println(data().lastOutput.norm() +" "+ error.norm());
 		if(regularization!=0)
 			error = error.add(tensor.multiply(regularization));
 		optimizer.update(tensor, error);

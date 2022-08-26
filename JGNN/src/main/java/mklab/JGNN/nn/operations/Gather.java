@@ -3,7 +3,7 @@ package mklab.JGNN.nn.operations;
 import java.util.List;
 
 import mklab.JGNN.core.Matrix;
-import mklab.JGNN.core.NNOperation;
+import mklab.JGNN.nn.NNOperation;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.DenseMatrix;
 

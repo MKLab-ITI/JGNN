@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import mklab.JGNN.core.Matrix;
-import mklab.JGNN.core.NNOperation;
+import mklab.JGNN.nn.NNOperation;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.ColumnRepetition;
 import mklab.JGNN.core.matrix.RowRepetition;
@@ -43,7 +43,9 @@ public class Add extends NNOperation {
 			return Tensor.fromDouble(val);
 		}
 		if(inputId==1 && input0 instanceof Matrix && !(input1 instanceof Matrix)) 
-			return new Sum(((Matrix)input0).getCols()==input1.size()).forward(Arrays.asList(error));
+			return new Sum(((Matrix)input0).getCols()==input1.size()).run(error);
+		if(inputId==0 && input1 instanceof Matrix && !(input0 instanceof Matrix)) 
+			return new Sum(((Matrix)input1).getRows()==input0.size()).run(error);
 		return error;
 	}
 }

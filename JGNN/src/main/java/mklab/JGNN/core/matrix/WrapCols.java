@@ -65,4 +65,9 @@ public class WrapCols extends Matrix {
 	public Iterator<Long> traverseNonZeroElements() {
 		return new Range(0, size());
 	}
+	
+	@Override
+	public Tensor accessCol(long col) {
+		return cols.get((int) col);
+	}
 }

@@ -67,8 +67,8 @@ public class Datasets {
 			String folderName = "downloads/citeseer";
 			if(!(new File(folderName)).exists())
 				downloadSource(folderName, "citeseer", "http://nrvis.com/download/data/labeled/citeseer.zip");
-			initStaticGraph(folderName+"/citeseer.edges", ",", 0, 1);
-			initNodeLabels(folderName+"/citeseer.node_labels", ",", 0, 1);
+			initStaticGraph(folderName+"/citeseer.cites", "\t", 0, 1);
+			initNodeLabels(folderName+"/citeseer.content", "\t", 0, -1);
 		}
 	}
 

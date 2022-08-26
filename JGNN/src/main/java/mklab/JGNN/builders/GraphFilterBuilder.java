@@ -1,9 +1,10 @@
 package mklab.JGNN.builders;
 
 import mklab.JGNN.core.Matrix;
-import mklab.JGNN.core.Model;
-import mklab.JGNN.core.ModelBuilder;
 import mklab.JGNN.core.Tensor;
+import mklab.JGNN.nn.Model;
+import mklab.JGNN.nn.ModelBuilder;
+
 
 public class GraphFilterBuilder extends ModelBuilder {
 	private int layer = 0;
@@ -21,7 +22,8 @@ public class GraphFilterBuilder extends ModelBuilder {
 		labelMatrix = "labels";
 		operation("sum0 = 0");
 	}
-	public GraphFilterBuilder addEmbeddingLayer(long dims) {
+	
+	public GraphFilterBuilder set(long dims) {
 		if(layer>0)
 			throw new RuntimeException("Can only add embedding layers befor adding normal layers");
 		operation("encoded = relu("+labelMatrix+" @ matrix("+labels.getCols()+","+dims+") + vector("+dims+"))");
@@ -29,7 +31,7 @@ public class GraphFilterBuilder extends ModelBuilder {
 		labelMatrix = "encoded";
 		return this;
 	}
-	public GraphFilterBuilder addLayer(double weight) {
+	public GraphFilterBuilder addShift(double weight) {
 		constant("h"+layer, Tensor.fromDouble(weight));
 		if(layer==0) {
 			operation("sum1 = sum0 + h0*"+labelMatrix);
@@ -44,17 +46,9 @@ public class GraphFilterBuilder extends ModelBuilder {
 	}
 	public Model getModel() {
 		if(super.getModel().getOutputs().size()==0) {
-			if(labelMatrix.equals("encoded")) {
-				operation("decoded = sum"+layer+" @ matrix("+embeddingDims+","+labels.getCols()+")");
-				this.var("nodes");
-				operation("result = softmax(decoded[nodes],row)");
-				this.out("result");
-			}
-			else {
-				this.var("nodes");
-				operation("result = sum"+layer+"[nodes]");
-				this.out("result");
-			}
+			this.var("nodes");
+			operation("result = sum"+layer+"[nodes]");
+			this.out("result");
 		}
 		return super.getModel();
 	}
