@@ -70,4 +70,12 @@ public class WrapCols extends Matrix {
 	public Tensor accessCol(long col) {
 		return cols.get((int) col);
 	}
+	@Override
+	public void release() {
+	}
+	@Override
+	public void persist() {
+		for(Tensor col : cols)
+			col.persist();
+	}
 }

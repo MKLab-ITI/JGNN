@@ -47,7 +47,6 @@ public class MLP {
 		
 		Slice nodeIds = dataset.nodes().getIds().shuffle(100);
 		
-		
 		long tic = System.currentTimeMillis();
 		Model model = new ModelTraining()
 				.setOptimizer(new GradientDescent(0.01))

@@ -3,6 +3,7 @@ package mklab.JGNN;
 import org.junit.Assert;
 import org.junit.Test;
 
+import mklab.JGNN.core.Memory;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.tensor.DenseTensor;
 

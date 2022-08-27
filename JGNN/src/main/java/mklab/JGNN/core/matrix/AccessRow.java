@@ -53,4 +53,12 @@ public class AccessRow extends Tensor {
 		return new Range(0, size());
 	}
 
+	@Override
+	public void release() {
+	}
+
+	@Override
+	public void persist() {
+	}
+
 }

@@ -109,5 +109,14 @@ public class TransposedMatrix extends Matrix {
 	public String describe() {
 		return matrix.getClass().getSimpleName()+" ("+getRows()+","+getCols()+")";
 	}
+
+	@Override
+	public void release() {
+	}
+
+	@Override
+	public void persist() {
+		matrix.persist();
+	}
 	
 }

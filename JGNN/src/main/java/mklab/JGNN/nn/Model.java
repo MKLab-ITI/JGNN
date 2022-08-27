@@ -8,6 +8,7 @@ import java.util.List;
 
 import mklab.JGNN.core.Loss;
 import mklab.JGNN.core.Matrix;
+import mklab.JGNN.core.Memory;
 import mklab.JGNN.core.Slice;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.tensor.RepeatTensor;
@@ -231,12 +232,18 @@ public class Model {
 		if(desiredOutputs.size() != this.outputs.size())
 			throw new IllegalArgumentException("Incompatible number of outputs: "+desiredOutputs.size()+" given but "+this.outputs.size()+" expected");
 		setTraining(true);
-		ArrayList<Tensor> outputs = predict(inputs);
-		for(int i=0;i<outputs.size();i++) {
-			this.outputs.get(i).forceBackpropagate(optimizer, 
-					loss.derivative(outputs.get(i), desiredOutputs.get(i)));
-		}
-		setTraining(false);
+		Memory.scope().enter();
+			ArrayList<Tensor> outputs = predict(inputs);
+			for(int i=0;i<outputs.size();i++) 
+				outputs.get(i).persist();
+		Memory.scope().exit();
+		Memory.scope().enter();
+			for(int i=0;i<outputs.size();i++) {
+				this.outputs.get(i).forceBackpropagate(optimizer, 
+						loss.derivative(outputs.get(i), desiredOutputs.get(i)));
+			}
+			setTraining(false);
+		Memory.scope().exit();
 		return outputs;
 	}
 	

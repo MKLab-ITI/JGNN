@@ -57,4 +57,12 @@ public class SparseMatrix extends Matrix {
 			ret.add(new AbstractMap.SimpleEntry<Long, Long>(i % getRows(), i/getRows()));
 		return ret;
 	}
+	@Override
+	public void release() {
+		tensor.release();
+	}
+	@Override
+	public void persist() {
+		tensor.persist();
+	}
 }

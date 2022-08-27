@@ -56,5 +56,12 @@ public class RowRepetition extends Matrix {
 			}
 		};
 	}
+	@Override
+	public void release() {
+	}
+	@Override
+	public void persist() {
+		row.persist();
+	}
 	
 }

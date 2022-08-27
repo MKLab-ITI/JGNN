@@ -99,4 +99,12 @@ public class Diagonal extends Matrix {
 	public Iterator<Long> traverseNonZeroElements() {
 		return new Diagonal1DIterator(diagonal.iterator());
 	}
+
+	@Override
+	public void release() {
+	}
+
+	@Override
+	public void persist() {
+	}
 }

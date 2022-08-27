@@ -3,6 +3,7 @@ package mklab.JGNN.core.tensor;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import mklab.JGNN.core.Memory;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.util.Range;
 
@@ -76,7 +77,7 @@ public class DenseTensor extends Tensor {
 	}
 	@Override
 	protected void allocate(long size) {
-		values = new double[(int)size];
+		values = Memory.allocate((int)size, this);//new double[(int)size];
 	}
 	@Override
 	public Tensor zeroCopy(long size) {
@@ -85,5 +86,14 @@ public class DenseTensor extends Tensor {
 	@Override
 	public Iterator<Long> traverseNonZeroElements() {
 		return new Range(0, size());
+	}
+	@Override
+	public void release() {
+		Memory.release(values);
+		values = null;
+	}
+	@Override
+	public void persist() {
+		Memory.scope().unregister(values);
 	}
 }

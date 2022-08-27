@@ -6,6 +6,7 @@ import java.util.List;
 
 import mklab.JGNN.core.Loss;
 import mklab.JGNN.core.Matrix;
+import mklab.JGNN.core.Memory;
 import mklab.JGNN.core.Slice;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.ThreadPool;
@@ -118,10 +119,12 @@ public class ModelTraining {
 				for(double batchLoss : batchLosses)
 					totalLoss += batchLoss/numBatches;
 			else {
+				Memory.scope().enter();
 				Matrix validationFeatures = new WrapRows(features.accessRows(validationSamples));
 				Matrix validationLabels = new WrapRows(labels.accessRows(validationSamples));
 				List<Tensor> outputs = model.predict(Arrays.asList(validationFeatures));
 				totalLoss = (validationLoss!=null?validationLoss:loss).evaluate(outputs.get(0), validationLabels);// outputs.get(0).multiply(-1).cast(Matrix.class).selfAdd(validationLabels).selfAbs().norm();
+				Memory.scope().exit();
 				//for(long i=0;i<validationLabels.getRows();i++)
 				//	totalLoss -=(outputs.get(0).cast(Matrix.class).accessRow(i).argmax()==validationLabels.accessRow(i).argmax())?1:0;
 				//totalLoss /= validationLabels.getRows();

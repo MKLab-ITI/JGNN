@@ -69,4 +69,12 @@ public class WrapRows extends Matrix {
 	public Tensor accessRow(long row) {
 		return rows.get((int) row);
 	}
+	@Override
+	public void release() {
+	}
+	@Override
+	public void persist() {
+		for(Tensor row : rows)
+			row.persist();
+	}
 }

@@ -50,4 +50,12 @@ public class DenseMatrix extends Matrix {
 	public Iterable<Entry<Long, Long>> getNonZeroEntries() {
 		return new Range2D(0, getRows(), 0, getCols());
 	}
+	@Override
+	public void release() {
+		tensor.release();
+	}
+	@Override
+	public void persist() {
+		tensor.persist();
+	}
 }

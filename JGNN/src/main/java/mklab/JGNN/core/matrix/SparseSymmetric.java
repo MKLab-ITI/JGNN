@@ -62,4 +62,12 @@ public class SparseSymmetric extends Matrix {
 			ret.add(new AbstractMap.SimpleEntry<Long, Long>(i / rows, i%rows));
 		return ret;
 	}
+	@Override
+	public void release() {
+		tensor.release();
+	}
+	@Override
+	public void persist() {
+		tensor.persist();
+	}
 }

@@ -84,6 +84,8 @@ public abstract class Tensor implements Iterable<Long> {
 				throw new RuntimeException("Did not find a finite value");
 	}
 	protected abstract void allocate(long size);
+	public abstract void release();
+	public abstract void persist();
 	/**
 	 * Assign a value to a tensor element. All tensor operations use this function to wrap
 	 * element assignments.

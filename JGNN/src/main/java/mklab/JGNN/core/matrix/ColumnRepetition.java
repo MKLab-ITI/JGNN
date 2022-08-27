@@ -59,5 +59,12 @@ public class ColumnRepetition extends Matrix {
 			}
 		};
 	}
+	@Override
+	public void release() {
+	}
+	@Override
+	public void persist() {
+		column.persist();
+	}
 	
 }

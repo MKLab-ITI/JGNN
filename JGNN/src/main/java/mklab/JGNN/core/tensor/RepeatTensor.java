@@ -39,4 +39,10 @@ public class RepeatTensor extends Tensor {
 	public Iterator<Long> traverseNonZeroElements() {
 		return new Range(0, size());
 	}
+	@Override
+	public void release() {
+	}
+	@Override
+	public void persist() {
+	}
 }

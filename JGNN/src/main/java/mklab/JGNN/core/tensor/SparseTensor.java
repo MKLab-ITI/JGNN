@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import mklab.JGNN.core.Memory;
 import mklab.JGNN.core.Tensor;
 
 /**
@@ -60,5 +61,12 @@ public class SparseTensor extends Tensor {
 		if(keySet==null)
 			keySet = new ArrayList<Long>(values.keySet());
 		return keySet.iterator();
+	}
+	@Override
+	public void release() {
+		values = null;
+	}
+	@Override
+	public void persist() {
 	}
 }
