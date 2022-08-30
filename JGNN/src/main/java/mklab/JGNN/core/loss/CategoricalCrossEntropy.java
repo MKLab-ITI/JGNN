@@ -1,7 +1,6 @@
 package mklab.JGNN.core.loss;
 
 import mklab.JGNN.core.Loss;
-import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.Tensor;
 
 /**
@@ -22,11 +21,11 @@ public class CategoricalCrossEntropy extends Loss {
 	
 	@Override
 	public double evaluate(Tensor output, Tensor desired) {
-		return -output.add(epsilon).selfLog().selfMultiply(desired).sum() / output.cast(Matrix.class).getRows();
+		return -output.add(epsilon).selfLog().selfMultiply(desired).sum();// / output.cast(Matrix.class).getRows();
 	}
 	
 	@Override
 	public Tensor derivative(Tensor output, Tensor desired) {
-		return desired.multiply(output.add(epsilon).selfInverse()).selfMultiply(-1. / output.cast(Matrix.class).getRows());
+		return desired.multiply(output.add(epsilon).selfInverse()).negative();//.selfMultiply(-1. / output.cast(Matrix.class).getRows());
 	}
 }

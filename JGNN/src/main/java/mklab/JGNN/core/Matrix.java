@@ -202,6 +202,8 @@ public abstract class Matrix extends Tensor {
 	 * @return <code>this</code> Matrix instance.
 	 */
 	public final Matrix put(long row, long col, double value) {
+		if(row<0 || col<0 || row>=rows || col>=cols)
+			throw new IllegalArgumentException("Element ("+row+","+col+") out of range for "+describe());
 		put(row+col*rows, value);
 		return this;
 	}
@@ -441,12 +443,12 @@ public abstract class Matrix extends Tensor {
 	}
 	
 	/**
-	 * Creates a copy of the Matrix that holds its normalized Laplacian transformation.
+	 * Creates a copy of the Matrix that holds its symmetrically normalized version.
 	 * @return A new Matrix of the same dimensions.
-	 * @see #setToLaplacian()
+	 * @see #setToSymmetricNormalization()
 	 */
-	public Matrix laplacian() {
-		return ((Matrix)copy()).setToLaplacian();
+	public Matrix symmetricNormalization() {
+		return ((Matrix)copy()).setToSymmetricNormalization();
 	}
 
 	/**
@@ -481,11 +483,12 @@ public abstract class Matrix extends Tensor {
 	}
 	
 	/**
-	 * Sets the Matrix to its normalized Laplacian transformation by appropriately adjusting its element values.
+	 * Sets the Matrix to its symmetrically normalized transformation 
+	 * by appropriately adjusting its element values.
 	 * @return <code>this</code> Matrix instance.
 	 * @see #laplacian()
 	 */
-	public Matrix setToLaplacian() {
+	public Matrix setToSymmetricNormalization() {
 		HashMap<Long, Double> outDegrees = new HashMap<Long, Double>();
 		HashMap<Long, Double> inDegrees = new HashMap<Long, Double>();
 		for(Entry<Long,Long> element : getNonZeroEntries()) {
@@ -774,6 +777,8 @@ public abstract class Matrix extends Tensor {
 	}
 	
 	protected Matrix determineZeroCopy(Matrix with, long rows, long cols) {
+		if(with instanceof SparseMatrix) 
+			return ((Matrix)with).zeroCopy(rows, cols);
 		try {
 			return zeroCopy(rows, cols);
 		}

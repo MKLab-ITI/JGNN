@@ -30,6 +30,7 @@ public abstract class NNOperation {
 	private ArrayList<NNOperation> inputs = new ArrayList<NNOperation>();
 	private ArrayList<NNOperation> outputs = new ArrayList<NNOperation>();
 	private String description = null;
+	private Boolean isConstant = null;
 	
 	protected static class ThreadData {
 		public Tensor lastOutput;
@@ -107,8 +108,18 @@ public abstract class NNOperation {
 	 * @return A <code>boolean</code> value.
 	 */
 	public boolean isConstant() {
-		// TODO: automatically check inputs in the future
-		return false;
+		if(isConstant==null) {
+			if(inputs.size()==0)
+				isConstant = false;
+			for(NNOperation input : inputs)
+				if(!input.isConstant()) {
+					isConstant = false;
+					break;
+				}
+			if(isConstant==null)
+				isConstant = true;
+		}
+		return isConstant;
 	}
 	
 	/**
@@ -137,6 +148,7 @@ public abstract class NNOperation {
 	public NNOperation addInput(NNOperation inputComponent) {
 		inputs.add(inputComponent);
 		inputComponent.outputs.add(this);
+		isConstant = null;
 		return this;
 	}
 	

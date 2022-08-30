@@ -26,7 +26,7 @@ import mklab.JGNN.nn.initializers.KaimingNormal;
 import mklab.JGNN.nn.initializers.XavierNormal;
 import mklab.JGNN.nn.optimizers.Adam;
 
-public class GNN {
+public class GCN {
 
 	public static void main(String[] args) throws Exception {
 		Dataset dataset = new Datasets.CiteSeer();
@@ -52,7 +52,7 @@ public class GNN {
 			adjacency.put(interaction.getKey(), interaction.getValue(), 1);
 			adjacency.put(interaction.getValue(), interaction.getKey(), 1);
 		}
-		adjacency.setMainDiagonal(1).setToLaplacian().setDimensionName("nodes", "nodes");
+		adjacency.setMainDiagonal(1).setToSymmetricNormalization().setDimensionName("nodes", "nodes");
 		
 		System.out.println("Labels\t: "+labels.describe());
 		System.out.println("Features: "+features.describe());

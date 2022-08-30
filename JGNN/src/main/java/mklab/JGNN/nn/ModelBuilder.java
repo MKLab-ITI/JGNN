@@ -229,7 +229,10 @@ public class ModelBuilder {
 						}
 						suboperation.clear();
 						suboperation.add(new StringBuilder());
-						newDesc += "( "+args+" )";
+						if(!components.containsKey(args) && !configurations.containsKey(args))
+							newDesc += "( "+args+" )";
+						else
+							newDesc += args;
 					}
 				}
 				else if(level>0)
@@ -237,10 +240,12 @@ public class ModelBuilder {
 				else
 					newDesc += c;
 			}
+			//System.out.println(newDesc);
 			if(level!=0)
 				throw new RuntimeException("Imbalanced parenthesis in operation: "+desc);
 			desc = newDesc;
 			String[] operators = {" + ", " * ", " @ ", " | "};
+			madeChanges = false;
 			for(String operator : operators) {
 				if(madeChanges)
 					break;
@@ -265,7 +270,7 @@ public class ModelBuilder {
 							String arg = newDesc.substring(0, newDesc.length()-operator.length()).trim();
 							if(arg.startsWith("(") && arg.endsWith(")"))
 								arg = arg.substring(1, arg.length()-1).trim();
-							if(components.containsKey(arg)) 
+							if(components.containsKey(arg) || configurations.containsKey(arg)) 
 								newDesc = arg+operator;
 							else {
 								newDesc = "("+arg+")"+operator;
@@ -336,9 +341,9 @@ public class ModelBuilder {
 			boolean mode = false;
 			if(splt.length>4) {
 				String modeText = splt[4].trim();
-				if(modeText.equals("row"))
+				if(modeText.equals("col"))
 					mode = false;
-				else if(modeText.equals("col"))
+				else if(modeText.equals("row"))
 					mode = true;
 				else
 					throw new RuntimeException("Invalid argument "+modeText+" to softmax");
@@ -350,9 +355,9 @@ public class ModelBuilder {
 			boolean mode = false;
 			if(splt.length>4) {
 				String modeText = splt[4].trim();
-				if(modeText.equals("row"))
+				if(modeText.equals("col"))
 					mode = false;
-				else if(modeText.equals("col"))
+				else if(modeText.equals("row"))
 					mode = true;
 				else
 					throw new RuntimeException("Invalid argument "+modeText+" to softmax");

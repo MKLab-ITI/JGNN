@@ -46,7 +46,6 @@ public class Parameter extends NNOperation {
 	}
 	@Override
 	protected void trainParameters(Optimizer optimizer, Tensor error) {
-		//System.out.println(data().lastOutput.norm() +" "+ error.norm());
 		if(regularization!=0)
 			error = error.add(tensor.multiply(regularization));
 		optimizer.update(tensor, error);

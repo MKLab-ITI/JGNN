@@ -19,7 +19,7 @@ public class SoftMax extends NNOperation {
 	protected Tensor forward(List<Tensor> inputs) {
 		if(inputs.size()!=1)
 			throw new IllegalArgumentException();
-		/*if(colMode && inputs.get(0) instanceof Matrix) {
+		if(colMode && inputs.get(0) instanceof Matrix) {
 			Matrix matrix = inputs.get(0).cast(Matrix.class);
 			Matrix ret = matrix.zeroCopy().cast(Matrix.class);
 			for(long row=0;row<ret.getRows();row++) {
@@ -69,8 +69,8 @@ public class SoftMax extends NNOperation {
 				sum += element;
 			}
 			return ret.selfMultiply(1./sum);
-		}*/
-		if(inputs.size()!=1)
+		}
+		/*if(inputs.size()!=1)
 			throw new IllegalArgumentException();
 		if(colMode && inputs.get(0) instanceof Matrix) {
 			Matrix ret = (Matrix)inputs.get(0).zeroCopy();
@@ -108,7 +108,7 @@ public class SoftMax extends NNOperation {
 				sum += Math.exp(inputs.get(0).get(i));
 			}
 			return ret.selfMultiply(1./sum);
-		}
+		}*/
 	}
 	@Override
 	protected Tensor partial(int inputId, List<Tensor> inputs, Tensor output, Tensor error) {

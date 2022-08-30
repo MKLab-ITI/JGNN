@@ -1,4 +1,4 @@
-package mklab.JGNN.builders;
+package mklab.JGNN.adhoc.builders;
 
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.Tensor;
@@ -25,7 +25,7 @@ public class GraphFilterBuilder extends ModelBuilder {
 	
 	public GraphFilterBuilder set(long dims) {
 		if(layer>0)
-			throw new RuntimeException("Can only add embedding layers befor adding normal layers");
+			throw new RuntimeException("Can only add embedding layers before adding normal layers");
 		operation("encoded = relu("+labelMatrix+" @ matrix("+labels.getCols()+","+dims+") + vector("+dims+"))");
 		embeddingDims = dims;
 		labelMatrix = "encoded";

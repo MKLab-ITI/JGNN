@@ -2,7 +2,7 @@ package nodeClassification;
 
 import java.util.Map.Entry;
 
-import mklab.JGNN.builders.GraphFilterBuilder;
+import mklab.JGNN.adhoc.builders.GraphFilterBuilder;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.Slice;
 import mklab.JGNN.core.matrix.SparseMatrix;
@@ -29,7 +29,7 @@ public class PageRank {
 			adjacency.put(interaction.getKey(), interaction.getValue(), 1);
 			adjacency.put(interaction.getValue(), interaction.getKey(), 1);
 		}
-		adjacency.setToLaplacian().setDimensionName("nodes", "nodes");
+		adjacency.setToSymmetricNormalization().setDimensionName("nodes", "nodes");
 		
 		System.out.println("Labels   : "+labels.describe());
 		System.out.println("Features : "+features.describe());

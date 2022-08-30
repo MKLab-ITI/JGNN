@@ -11,6 +11,7 @@ import mklab.JGNN.data.IdConverter;
 import mklab.JGNN.data.datasets.Dataset;
 import mklab.JGNN.data.datasets.Datasets;
 import mklab.JGNN.nn.initializers.XavierNormal;
+import mklab.JGNN.nn.optimizers.Adam;
 import mklab.JGNN.nn.optimizers.GradientDescent;
 
 /**
@@ -49,14 +50,14 @@ public class MLP {
 		
 		long tic = System.currentTimeMillis();
 		Model model = new ModelTraining()
-				.setOptimizer(new GradientDescent(0.01))
+				.setOptimizer(new Adam(0.1))
 				.setEpochs(3000)
 				.setPatience(300)
-				.setNumBatches(10)
-				.setParallelizedStochasticGradientDescent(true)
+				.setNumBatches(1)
+				.setParallelizedStochasticGradientDescent(false)
 				.setLoss(new BinaryCrossEntropy())
 				.train(new XavierNormal().apply(modelBuilder.getModel()), 
-						features, labels, nodeIds.range(0, 0.8), null);
+						features, labels, nodeIds.range(0, 0.7), nodeIds.range(0.7, 0.8));
 		long toc = System.currentTimeMillis();
 
 		double acc = 0;
