@@ -134,4 +134,4 @@ for(Long node : test) {
 System.out.println("Acc\t "+acc/testIds.size());
 ```
 
-[NEXT: Your first neural network](tutorials/NN.md)
+[NEXT: Neural networks](NN.md)

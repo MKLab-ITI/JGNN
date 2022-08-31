@@ -10,19 +10,19 @@ c-based machine learning libraries (e.g. [tensorflow lite](https://www.tensorflo
 the require specific hardware or firmware to run and increase the size of applications.
 
 
-# :hammer_and_wrench: Installation
-For quick installation of the latest working version of the library, you can include it as Maven or Gradle dependency by following the instructions found in the following JitPack distribution page:
+# :zap: Quickstart
+To install the latest working version, you can include it as Maven or Gradle dependency by following the instructions of its JitPack distribution:
 [![](https://jitpack.io/v/maniospas/jgnn.svg)](https://jitpack.io/#maniospas/jgnn)
 
-# :zap: Quickstart
-1. [Basic concepts](tutorials/Introduction.md) <br>
-2. [Your first neural network](tutorials/NN.md) <br>
-3. [Debugging your pipeline](tutorials/Debugging.md) <br>
+1. [Basic concepts](tutorials/Introduction.md) <br
+2. [Neural networks](tutorials/NN.md) <br>
+3. [Graph neural networks](tutorials/GNN.md) <br>
+4. [Debugging](tutorials/Debugging.md) <br>
 
 # :fire: Features
-* Cross-platform support (written in native java)
+* Cross-platform (written in native java)
 * Lightweight
-* Speed ups and minimal memory footprints
+* Minimal memory footprints
 * Parallelized batching
 
 # :link: Material

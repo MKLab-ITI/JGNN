@@ -1,4 +1,4 @@
-# :zap: Your first neural network
+# :zap: Neural networks
 For this example, we refer to the same dataset and experimentation 
 methodology as in the in the [Basic concepts](tutorials/Introduction.md)
 But we will see how to easily create a multilayer perceptron.
@@ -48,4 +48,4 @@ ModelBuilder modelBuilder = new LayeredBuilder()
 				.out("yhat");
 ```
 
-[NEXT: Your first graph neural network](tutorials/GNN.md)
+[NEXT: Your first graph neural network](GNN.md)

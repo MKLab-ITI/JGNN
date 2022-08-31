@@ -1,2 +1,2 @@
-# :zap: Your first graph neural network
+# :zap: Graph neural networks
 TODO
