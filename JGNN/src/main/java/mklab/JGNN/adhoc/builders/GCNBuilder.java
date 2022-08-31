@@ -4,9 +4,8 @@ import java.util.HashMap;
 
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.Tensor;
-import mklab.JGNN.nn.ModelBuilder;
 
-public class GCNBuilder extends ModelBuilder {
+public class GCNBuilder extends LayeredBuilder {
 	private int layer = 0;
 	private HashMap<String, Integer> rememberAs = new HashMap<String, Integer>();
 	public GCNBuilder(Matrix adjacency, Matrix features) {

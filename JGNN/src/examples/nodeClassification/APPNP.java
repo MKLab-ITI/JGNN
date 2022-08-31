@@ -7,12 +7,12 @@ import mklab.JGNN.core.Matrix;
 import mklab.JGNN.nn.Model;
 import mklab.JGNN.nn.ModelBuilder;
 import mklab.JGNN.nn.ModelTraining;
+import mklab.JGNN.nn.NNOperation;
 import mklab.JGNN.core.Slice;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.loss.Accuracy;
 import mklab.JGNN.core.loss.CategoricalCrossEntropy;
 import mklab.JGNN.core.matrix.SparseMatrix;
-import mklab.JGNN.data.IdConverter;
 import mklab.JGNN.data.datasets.Dataset;
 import mklab.JGNN.data.datasets.Datasets;
 import mklab.JGNN.nn.initializers.XavierNormal;
@@ -40,8 +40,8 @@ public class APPNP {
 				.layer("h{l+1}=h{l}@matrix(32, classes)+vector(classes)")
 				.rememberAs("0")
 				.constant("a", 0.9)
-				.layerRepeat("h{l+1} = a*(dropout(A,0.5)@h{l})+(1-a)*h{0}", 10)
-				.classify();
+				.layerRepeat("h{l+1} = a*(dropout(A, 0.5)@h{l})+(1-a)*h{0}", 10)
+				.classify();				;
 		
 		ModelTraining trainer = new ModelTraining()
 				.setOptimizer(new Adam(0.01))
@@ -49,7 +49,7 @@ public class APPNP {
 				.setPatience(100)
 				.setLoss(new CategoricalCrossEntropy())
 				.setValidationLoss(new Accuracy());
-
+		
 		Slice nodes = dataset.nodes().getIds().shuffle(100);
 		Model model = modelBuilder.getModel()
 				.init(new XavierNormal())

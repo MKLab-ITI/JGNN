@@ -2,14 +2,12 @@
 A native Java library for Graph Neural Networks.
 
 # :brain: About
-Graph Neural Networks (GNNs) have seen a dramatic increase in popularity
-thanks to their ability to understand relations between graph nodes.
-This library aims to provide GNN capabilities to native Java applications, 
-for example to perform machine learning on Android. It does so by avoiding
-c-based machine learning libraries, such as [TensorFlow Lite](https://www.tensorflow.org/lite).
-The latter are often designed with pure performance in mind but often require
-specific hardware to run, such as GPUs, drastically increase the size of
-deployed applications.
+Graph Neural Networks (GNNs) are getting more and more popular;
+they can reason from relational information and perform inference from small datasets.
+JGNN provides capabilities to native Java applications and supports cross-platform machine
+learning, such as on Android. It avoids
+c-based machine learning libraries (e.g. [tensorflow lite](https://www.tensorflow.org/lite) ).
+the require specific hardware or firmware to run and increase the size of applications.
 
 
 # :hammer_and_wrench: Installation
@@ -17,8 +15,9 @@ For quick installation of the latest working version of the library, you can inc
 [![](https://jitpack.io/v/maniospas/jgnn.svg)](https://jitpack.io/#maniospas/jgnn)
 
 # :zap: Quickstart
-1. [Introduction to JGNN](tutorials/Introduction.md)
-2. [Debugging your pipeline](tutorials/Debugging.md)
+1. [Basic concepts](tutorials/Introduction.md) <br>
+2. [Your first neural network](tutorials/NN.md) <br>
+3. [Debugging your pipeline](tutorials/Debugging.md) <br>
 
 # :fire: Features
 * Cross-platform support (written in native java)

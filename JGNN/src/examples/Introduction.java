@@ -45,7 +45,8 @@ public class Introduction {
 				.var("x")
 				.operation("h = relu(x@matrix(features, 64, regularize)+vector(64))")
 				.operation("yhat = softmax(h@matrix(64, classes)+vector(classes), row)")
-				.out("yhat");
+				.out("yhat")
+				.assertBackwardValidity();
 		
 		System.out.println(modelBuilder.getExecutionGraphDot());
 		Model model = modelBuilder
