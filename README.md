@@ -34,7 +34,7 @@ for(Entry<Long, Long> interaction : dataset.getInteractions())
 adjacency.setMainDiagonal(1).setToSymmetricNormalization();
 
 long numClasses = labels.getCols();
-ModelBuilder modelBuilder = new GCNBuilder(adjacency, features)
+ModelBuilder appnp = new GCNBuilder(adjacency, features)
 		.config("reg", 0.005)
 		.config("classes", numClasses)
 		.config("hidden", hidden)
@@ -53,7 +53,7 @@ ModelTraining trainer = new ModelTraining()
 		.setValidationLoss(new Accuracy());
 
 Slice nodes = dataset.nodes().getIds().shuffle(100);
-Model model = modelBuilder.getModel()
+Model model = appnp.getModel()
 		.init(new XavierNormal())
 		.train(trainer,
 				Tensor.fromRange(0, nodes.size()).asColumn(), 

@@ -5,12 +5,12 @@ But we will see how to easily create a multilayer perceptron.
 We cover the following topics:
 
 1. [Building layers](#building-layers)
-2. [Deep architecture](#deep-architecture)
+2. [Deep architectures](#deep-architectures)
 3. [Writing operations](#writing-operations)
 
 *Full implementations can be found in the [examples](../JGNN/src/examples/tutorial/NN.java).*
 
-# Building layers
+## Building layers
 The class building layered architectures (`LayeredBuilder`) improves base builder
 functionalities by introducing methods like `.layer(String)`. This
 is an extension of normal `.operation(String)` definitions, 
@@ -28,7 +28,7 @@ ModelBuilder modelBuilder = new LayeredBuilder("h0")
 				.out("yhat");
 ```
 
-# Deep architecture
+## Deep architectures
 Now that we have explained how simple layers work, let's look at two more advanced
 `LayeredBuilder` methods pivotal to many deep neural networks.
 The first is `.layerRepeat(String, int)`), which just repeats
@@ -52,7 +52,7 @@ ModelBuilder modelBuilder = new LayeredBuilder()
 				.out("yhat");
 ```
 
-# Writing operations
+## Writing operations
 This is a good point to we present symbols you can use to define operation expressions.
 Unless otherwise specified, you can replace x and y with any expression. Sometimes,
 y needs to be a constant defined either by presenting a number, calling 

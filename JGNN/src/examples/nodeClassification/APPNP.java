@@ -7,7 +7,6 @@ import mklab.JGNN.core.Matrix;
 import mklab.JGNN.nn.Model;
 import mklab.JGNN.nn.ModelBuilder;
 import mklab.JGNN.nn.ModelTraining;
-import mklab.JGNN.nn.NNOperation;
 import mklab.JGNN.core.Slice;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.loss.Accuracy;
@@ -41,7 +40,9 @@ public class APPNP {
 				.rememberAs("0")
 				.constant("a", 0.9)
 				.layerRepeat("h{l+1} = a*(dropout(A, 0.5)@h{l})+(1-a)*h{0}", 10)
-				.classify();				;
+				.classify()
+				.layerRepeat("h{l+1} = a*(dropout(A, 0.5)@h{l})+(1-a)*h{0}", 10)
+				.assertBackwardValidity();				;
 		
 		ModelTraining trainer = new ModelTraining()
 				.setOptimizer(new Adam(0.01))

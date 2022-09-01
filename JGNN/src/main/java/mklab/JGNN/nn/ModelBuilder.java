@@ -501,9 +501,10 @@ public class ModelBuilder {
 				System.err.println("The component "+component.describe()+" was not added by this builder to its model's pipeline");
 		for(NNOperation component : actualComponents)
 			if(!allFoundComponents.contains(component)) {
-				System.err.println("The component "+component.describe()+" does not lead to an output and will be removed from the outputs of other components");
-				for(NNOperation other : actualComponents)
-					other.getOutputs().remove(component);
+				throw new RuntimeException("The component "+component.describe()+" does not lead to an output");
+				//System.err.println("The component "+component.describe()+" does not lead to an output and will be removed from the outputs of other components");
+				//for(NNOperation other : actualComponents)
+				//	other.getOutputs().remove(component);
 			}
 		
 		return this;

@@ -10,7 +10,7 @@ on the Lymphography dataset. This implements the following:
 
 *Full implementations can be found in the [examples](../JGNN/src/examples/tutorial/Learning.java).*
 
-# Dataset loading
+## Dataset loading
 First, we load the dataset (it is automatically downloaded) and use the `IdConverter` class
 to get label and feature matrices. To save memory, these are sparse. 
 Matrices could also be programmatically generated in either sparse or dense form (according 
@@ -28,7 +28,7 @@ Matrix features = nodeIdConverter.oneHot(dataset.getFeatures()).setDimensionName
 :bulb: To maintain the same naming convention between traditional and graph neural networks, 
 data samples are refferred to as *nodes* .
 
-# Model definition
+## Model definition
 We first retrieve the number of features and class labels that will help us define our model. Note 
 that matrix dimensions and elements are `long` numbers. Dense matrices can only
 store up to MaxInt, but this convention makes large sparce matrices interoperable.
@@ -80,7 +80,7 @@ of the execution graph:
 
 ![Example execution graph](graphviz.png)
 
-# Training
+## Training
 To train the model, we set up 50-25-25 training-validation-test data slices.
 These basically handle shuffled sample identifiers. You can use integers instead of
 doubles in the `range` method to reference a fixed fixed instead of fractional slice sizes.
@@ -119,7 +119,7 @@ model
 more memory, but we keep things simple here.
 
 
-# Testing
+## Testing
 We finally report training accuracy on the test set. We demonstrate how single-sample predictions can be
 made and measure the accuracy of those. To do this, we use `Matrix.accessRow` to obtain specific matrix rows from node features as tensors and `Tensor.asRow` to convert the obtained tensors into a row representation. Row representations are matrices and can pass through the model just fine. 
 We use `argmax` to convert one-hot predictions to label ids.
