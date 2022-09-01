@@ -5,6 +5,7 @@ But we will see how to easily create a multilayer perceptron.
 
 1. [Building layers](#building-layers)
 2. [Deep architecture](#deep-architecture)
+3. [Writing operations](#writing-operations)
 
 # Building layers
 The class building layered architectures (`LayeredBuilder`) improves base builder
@@ -47,5 +48,38 @@ ModelBuilder modelBuilder = new LayeredBuilder()
 				.layer("yhat = softmax(h{l}@matrix(2hidden, classes)+vector(classes), row)")
 				.out("yhat");
 ```
+
+# Writing operations
+This is a good point to we present symbols you can use to define operation expressions.
+Unless otherwise specified, you can replace x and y with any expression. Sometimes,
+y needs to be a constant defined either by presenting a number, calling 
+`ModelBuilder.config(y, double)`, or calling `ModelBuilder.constant(y, double)` to
+set the numbers as hyperparameters.
+
+|Symbol| Type | Number of inputs  |
+| --- | --- | --- |
+| x = y | Operator | Assign to variable x the outcome of executing y. 
+| x + y | Operator | Element-by-element addition. |
+| x * y | Operator | Element-by-element multiplication. |
+| x - y | Operator | Element-by-element subtraction. |
+| x @ y | Operator | Matrix multiplication.  |
+| x | y | Operator | Row-wise concatenation of x and y. |
+| x [y] | Operator | Gathers the rows with indexes y of x.| 
+| transpose(x) | Function | Transposes matrix x. |
+| log(x)  | Function | Apply logarithm on each tensor element. |
+| relu(x) | Function | Apply relu on each tensor element. |
+| tanh(x) | Function | Apply a tanh activation on each tensor element. |
+| sigmoid(x) | Function | Apply a sigmoid activation on each tensor element. |
+| dropout(x, y) | Function | Apply training dropout on tensor x with constant dropout rate y. |
+| lrely(x, y)   | Function | Leaky relu on tensor x with constant negative slope y. |
+| prelu(x)      | Function | Leaky relu on tensor x with learnanble negative slope. |
+| softmax(x, y) | Function | Apply y-wide  softmax on x, where y is either row or col.|
+| sum(x, y) | Function | Apply y-wide sum reduction on x, where y is either row or col.|
+| max(x, y) | Function | Apply y-wide max reduction on x, where y is either row or col.|
+| matrix(x, y)  | Function | Generate a matrix parameter with respective hyperparameter dimensions. |
+| vector(x)     | Function | Generate a vector with respective hyperparameter size.|
+
+Prefer using hyperparameters for matrix and vector creation, as these transfer their names to respective
+dimensions for error checking. For `dropout,matrix,vector` you can also use the short names `drop,mat,vec`.
 
 [NEXT: Your first graph neural network](GNN.md)

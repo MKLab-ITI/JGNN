@@ -47,11 +47,12 @@ has four important methods:
 
 We can retrieve the defined model at anytime with the builder's `getModel()` method. 
 Until that point, models are incrementally constructed with functional programming.
-For our example, we define a two-layer perceptron, with a relu hidden layer and 
+For this example, we define a two-layer perceptron, with a relu hidden layer and 
 a row-wide softmax activation. Learnable matrices and vectors could be defined manually,
-but in this example we automatically generate them. The number of
+but we automatically generate them in operation definitions. The number of
 hidden dimensions (64 right now) could also have been set as a hyperparameter. 
-`@` corresponds to matrix multiplication.
+`@` corresponds to matrix multiplication. Details on how to write operations
+are presented in the [next tutorial](NN.md). 
 
 ```java
 ModelBuilder modelBuilder = new ModelBuilder()

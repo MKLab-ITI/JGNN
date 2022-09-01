@@ -43,7 +43,7 @@ public class NN {
 				.setEpochs(3000)
 				.setPatience(10)
 				.setLoss(new BinaryCrossEntropy())
-				.setValidationLoss(new Accuracy())
+				.setValidationLoss(new BinaryCrossEntropy())
 				.train(new XavierNormal().apply(modelBuilder.getModel()), 
 						features, labels, nodeIds.range(0, 0.7), nodeIds.range(0.7, 0.8));
 		long toc = System.currentTimeMillis();
