@@ -15,7 +15,7 @@ import mklab.JGNN.nn.initializers.XavierNormal;
 import mklab.JGNN.nn.optimizers.Adam;
 
 /**
- * This implementation covers code covered in the Neural Networks tutorial.
+ * This implementation covers code of the Neural Networks tutorial.
  * 
  * @author Emmanouil Krasanakis
  */

@@ -15,7 +15,7 @@ import mklab.JGNN.nn.optimizers.Adam;
 
 
 /**
- * This implementation covers code covered in the Learning tutorial.
+ * This implementation covers code of the Learning tutorial.
  * 
  * @author Emmanouil Krasanakis
  */

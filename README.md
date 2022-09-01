@@ -7,7 +7,7 @@ they can reason from relational information and perform inference from small dat
 JGNN provides GNNs to native Java applications and supports cross-platform machine
 learning, such as on Android, without specific hardware or firmware.
 
-* [Tutorials](tutorials/Tutorials.md)
+* [Tutorials](tutorials/README.md)
 * [Javadoc](https://mklab-iti.github.io/JGNN/)
 
 # :rocket: Features

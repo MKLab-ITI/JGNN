@@ -8,7 +8,7 @@ We cover the following topics:
 2. [Deep architecture](#deep-architecture)
 3. [Writing operations](#writing-operations)
 
-*Full implementations can be found in [examples](../JGNN/src/examples/tutorial/NN.java).*
+*Full implementations can be found in the [examples](../JGNN/src/examples/tutorial/NN.java).*
 
 # Building layers
 The class building layered architectures (`LayeredBuilder`) improves base builder

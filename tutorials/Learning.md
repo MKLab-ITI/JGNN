@@ -8,7 +8,7 @@ on the Lymphography dataset. This implements the following:
 3. [Training](#training)
 4. [Testing](#testing)
 
-*Full implementations can be found in [examples](../JGNN/src/examples/tutorial/Learning.java).*
+*Full implementations can be found in the [examples](../JGNN/src/examples/tutorial/Learning.java).*
 
 # Dataset loading
 First, we load the dataset (it is automatically downloaded) and use the `IdConverter` class
