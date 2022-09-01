@@ -7,6 +7,16 @@ they can reason from relational information and perform inference from small dat
 JGNN provides GNNs to native Java applications and supports cross-platform machine
 learning, such as on Android, without specific hardware or firmware.
 
+* [Tutorials](tutorials/Tutorials.md)
+* [Javadoc](https://maniospas.github.io/JGNN/)
+
+# :rocket: Features
+* Cross-platform (written in native java)
+* Lightweight
+* Minimal memory footprints
+* Symbolic model definition
+* Parallelized batching
+
 # :zap: Quickstart
 To install the latest working version, you can include it as Maven or Gradle dependency by following the instructions of its JitPack distribution:
 [![](https://jitpack.io/v/maniospas/jgnn.svg)](https://jitpack.io/#maniospas/jgnn)
@@ -59,16 +69,6 @@ for(Long node : nodes.range(0.4, 1)) {
 }
 System.out.println("Acc\t "+acc/nodes.range(0.4, 1).size());
 ```
-
-# :rocket: Features
-* Cross-platform (written in native java)
-* Lightweight
-* Minimal memory footprints
-* Parallelized batching
-
-# :link: Tutorials
-* [Tutorials](tutorials/Tutorials.md)
-* [Javadoc](https://maniospas.github.io/JGNN/)
 
 # :thumbsup: Contributing
 Feel free to contribute in any way, for example through the [issue tracker](https://github.com/MKLab-ITI/JGNN/issues).
