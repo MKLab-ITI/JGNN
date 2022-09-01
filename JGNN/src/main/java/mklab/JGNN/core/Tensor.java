@@ -198,12 +198,20 @@ public abstract class Tensor implements Iterable<Long> {
 	public final Iterable<Long> getNonZeroElements() {
 		return this;
 	}
-	public long getNumNonZeroElements() {
-		long ret = 0;
+	/**
+	 * Provides an estimation for the non-zero number of elements stored in the tensor,
+	 * where this number is equal to the size for dense tensors, but equal to the actual
+	 * number of non-zero elements for sparse tensors.
+	 * Basically, this quantity is proportional to the allocated memory.
+	 * @return A long number equal to or less to the tensor size.
+	 */
+	public long estimateNumNonZeroElements() {
+		/*long ret = 0;
 		for(long pos : getNonZeroElements())
 			if(get(pos)!=0)
 				ret += 1;
-		return ret;
+		return ret;*/
+		return size;
 	}
 	/**
 	 * Retrieves positions within the tensor that may hold non-zero elements.

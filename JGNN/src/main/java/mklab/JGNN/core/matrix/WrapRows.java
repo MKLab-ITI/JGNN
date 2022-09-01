@@ -27,8 +27,8 @@ public class WrapRows extends Matrix {
 	public WrapRows(List<Tensor> rows) {
 		super(rows.size(), rows.get(0).size());
 		this.rows = rows;
-		for(Tensor col : rows)
-			col.assertMatching(rows.get(0));
+		for(Tensor row : rows)
+			row.assertMatching(rows.get(0));
 		setRowName(rows.get(0).getDimensionName());
 	}
 	@Override

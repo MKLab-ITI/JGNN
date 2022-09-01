@@ -160,6 +160,14 @@ public abstract class NNOperation {
 		return data().lastOutput;
 	}
 	
+	protected boolean isOutputNeededForDerivative() {
+		return false;
+	}
+	
+	protected boolean isInputNeededForDerivative(int inputId) {
+		return true;
+	}
+	
 	public final Tensor runPrediction() {
 		try {
 			ThreadData data = data();
@@ -168,6 +176,11 @@ public abstract class NNOperation {
 			ArrayList<Tensor> lastInputs = new ArrayList<Tensor>();
 			for(NNOperation input : inputs)
 				lastInputs.add(input.runPrediction());
+			/*for(int inputId=0;inputId<inputs.size();inputId++)
+				if(!isInputNeededForDerivative(inputId) 
+						&& inputs.get(inputId).getOutputs().size()==1 
+						&& !inputs.get(inputId).isOutputNeededForDerivative())
+					inputs.get(inputId).data().lastOutput = null;*/
 			if(debugging) {
 				System.out.println("Predicting... "+this.getClass());
 				for(Tensor input : lastInputs)
@@ -201,9 +214,13 @@ public abstract class NNOperation {
 			if(debugging && error!=null)
 				System.out.println("Packpropagating... "+describe()+" Derivative "+error.describe()+" on thread "+ThreadPool.getCurrentThreadId());
 			if(error!=null) {
-				if(data.tapeError==null)
-					data.tapeError = data.lastOutput.zeroCopy();
-				data.tapeError.selfAdd(error);
+				if(getOutputs().size()==1)
+					data.tapeError = error;
+				else {
+					if(data.tapeError==null)
+						data.tapeError = data.lastOutput.zeroCopy();
+					data.tapeError.selfAdd(error);
+				}
 			}
 			data.countTapeSources++;
 			if(data.countTapeSources>outputs.size())
@@ -223,6 +240,7 @@ public abstract class NNOperation {
 			trainParameters(optimizer, data.tapeError);
 			if(debugging)
 				System.out.println("Finished backpropagation on "+describe()+" on thread "+ThreadPool.getCurrentThreadId());
+			data.tapeError = null;
 		}
 		catch(Exception e) {
 			System.err.println(e.toString());

@@ -430,12 +430,12 @@ public class TensorTest {
 	@Test
 	public void testOneHotNumNonZero() { 
 		for(Tensor tensor : allTensorTypes(10)) 
-			Assert.assertEquals(tensor.put(0, 1).put(1, 0).getNumNonZeroElements(), 1, 0);
+			Assert.assertEquals(tensor.put(0, 1).put(1, 0).estimateNumNonZeroElements(), 1, 0);
 	}
 	@Test
 	public void testNumNonZero() { 
 		for(Tensor tensor : allTensorTypes(10))
-			Assert.assertEquals(tensor.setToRandom().add(2).getNumNonZeroElements(), 10, 0);
+			Assert.assertEquals(tensor.setToRandom().add(2).estimateNumNonZeroElements(), 10, 0);
 	}
 	@Test
 	public void testRepeatTensor() {

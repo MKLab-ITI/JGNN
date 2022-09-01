@@ -55,6 +55,11 @@ public class Diagonal extends Matrix {
 		}
 	}
 	
+	@Override
+	public long estimateNumNonZeroElements() {
+		return this.diagonal.estimateNumNonZeroElements();
+	}
+	
 	protected Diagonal(Tensor diagonal) {
 		super(diagonal.size(), diagonal.size());
 		this.diagonal = diagonal;

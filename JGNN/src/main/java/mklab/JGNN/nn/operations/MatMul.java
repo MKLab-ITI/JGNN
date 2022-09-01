@@ -20,16 +20,22 @@ public class MatMul extends NNOperation {
 		Matrix H = inputs.get(1).cast(Matrix.class);
 		return W.matmul(H);
 	}
+	
+	protected boolean isInputNeededForDerivative(int inputId) {
+		return !getInputs().get(1-inputId).isConstant();
+	}
 
 	@Override
 	protected Tensor partial(int inputId, List<Tensor> inputs, Tensor output, Tensor error) {
 		Matrix errorMatrix = (Matrix)error;
-		Matrix W = inputs.get(0).cast(Matrix.class);
-		Matrix H = inputs.get(1).cast(Matrix.class);
-		if(inputId==0)
+		if(inputId==0) {
+			Matrix H = inputs.get(1).cast(Matrix.class);
 			errorMatrix = errorMatrix.matmul(H, false, true);
-		else if(inputId==1) 
+		}
+		else if(inputId==1) {
+			Matrix W = inputs.get(0).cast(Matrix.class);
 			errorMatrix = W.matmul(errorMatrix, true, false);
+		}
 		return errorMatrix;
 	}
 	@Override

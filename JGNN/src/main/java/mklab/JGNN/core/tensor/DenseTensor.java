@@ -77,7 +77,7 @@ public class DenseTensor extends Tensor {
 	}
 	@Override
 	protected void allocate(long size) {
-		values = Memory.allocate((int)size, this);//new double[(int)size];
+		values = new double[(int)size];//Memory.allocate((int)size, this);//new double[(int)size];
 	}
 	@Override
 	public Tensor zeroCopy(long size) {
@@ -89,11 +89,11 @@ public class DenseTensor extends Tensor {
 	}
 	@Override
 	public void release() {
-		Memory.release(values);
+		//Memory.release(values);
 		values = null;
 	}
 	@Override
 	public void persist() {
-		Memory.scope().unregister(values);
+		//Memory.scope().unregister(values);
 	}
 }

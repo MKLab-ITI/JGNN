@@ -67,6 +67,11 @@ public class TransposedMatrix extends Matrix {
 	}
 
 	@Override
+	public long estimateNumNonZeroElements() {
+		return matrix.estimateNumNonZeroElements();
+	}
+	
+	@Override
 	public Iterable<Entry<Long, Long>> getNonZeroEntries() {
 		return new Transposed2DIterator(matrix.getNonZeroEntries().iterator());
 	}

@@ -48,14 +48,19 @@ public class SparseMatrix extends Matrix {
 	}
 	@Override
 	public String describe() {
-		return super.describe()+" "+getNumNonZeroElements()+"/"+(getRows()*getCols())+" entries";
+		return super.describe()+" "+estimateNumNonZeroElements()+"/"+(getRows()*getCols())+" entries";
+	}
+	@Override
+	public long estimateNumNonZeroElements() {
+		return tensor.estimateNumNonZeroElements();
 	}
 	@Override
 	public Iterable<Entry<Long, Long>> getNonZeroEntries() {
-		ArrayList<Entry<Long, Long>> ret = new ArrayList<Entry<Long, Long>>();
+		/*ArrayList<Entry<Long, Long>> ret = new ArrayList<Entry<Long, Long>>();
 		for(long i : getNonZeroElements())
 			ret.add(new AbstractMap.SimpleEntry<Long, Long>(i % getRows(), i/getRows()));
-		return ret;
+		return ret;*/
+		return new Sparse2DIterator(traverseNonZeroElements());
 	}
 	@Override
 	public void release() {
@@ -64,5 +69,27 @@ public class SparseMatrix extends Matrix {
 	@Override
 	public void persist() {
 		tensor.persist();
+	}
+	
+	protected class Sparse2DIterator implements Iterator<Entry<Long, Long>>, Iterable<Entry<Long, Long>> {
+		private Iterator<Long> iterator;
+		private long rows;
+		public Sparse2DIterator(Iterator<Long> iterator) {
+			this.iterator = iterator;
+			rows = getRows();
+		}
+		@Override
+		public boolean hasNext() {
+			return iterator.hasNext();
+		}
+		@Override
+		public Entry<Long, Long> next() {
+			long pos = iterator.next();
+			return new AbstractMap.SimpleEntry<Long,Long>(pos % rows, pos/rows);
+		}
+		@Override
+		public Iterator<Entry<Long, Long>> iterator() {
+			return this;
+		}
 	}
 }

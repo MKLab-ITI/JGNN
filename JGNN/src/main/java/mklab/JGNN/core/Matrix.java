@@ -258,7 +258,7 @@ public abstract class Matrix extends Tensor {
 			throw new IllegalArgumentException("Mismatched matrix sizes between "+describe()+" and "+with.describe());
 		if(colName!=null && with.getRowName()!=null && !colName.equals(with.getRowName()))
 			throw new IllegalArgumentException("Mismatched matrix dimension names between "+describe()+" and "+with.describe());
-		Matrix ret = determineZeroCopy(with, getRows(), with.getCols());
+		Matrix ret = determineZeroCopy(with, getRows(), with.getCols(), getCols());
 		if(parallelizedMultiplication>1) {
 			ArrayList<Entry<Long, Long>> entries = new ArrayList<Entry<Long, Long>>();
 			for(Entry<Long, Long> element : getNonZeroEntries()) 
@@ -292,11 +292,21 @@ public abstract class Matrix extends Tensor {
 				}
 		}
 		else {
-			for(Entry<Long, Long> element : getNonZeroEntries()) {
-				long row = element.getKey();
-				long col = element.getValue();
-				for(long col2=0;col2<with.getCols();col2++) 
-					ret.put(row, col2, ret.get(row, col2) + get(row, col)*with.get(col, col2));
+			if(estimateNumNonZeroElements()/getRows()<with.estimateNumNonZeroElements()/with.getCols()) {
+				for(Entry<Long, Long> element : getNonZeroEntries()) {
+					long row = element.getKey();
+					long col = element.getValue();
+					for(long col2=0;col2<with.getCols();col2++) 
+						ret.put(row, col2, ret.get(row, col2) + get(row, col)*with.get(col, col2));
+				}
+			}
+			else {
+				for(Entry<Long, Long> element : with.getNonZeroEntries()) {
+					long row = element.getKey();
+					long col = element.getValue();
+					for(long row1=0;row1<getRows();row1++) 
+						ret.put(row1, col, ret.get(row1, col) + get(row1, row)*with.get(row, col));
+				}
 			}
 		}
 		return ret.setRowName(getRowName()).setColName(with.getColName());
@@ -326,7 +336,7 @@ public abstract class Matrix extends Tensor {
 				(transposeWith?with.getColName():with.getRowName())!=null &&
 				!(transposeSelf?rowName:colName).equals(transposeWith?with.getColName():with.getRowName()))
 			throw new IllegalArgumentException("Mismatched matrix dimension names");
-		Matrix ret = determineZeroCopy(with, transposeSelf?cols:rows, transposeWith?with.getRows():with.getCols());
+		Matrix ret = determineZeroCopy(with, transposeSelf?cols:rows, transposeWith?with.getRows():with.getCols(), transposeWith?with.getCols():with.getRows());
 		
 		if(parallelizedMultiplication>1) {
 			ArrayList<Entry<Long, Long>> entries = new ArrayList<Entry<Long, Long>>();
@@ -364,11 +374,21 @@ public abstract class Matrix extends Tensor {
 				}
 		}
 		else {
-			for(Entry<Long, Long> element : getNonZeroEntries()) {
-				long row = transposeSelf?element.getValue():element.getKey();
-				long col = transposeSelf?element.getKey():element.getValue();
-				for(long col2=0;col2<(transposeWith?with.getRows():with.getCols());col2++) 
-					ret.put(row, col2, ret.get(row, col2) + get(element.getKey(),element.getValue())*with.get(transposeWith?col2:col, transposeWith?col:col2));
+			if(estimateNumNonZeroElements()/(transposeSelf?getCols():getRows())<with.estimateNumNonZeroElements()/(transposeWith?with.getRows():with.getCols())) {
+				for(Entry<Long, Long> element : getNonZeroEntries()) {
+					long row = transposeSelf?element.getValue():element.getKey();
+					long col = transposeSelf?element.getKey():element.getValue();
+					for(long col2=0;col2<(transposeWith?with.getRows():with.getCols());col2++) 
+						ret.put(row, col2, ret.get(row, col2) + get(element.getKey(),element.getValue())*with.get(transposeWith?col2:col, transposeWith?col:col2));
+				}
+			}
+			else {
+				for(Entry<Long, Long> element : with.getNonZeroEntries()) {
+					long row = transposeWith?element.getValue():element.getKey();
+					long col = transposeWith?element.getKey():element.getValue();
+					for(long row1=0;row1<(transposeSelf?getCols():getRows());row1++) 
+						ret.put(row1, col, ret.get(row1, col) + get(transposeSelf?row:row1, transposeSelf?row1:row)*with.get(element.getKey(), element.getValue()));
+				}
 			}
 		}
 		return ret.setRowName(transposeSelf?getColName():getRowName()).setColName(transposeWith?with.getRowName():with.getColName());
@@ -776,8 +796,12 @@ public abstract class Matrix extends Tensor {
 		return ret;
 	}
 	
-	protected Matrix determineZeroCopy(Matrix with, long rows, long cols) {
-		if(with instanceof SparseMatrix) 
+	protected Matrix determineZeroCopy(Matrix with, long rows, long cols, long intermediate) {
+		double density1 = estimateNumNonZeroElements()/(double)getRows()/getCols();
+		double density2 = with.estimateNumNonZeroElements()/(double)with.getRows()/with.getCols();
+		if(density1*density2*intermediate < 0.3)
+			return new SparseMatrix(rows, cols);
+		/*if(with instanceof SparseMatrix) 
 			return ((Matrix)with).zeroCopy(rows, cols);
 		try {
 			return zeroCopy(rows, cols);
@@ -788,7 +812,7 @@ public abstract class Matrix extends Tensor {
 			return ((Matrix)with).zeroCopy(rows, cols);
 		}
 		catch(UnsupportedOperationException e) {
-		}
+		}*/
 		return new DenseMatrix(rows, cols);
 		//throw new UnsupportedOperationException("Neither "+describe()+" nor "+with.describe()+" support zeroCopy("+rows+", "+cols+")");
 	}

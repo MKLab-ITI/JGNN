@@ -50,7 +50,7 @@ public class SparseSymmetric extends Matrix {
 	}
 	@Override
 	public String describe() {
-		return super.describe()+" "+getNumNonZeroElements()+"/"+(getRows()*getCols())+" entries";
+		return super.describe()+" "+estimateNumNonZeroElements()+"/"+(getRows()*getCols())+" entries";
 	}
 	@Override
 	public Iterable<Entry<Long, Long>> getNonZeroEntries() {
