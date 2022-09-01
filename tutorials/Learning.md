@@ -1,4 +1,4 @@
-# :zap: Basic concepts
+# :zap: Learning
 
 For demonstration purposes, we will create a custom model to make predictions 
 on the Lymphography dataset. This implements the following:

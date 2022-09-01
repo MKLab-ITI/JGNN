@@ -1,4 +1,4 @@
-# Primitives
+# Working with primitives
 JGNN provides the `mklab.JGNN.core.Tensor` abstract class for storing
 calculation primitives. Vector and matrix operations use primitives 
 of this or derived classes. To reduce the number of code predicates
@@ -59,9 +59,9 @@ Operation | Type | Comments
 `String describe()` | summary statistics | Description of type and dimensions.
 
 
-:bulb: To write code that accommodates both dense and sparse tensors, make sure that iterating over non-zero elements is performed through the iterator `Iterator<Long> getNonZeroElements()`.
+:bulb: To write code that accommodates both dense and sparse tensors, make sure that iterating over indices elements is performed with the iterator `Iterator<Long> getNonZeroElements()`.
 
-:bulb: Prefer in-place arithmetic operations when transforming tensor values or when tensors are stored as an intermediate calculation step, as these do not allocate new memory. For example, the following code can be used for creating and normalizing a tensor of ones without using additional memory:
+Prefer in-place arithmetic operations when transforming tensor values or for intermediate calculation steps, as these do not allocate new memory. For example, the following code can be used for creating and normalizing a tensor of ones without using additional memory:
 
 ```Java
 Tensor normalized = new DenseTensor(10).setToOnes().setToNormalized();
@@ -71,7 +71,7 @@ Tensor normalized = new DenseTensor(10).setToOnes().setToNormalized();
 ## Vector initialization
 
 You can initialize either a dense tensor with the expression `Tensor denseTensor = new mklab.JGNN.tensor.DenseTensor(long size)` .
-If there are many zero elements expected or if sizes go beyond the max integer limit Java imposes on array sizes (and hence a dense representation can not be stored as an array), a sparse tensor can be used per `Tensor sparseTensor = new mklab.JGNN.tensor.SparseTensor(long size)`. For example, one-hot encodings for classification problems can be generated with the following code, which creates a dense tensor with *numClasses* elements and puts at element *classId* the value 1:
+If there are many zero elements expected, or if sizes go beyond the max integer limit Java imposes on array sizes (and hence a dense representation can not be stored as an array), a sparse tensor can be used per `Tensor sparseTensor = new mklab.JGNN.tensor.SparseTensor(long size)`. For example, one-hot encodings for classification problems can be generated with the following code. This creates a dense tensor with *numClasses* elements and puts at element *classId* the value 1:
 
 ```java
 int classId = ...;
@@ -108,10 +108,11 @@ Operation | Type | Comments
 
 
 ## Named dimensions
-In addition to other oeprations, there exists a type of in-place arithmetic operations that do not affect tensor or matrix values but are only
-responsible for naming dimensions. These are purely decorative and only aim to improve debugging by throwing errors for incompatible non-null names. For example, adding two matrices with different
-dimension names will result in an error. Likewise, the inner dimension names during matrix multiplication
-should agree.
+In addition to other oeprations, there exists a type of in-place arithmetic operations that do not affect
+tensor or matrix values but are only responsible for naming dimensions. These are purely decorative and 
+aim to improve debugging by throwing errors for incompatible non-null names. For example, adding two
+matrices with different dimension names will result in an error. Likewise, the inner dimension names 
+during matrix multiplication should agree.
 
 Operation | Type | Comments
 --- | --- | ---
@@ -121,9 +122,8 @@ Operation | Type | Comments
  `Tensor setDimensionName(String rowName, String colName)` | arithmetic | A shorthand of calling `setRowName(rowName).setColName(colName)`.
  
  
-When they can, arithmetic operations, *including* matrix multiplication and copying,
-automatically infer dimension names in the result
-to make sure that only compatible data types are compared.
-Dimension names can be freely changed for any data Tensor object *without*
-backtracking changes (even for see-through data types, shuch as asTransposed()).
+:bulb: Arithmetic operations, *including* matrix multiplication and copying,
+automatically infer dimension names in the result to make sure that only compatible data types 
+are compared. Dimension names can be freely changed for any Tensor *without*
+backtracking changes (even for see-through data types, such as the outcome of asTransposed()).
  
