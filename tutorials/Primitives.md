@@ -1,10 +1,18 @@
-# Working with primitives
-JGNN provides the `mklab.JGNN.core.Tensor` abstract class for storing
-calculation primitives. Vector and matrix operations use primitives 
+# Primitives
+Primitive operations found in other tutorials suffice for most 
+machine learning operations. However, you may need to process
+neural inputs, postprocess learning outcomes, create custom 
+parameters, contribute to the library with more components,
+or or make derivative works based on native java vector and matrix
+arithmetics.
+
+This tutorial lists JGNN primitives and explains how to work with them.
+
+In general, JGNN provides the `mklab.JGNN.core.Tensor` abstract class 
+for storing data. Vector and matrix operations use primitives 
 of this or derived classes. To reduce the number of code predicates
-and improve comprehensibility of source code, operations between
-two tensors are implemented by calling respective methods of the first
-one. 
+and improve comprehensibility, operations between two tensors are implemented 
+by calling respective methods of the first one. 
 
 ## Table of contents
 
@@ -14,17 +22,20 @@ one.
 4. [Named dimensions](#named-dimensions)
 
 ## Tensor operations
-Tensor operations are performed element-by-element and can be split
-into basic arithmetic, in-place arithmetic, summary statistics and
-element access ones. Basic arithmetics combine the values of two
-tensors to create a new one, whereas in-place arithmetics affect the 
-tensor's values and begin with with a "self" prefix for pairwise
-operations or "setTo" prefix to perform operators. Summary statistics
-comprise operations that output simple numeric values. Finally, element
-access allows manipulation of specific values. Here we present some commonly
-used operations applicable to all tensors, whose functionality is inferable
-from their name and argument types.
-For more operations or details, please refer to the project's Javadoc.
+Tensor operations are performed element-by-element and can be split into
+the following categories:
+<br>a) *arithmetic* - combine the values of two tensors to create a new one
+<br>b) *in-place arithmetic* - combine the values of two tensors to alter the first one
+<br>c) *summary statistics* - output simple numeric values
+<br>c) *element access* - manipulation of specific values
+
+
+:bulb: In-place arithmetics follow the same naming conventions of base arithmetics and
+begin with with a "self" prefix for pairwise operations or "setTo" prefix to perform operators.
+
+Here we present some commonly used operations applicable to all tensors, whose functionality is inferable
+from their name and argument types. For more operations or details, please refer to the project's 
+[Javadoc](https://mklab-iti.github.io/JGNN/).
 
 Operation | Type | Comments
 --- | --- | ---
@@ -108,11 +119,11 @@ Operation | Type | Comments
 
 
 ## Named dimensions
-In addition to other oeprations, there exists a type of in-place arithmetic operations that do not affect
-tensor or matrix values but are only responsible for naming dimensions. These are purely decorative and 
-aim to improve debugging by throwing errors for incompatible non-null names. For example, adding two
-matrices with different dimension names will result in an error. Likewise, the inner dimension names 
-during matrix multiplication should agree.
+In addition to other operations, there exist methods that do not affect
+tensor or matrix values but are only responsible for naming dimensions. Functioanlly, these
+are decorative and  aim to improve debugging by throwing errors for incompatible non-null names. 
+For example, adding two matrices with different dimension names will result in an error. 
+Likewise, the inner dimension names during matrix multiplication should agree.
 
 Operation | Type | Comments
 --- | --- | ---
@@ -120,10 +131,13 @@ Operation | Type | Comments
  `Tensor setRowName(String rowName)` | arithmetic | For naming what kind of information matrix rows hold (e.g. `"samples"`).
  `Tensor setColName(String colName)` | arithmetic | For naming what kind of information matrix columns hold (e.g. `"features"`).
  `Tensor setDimensionName(String rowName, String colName)` | arithmetic | A shorthand of calling `setRowName(rowName).setColName(colName)`.
+
  
- 
-:bulb: Arithmetic operations, *including* matrix multiplication and copying,
+Arithmetic operations, *including* matrix multiplication and copying,
 automatically infer dimension names in the result to make sure that only compatible data types 
 are compared. Dimension names can be freely changed for any Tensor *without*
 backtracking changes (even for see-through data types, such as the outcome of asTransposed()).
+
+:bulb: Matrices effectively have three dimension names: for their rows, columns, and inner
+data as long as they are treated as tensors.
  

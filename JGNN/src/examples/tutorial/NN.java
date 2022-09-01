@@ -1,3 +1,4 @@
+package tutorial;
 
 
 import mklab.JGNN.adhoc.builders.LayeredBuilder;
@@ -7,15 +8,17 @@ import mklab.JGNN.nn.ModelBuilder;
 import mklab.JGNN.nn.ModelTraining;
 import mklab.JGNN.core.Slice;
 import mklab.JGNN.core.Tensor;
-import mklab.JGNN.core.loss.Accuracy;
 import mklab.JGNN.core.loss.BinaryCrossEntropy;
-import mklab.JGNN.data.IdConverter;
 import mklab.JGNN.data.datasets.Dataset;
 import mklab.JGNN.data.datasets.Datasets;
 import mklab.JGNN.nn.initializers.XavierNormal;
 import mklab.JGNN.nn.optimizers.Adam;
 
-
+/**
+ * This implementation covers code covered in the Neural Networks tutorial.
+ * 
+ * @author Emmanouil Krasanakis
+ */
 public class NN {
 
 	public static void main(String[] args) {

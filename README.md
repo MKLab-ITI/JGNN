@@ -8,7 +8,7 @@ JGNN provides GNNs to native Java applications and supports cross-platform machi
 learning, such as on Android, without specific hardware or firmware.
 
 * [Tutorials](tutorials/Tutorials.md)
-* [Javadoc](https://maniospas.github.io/JGNN/)
+* [Javadoc](https://mklab-iti.github.io/JGNN/)
 
 # :rocket: Features
 * Cross-platform (written in native java)

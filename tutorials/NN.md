@@ -2,10 +2,13 @@
 For this example, we refer to the same dataset and experimentation 
 methodology as in the in the [Basic concepts](tutorials/Introduction.md)
 But we will see how to easily create a multilayer perceptron.
+We cover the following topics:
 
 1. [Building layers](#building-layers)
 2. [Deep architecture](#deep-architecture)
 3. [Writing operations](#writing-operations)
+
+*Full implementations can be found in [examples](../JGNN/src/examples/tutorial/NN.java).*
 
 # Building layers
 The class building layered architectures (`LayeredBuilder`) improves base builder
@@ -82,4 +85,4 @@ set the numbers as hyperparameters.
 Prefer using hyperparameters for matrix and vector creation, as these transfer their names to respective
 dimensions for error checking. For `dropout,matrix,vector` you can also use the short names `drop,mat,vec`.
 
-[NEXT: Your first graph neural network](GNN.md)
+[NEXT: Graph neural networks](GNN.md)
