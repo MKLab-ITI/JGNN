@@ -21,7 +21,7 @@ import mklab.JGNN.data.IdConverter;
 import mklab.JGNN.nn.initializers.XavierNormal;
 import mklab.JGNN.nn.optimizers.Adam;
 
-public class APPNP {
+public class GCNII {
 
 	public static void main(String[] args) throws Exception {
 		IdConverter nodes2Ids = new IdConverter();
@@ -68,21 +68,24 @@ public class APPNP {
 		ModelBuilder modelBuilder = new GCNBuilder(adjacency, features)
 				.config("reg", 0.005)
 				.config("classes", numClasses)
-				.config("hidden", 64)
+				.config("hidden", 16)
+				.constant("I", Matrix.eye(16))
 				.layer("h{l+1}=relu(h{l}@matrix(features, hidden, reg)+vector(hidden))")
-				.layer("h{l+1}=h{l}@matrix(hidden, classes)+vector(classes)")
 				.rememberAs("0")
-				.constant("a", 0.9)
-				.layerRepeat("h{l+1} = a*(dropout(A, 0.5)@h{l})+(1-a)*h{0}", 10)
+				.constant("a", 0.1)
+				.futureConstants("b{l}", l->0.5/(l+1), 16)
+				.layerRepeat("ch{l}=b{l}*matrix(hidden, hidden)+(1-b{l})*I; h{l+1}=relu((1-a)*(dropout(A, 0.5)@h{l})+a*h{0})@ch{l}", 16)
+				.layer("h{l+1}=h{l}@matrix(hidden, classes)+vector(classes)")
 				.classify()
-				.assertBackwardValidity();				;
+				.assertBackwardValidity()
+				.print();
 		
 		ModelTraining trainer = new ModelTraining()
 				.setOptimizer(new Adam(0.01))
-				.setEpochs(10)
+				.setEpochs(300)
 				.setPatience(100)
 				.setLoss(new CategoricalCrossEntropy())
-				.setValidationLoss(new Accuracy());
+				.setValidationLoss(new CategoricalCrossEntropy());
 		
 		long tic = System.currentTimeMillis();
 		Slice nodes = nodes2Ids.getIds().shuffle(100);

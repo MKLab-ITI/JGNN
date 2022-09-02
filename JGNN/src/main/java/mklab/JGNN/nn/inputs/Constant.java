@@ -22,6 +22,10 @@ public class Constant extends Parameter {
 		return true;
 	}
 	@Override
+	public boolean isCachable() {
+		return tensor == data().lastOutput;
+	}
+	@Override
 	protected void trainParameters(Optimizer optimizer, Tensor error) {
 	}
 }

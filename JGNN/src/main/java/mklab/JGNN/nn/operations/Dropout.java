@@ -1,9 +1,7 @@
 package mklab.JGNN.nn.operations;
 
 import java.util.List;
-import java.util.Map.Entry;
 
-import mklab.JGNN.core.Matrix;
 import mklab.JGNN.nn.NNOperation;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.ColumnRepetition;
@@ -57,8 +55,8 @@ public class Dropout extends NNOperation {
 	}
 	
 	@Override
-	public boolean isConstant() {
-		return getInputs().get(0).isConstant();
+	public boolean isCachable() {
+		return false;
 	}
 	
 }

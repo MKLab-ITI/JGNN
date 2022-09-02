@@ -58,4 +58,12 @@ public class Parameter extends NNOperation {
 	protected Tensor partial(int inputId, List<Tensor> inputs, Tensor output, Tensor error) {
 		return null;
 	}
+	@Override
+	public boolean isConstant() {
+		return false;
+	}
+	@Override
+	public boolean isCachable() {
+		return false;
+	}
 }

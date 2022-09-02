@@ -15,11 +15,15 @@ public class Variable extends Parameter {
 		super(null);
 	}
 	@Override
+	protected void trainParameters(Optimizer optimizer, Tensor error) {
+	}
+	@Override
 	public boolean isConstant() {
 		return true;
 	}
 	@Override
-	protected void trainParameters(Optimizer optimizer, Tensor error) {
+	public boolean isCachable() {
+		return false;
 	}
 	public void setTo(Tensor value) {
 		this.tensor = value;

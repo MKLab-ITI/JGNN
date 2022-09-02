@@ -204,6 +204,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * number of non-zero elements for sparse tensors.
 	 * Basically, this quantity is proportional to the allocated memory.
 	 * @return A long number equal to or less to the tensor size.
+	 * @see #density()
 	 */
 	public long estimateNumNonZeroElements() {
 		/*long ret = 0;
@@ -213,6 +214,17 @@ public abstract class Tensor implements Iterable<Long> {
 		return ret;*/
 		return size;
 	}
+	
+	/**
+	 * Provides the memory allocation density of {@link #getNonZeroElements()}
+	 * compare to the size of the tensor. 1 indicates fully dense tensors,
+	 * and lower values sparser data.
+	 * @return A double in the range [0,1].
+	 */
+	public final double density() {
+		return estimateNumNonZeroElements() / (double)size;
+	}
+	
 	/**
 	 * Retrieves positions within the tensor that may hold non-zero elements.
 	 * This guarantees that <b>all non-zero elements positions are traversed</b> 
@@ -242,6 +254,8 @@ public abstract class Tensor implements Iterable<Long> {
 	 */
 	public final Tensor add(Tensor tensor) {
 		assertMatching(tensor);
+		if(density()<tensor.density()) 
+			return tensor.add(this);
 		Tensor res = copy();
 		for(long i : tensor.getNonZeroElements())
 			res.put(i, get(i)+tensor.get(i));
@@ -322,8 +336,12 @@ public abstract class Tensor implements Iterable<Long> {
 	public Tensor selfMultiply(Tensor tensor) {
 		assertMatching(tensor);
 		Tensor res = this;
-		for(long i : getNonZeroElements())
-			res.put(i, get(i)*tensor.get(i));
+		if(density()<tensor.density()) 
+			for(long i : getNonZeroElements())
+				res.put(i, get(i)*tensor.get(i));
+		else
+			for(long i : tensor.getNonZeroElements())
+				res.put(i, get(i)*tensor.get(i));
 		return res;
 	}
 	/**
@@ -457,8 +475,12 @@ public abstract class Tensor implements Iterable<Long> {
 	public final double dot(Tensor tensor) {
 		assertMatching(tensor);
 		double res = 0;
-		for(long i : getNonZeroElements())
-			res += get(i)*tensor.get(i);
+		if(density() < tensor.density())
+			for(long i : getNonZeroElements())
+				res += get(i)*tensor.get(i);
+		else
+			for(long i : tensor.getNonZeroElements())
+				res += get(i)*tensor.get(i);
 		return res;
 	}
 	/**

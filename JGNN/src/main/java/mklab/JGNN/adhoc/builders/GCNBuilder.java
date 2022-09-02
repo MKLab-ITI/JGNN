@@ -1,6 +1,7 @@
 package mklab.JGNN.adhoc.builders;
 
 import java.util.HashMap;
+import java.util.function.Function;
 
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.Tensor;
@@ -62,6 +63,20 @@ public class GCNBuilder extends ModelBuilder {
 	}
 	public GCNBuilder operation(String desc) {
 		super.operation(desc);
+		return this;
+	}
+	public GCNBuilder futureConfigs(String config, Function<Integer, Double> func, int depth) {
+		for(int layer=this.layer;layer<this.layer+depth;layer++) {
+			String expression = config.replace("{l}", ""+layer);
+			config(expression, func.apply(layer-this.layer));
+		}
+		return this;
+	}
+	public GCNBuilder futureConstants(String constantName, Function<Integer, Double> func, int depth) {
+		for(int layer=this.layer;layer<this.layer+depth;layer++) {
+			String expression = constantName.replace("{l}", ""+layer);
+			constant(expression, func.apply(layer-this.layer));
+		}
 		return this;
 	}
 }

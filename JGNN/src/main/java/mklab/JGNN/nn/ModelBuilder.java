@@ -53,6 +53,12 @@ public class ModelBuilder {
 	public Model getModel() {
 		return model;
 	}
+	/**
+	 * Checks whether the builder has added to its managed model a component of 
+	 * the given name.
+	 * @param name The component name to check for.
+	 * @return a <code>boolean</code> value
+	 */
 	public boolean hasComponent(String name) {
 		return components.containsKey(name);
 	}
@@ -65,8 +71,10 @@ public class ModelBuilder {
 			throw new IllegalArgumentException("Component name "+name+" already in use by another model component");
 	}
 	protected void assertExists(String name) {
+		if(configurations.containsKey(name))
+			throw new IllegalArgumentException("Component name "+name+" is a configuration but expressions can only parse components");
 		if(!components.containsKey(name))
-			throw new IllegalArgumentException("Component name "+name+" not declared (maybe it is a configuration)");
+			throw new IllegalArgumentException("Component name "+name+" not declared");
 	}
 	
 	public ModelBuilder var(String name) {
@@ -77,13 +85,35 @@ public class ModelBuilder {
 		variable.setDescription(name);
 		return this;
 	}
-
+	
+	/**
+	 * Declares the component with the given name an output of the 
+	 * managed model. The component should have already been assigned a value.
+	 * To output complex expressions use {@link #operation(String)}
+	 * to define them first.
+	 * @param name A component name.
+	 * @return The builder's instance.
+	 */
 	public ModelBuilder out(String name) {
 		assertExists(name);
 		model.addOutput(components.get(name));
 		return this;
 	}
 	
+	/**
+	 * Declares a learnable {@link Paramater} component with the given name,
+	 * learning L2 regularization, and initial value.
+	 * @param name The name to be assigned to the new component.
+	 * @param regularization The regularization value. Zero corresponds to no regularization.
+	 * 	Typically, this is non-negative.
+	 * @param value The initial value to be assigned to the parameter. Exact values
+	 * 	can be overridden by neural initialization strategies, but an initial value
+	 *  should be declared nonetheless to determine the parameter type and allocate
+	 *  any necessary memory.
+	 * @return The builder's instance.
+	 * @see #param(String, Tensor)
+	 * @see #operation(String)
+	 */
 	public ModelBuilder param(String name, double regularization, Tensor value) {
 		assertValidName(name);
 		NNOperation variable = new Parameter(value, regularization);
@@ -92,6 +122,18 @@ public class ModelBuilder {
 		return this;
 	}
 	
+	/**
+	 * Declares a configuration hyperparameter, which can be used to declare
+	 * matrix and vector parameters during {@link #operation(String)} expressions.
+	 * For in-expression use of hyperparameters, delcare them with {@link #constant(String, double)}.
+	 * @param name The name of the configuration hyperparameter.
+	 * @param value The value to be assigned to the hyperparameter.
+	 * 	Typically, provide a long number.
+	 * @return The builder's instance.
+	 * @see #operation(String)
+	 * @see #param(String, Tensor)
+	 * @see #param(String, double, Tensor)
+	 */
 	public ModelBuilder config(String name, double value) {
 		configurations.put(name, value);
 		return this;
@@ -112,7 +154,19 @@ public class ModelBuilder {
 			return false;
 		}
 	}
-	
+
+	/**
+	 * Declares a learnable {@link Paramater} component with the given name,
+	 * zero regularization, and initial value.
+	 * @param name The name to be assigned to the new component.
+	 * @param value The initial value to be assigned to the parameter. Exact values
+	 * 	can be overridden by neural initialization strategies, but an initial value
+	 *  should be declared nonetheless to determine the parameter type and allocate
+	 *  any necessary memory.
+	 * @return The builder's instance.
+	 * @see #param(String, double, Tensor)
+	 * @see #operation(String)
+	 */
 	public ModelBuilder param(String name, Tensor value) {
 		assertValidName(name);
 		NNOperation variable = new Parameter(value);
@@ -240,7 +294,6 @@ public class ModelBuilder {
 				else
 					newDesc += c;
 			}
-			//System.out.println(newDesc);
 			if(level!=0)
 				throw new RuntimeException("Imbalanced parenthesis in operation: "+desc);
 			desc = newDesc;
@@ -286,7 +339,7 @@ public class ModelBuilder {
 					newDesc = newDesc.substring(0, lastArgPos);
 					if(arg.startsWith("(") && arg.endsWith(")"))
 						arg = arg.substring(1, arg.length()-1).trim();
-					if(components.containsKey(arg)) 
+					if(components.containsKey(arg) || configurations.containsKey(arg)) 
 						newDesc += arg;
 					else {
 						newDesc += "("+arg+")";
@@ -401,6 +454,10 @@ public class ModelBuilder {
 		else if(splt[2].equals("log")) {
 			component = new Log();
 			arg0 = splt[3];
+		}
+		else if(splt[2].equals("debug")) {
+			component = this.get(splt[3]);
+			component.debugging = true;
 		}
 		else if(splt[2].equals("transpose")) {
 			component = new Transpose();

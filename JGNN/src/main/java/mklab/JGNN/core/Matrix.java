@@ -797,9 +797,7 @@ public abstract class Matrix extends Tensor {
 	}
 	
 	protected Matrix determineZeroCopy(Matrix with, long rows, long cols, long intermediate) {
-		double density1 = estimateNumNonZeroElements()/(double)getRows()/getCols();
-		double density2 = with.estimateNumNonZeroElements()/(double)with.getRows()/with.getCols();
-		if(density1*density2*intermediate < 0.3)
+		if(1-Math.pow(1-density()*with.density(), intermediate) < 0.3)
 			return new SparseMatrix(rows, cols);
 		/*if(with instanceof SparseMatrix) 
 			return ((Matrix)with).zeroCopy(rows, cols);

@@ -26,11 +26,13 @@ import mklab.JGNN.core.ThreadPool;
  * @author Emmanouil Krasanakis
  */
 public abstract class NNOperation {
-	public static boolean debugging = false;
+	public boolean debugging = false;
 	private ArrayList<NNOperation> inputs = new ArrayList<NNOperation>();
 	private ArrayList<NNOperation> outputs = new ArrayList<NNOperation>();
 	private String description = null;
 	private Boolean isConstant = null;
+	private Boolean isCachable = null;
+	private Tensor constantCache = null;
 	
 	protected static class ThreadData {
 		public Tensor lastOutput;
@@ -70,7 +72,8 @@ public abstract class NNOperation {
 	public String describe() {
 		return this.getClass()+": "
 					+(description!=null?description:("#"+this.hashCode()))+" = "
-					+(data().lastOutput!=null?data().lastOutput.describe():"null");
+					+(data().lastOutput!=null?data().lastOutput.describe():"NA")
+					+(isConstant()?" (constant)":"");
 	}
 	
 	/**
@@ -104,13 +107,14 @@ public abstract class NNOperation {
 	}
 	
 	/**
-	 * Checks whether the operation yields a constant output.
+	 * Checks whether the operation yields a constant output,
+	 * so that propagation does not try to compute partial derivatives for it.
 	 * @return A <code>boolean</code> value.
 	 */
 	public boolean isConstant() {
 		if(isConstant==null) {
 			if(inputs.size()==0)
-				isConstant = false;
+				throw new RuntimeException("Only components with overriden method isContant() can be used as inputs, this does not hold true for "+describe());
 			for(NNOperation input : inputs)
 				if(!input.isConstant()) {
 					isConstant = false;
@@ -120,6 +124,29 @@ public abstract class NNOperation {
 				isConstant = true;
 		}
 		return isConstant;
+	}
+	
+	/**
+	 * Checks whether the operation's output should be cached given
+	 * that it is a constant. This returns <code>false</code> only for 
+	 * randomized components that yield different outputs from
+	 * different inputs, such as dropouts.
+	 * @return A <code>boolean</code> values.
+	 */
+	public boolean isCachable() {
+		// return false to avoid components with isConstant()==true from caching outputs
+		if(isCachable==null) {
+			if(inputs.size()==0)
+				throw new RuntimeException("Only components with overriden method isCachable() can be used as inputs, this does not hold true for "+describe());
+			for(NNOperation input : inputs)
+				if(!input.isCachable()) {
+					isCachable = false;
+					break;
+				}
+			if(isCachable==null)
+				isCachable = true;
+		}
+		return isCachable;
 	}
 	
 	/**
@@ -149,6 +176,7 @@ public abstract class NNOperation {
 		inputs.add(inputComponent);
 		inputComponent.outputs.add(this);
 		isConstant = null;
+		isCachable = null;
 		return this;
 	}
 	
@@ -173,7 +201,7 @@ public abstract class NNOperation {
 			ThreadData data = data();
 			if(data.lastOutput!=null)
 				return data.lastOutput;
-			ArrayList<Tensor> lastInputs = new ArrayList<Tensor>();
+			ArrayList<Tensor> lastInputs = new ArrayList<Tensor>(inputs.size());
 			for(NNOperation input : inputs)
 				lastInputs.add(input.runPrediction());
 			/*for(int inputId=0;inputId<inputs.size();inputId++)
@@ -182,7 +210,7 @@ public abstract class NNOperation {
 						&& !inputs.get(inputId).isOutputNeededForDerivative())
 					inputs.get(inputId).data().lastOutput = null;*/
 			if(debugging) {
-				System.out.println("Predicting... "+this.getClass());
+				System.out.println("Predicting "+describe()+" for inputs:");
 				for(Tensor input : lastInputs)
 					System.out.println("\t"+input.describe());
 				/*if(data()!=data)
@@ -190,9 +218,18 @@ public abstract class NNOperation {
 			}
 			if(data()!=data)
 				throw new RuntimeException("Thread data object should not change within the same thread");
-			data.lastOutput = forward(lastInputs);
+
+			if(constantCache!=null) {
+				data.lastOutput = constantCache;
+				if(debugging)
+					System.out.println("\tUsing cached value for "+describe());
+			}
+			else 
+				data.lastOutput = forward(lastInputs);
 			data.tapeError = null;
 			data.countTapeSources = 0;
+			if(isConstant() && isCachable())
+				constantCache = data.lastOutput;
 			if(debugging) 
 				System.out.println("\t=> "+describe());
 			return data.lastOutput;
@@ -209,6 +246,8 @@ public abstract class NNOperation {
 	}
 	
 	final void backpropagate(Optimizer optimizer, Tensor error) {
+		if(constantCache!=null)
+			return;
 		try {
 			ThreadData data = data();
 			if(debugging && error!=null)
@@ -231,7 +270,7 @@ public abstract class NNOperation {
 				return;
 			//if(debugging)
 			//	System.out.println("Packpropagating... "+describe()+" Derivative "+data.tapeError+" prev out "+data.lastOutput);
-			ArrayList<Tensor> lastInputs = new ArrayList<Tensor>();
+			ArrayList<Tensor> lastInputs = new ArrayList<Tensor>(inputs.size());
 			for(NNOperation input : inputs)
 				lastInputs.add(input.data().lastOutput);
 			for(int i=0;i<inputs.size();i++)

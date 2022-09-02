@@ -1,7 +1,6 @@
 package mklab.JGNN.core.matrix;
 
 import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
