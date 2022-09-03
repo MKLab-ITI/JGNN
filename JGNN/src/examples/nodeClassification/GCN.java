@@ -9,7 +9,6 @@ import mklab.JGNN.core.Matrix;
 import mklab.JGNN.nn.Model;
 import mklab.JGNN.nn.ModelBuilder;
 import mklab.JGNN.nn.ModelTraining;
-import mklab.JGNN.nn.NNOperation;
 import mklab.JGNN.core.Slice;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.loss.Accuracy;

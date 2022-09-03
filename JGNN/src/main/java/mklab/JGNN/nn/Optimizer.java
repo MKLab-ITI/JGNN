@@ -10,6 +10,18 @@ import mklab.JGNN.core.Tensor;
  * @author Emmanouil Krasanakis
  */
 public abstract interface Optimizer {
+	/**
+	 * In-place updates the value of a tensor given its gradient.
+	 * Some optimizers (e.g. Adama) require the exact same tensor instance to be provided
+	 * so as to keep track of its optimization progress. The library makes sure to keep
+	 * this constraint.
+	 * @param value The tensor to update.
+	 * @param gradient The tensor's gradient.
+	 */
 	public void update(Tensor value, Tensor gradient);
+	/**
+	 * Resets (and lets the garbage collector free) optimizer memory.
+	 * Should be called at the beginning of training (<b>not</b> after each epoch). 
+	 */
 	public default void reset() {};
 }

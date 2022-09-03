@@ -23,6 +23,10 @@ public class ColumnRepetition extends Matrix {
 		this.column = column;
 		this.setDimensionName(null, column.getDimensionName());
 	}
+	/**
+	 * Retrieves the wrapped column tensor.
+	 * @return The wrapped {@link Tensor}.
+	 */
 	public Tensor getColumn() {
 		return column;
 	}

@@ -506,7 +506,7 @@ public abstract class Matrix extends Tensor {
 	 * Sets the Matrix to its symmetrically normalized transformation 
 	 * by appropriately adjusting its element values.
 	 * @return <code>this</code> Matrix instance.
-	 * @see #laplacian()
+	 * @see #symmetricNormalization()
 	 */
 	public Matrix setToSymmetricNormalization() {
 		HashMap<Long, Double> outDegrees = new HashMap<Long, Double>();

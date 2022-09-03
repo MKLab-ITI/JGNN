@@ -19,6 +19,11 @@ public class AccessCol extends Tensor {
 	private Matrix matrix;
 	private long col;
 	
+	/**
+	 * Instantiates a see-through access of a matrix column.
+	 * @param matrix The base matrix.
+	 * @param col Which column to access.
+	 */
 	public AccessCol(Matrix matrix, long col) {
 		super(matrix.getRows());
 		this.matrix = matrix;

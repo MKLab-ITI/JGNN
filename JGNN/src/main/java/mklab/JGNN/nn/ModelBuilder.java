@@ -37,6 +37,12 @@ import mklab.JGNN.nn.pooling.Max;
  * textual descriptions.
  * 
  * @author Emmanouil Krasanakis
+ * @see #config(String, double)
+ * @see #constant(String, double)
+ * @see #constant(String, Tensor)
+ * @see #operation(String)
+ * @see #out(String)
+ * @see #getModel()
  */
 public class ModelBuilder {
 	private String routing = "";
@@ -175,10 +181,29 @@ public class ModelBuilder {
 		return this;
 	}
 	
+	/**
+	 * Declares a non-learnable constant component with the given name.
+	 * This can be used in computations. To edit the constant's values,
+	 * use {@link #get(String)} to retrieve the respective component.
+	 * @param name The name of the constant component.
+	 * @param value A double value to assign to the constant.
+	 * @return The builder's instance.
+	 * @see #config(String, double)
+	 * @see #constant(String, Tensor)
+	 */
 	public ModelBuilder constant(String name, double value) {
 		return constant(name, Tensor.fromDouble(value));
 	}
 	
+	/**
+	 * Declares a non-learnable constant component with the given name.
+	 * This can be used in computations. To edit the constant's values,
+	 * use {@link #get(String)} to retrieve the respective component.
+	 * @param name The name of the constant component.
+	 * @param value A Tensor value to assign to the constant.
+	 * @return The builder's instance.
+	 * @see #constant(String, double)
+	 */
 	public ModelBuilder constant(String name, Tensor value) {
 		if(components.containsKey(name)) {
 			((Constant)components.get(name)).set(value);
@@ -192,20 +217,58 @@ public class ModelBuilder {
 		return this;
 	}
 	
+	/**
+	 * Retrieves the {@link NNComponent} registered with the provided
+	 * name, for example to investigates its value.
+	 * @param name The name of the component.
+	 * @return A {@link NNComponent}.
+	 */
 	public NNOperation get(String name) {
 		return components.get(name);
 	}
 	
+	/**
+	 * This is a wrapper for <code>getModel().predict(inputs)</code>
+	 * <b>without</b> returning output values (use {@link #get(String)}
+	 * afterwards to view outputs.
+	 * @param inputs A variable number of Tensor inputs.
+	 * @return The builder's instance.
+	 * @see #getModel()
+	 * @see Model#predict(List)
+	 */
 	public ModelBuilder runModel(Tensor... inputs) {
 		model.predict(inputs);
 		return this;
 	}
-	
+	/**
+	 * This is a wrapper for <code>getModel().predict(inputs)</code>
+	 * <b>without</b> returning output values (use {@link #get(String)}
+	 * afterwards to view outputs.
+	 * @param inputs A list of Tensor inputs.
+	 * @return The builder's instance.
+	 * @see #getModel()
+	 * @see Model#predict(ArrayList<Tensor>)
+	 */
 	public ModelBuilder runModel(ArrayList<Tensor> inputs) {
 		model.predict(inputs);
 		return this;
 	}
 	
+	/**
+	 * Parses one or more operations split by new line characters or ; 
+	 * to add to the execution graph. All operations should assign a
+	 * value to a new component name and comprise operators and functions. 
+	 * For a detailed description of the domain-specific language this
+	 * method accepts, please refer to the library's 
+	 * <a href="https://github.com/MKLab-ITI/JGNN/blob/main/tutorials/NN.md">
+	 * online documentation</a>.
+	 * @param desc The operation to parse.
+	 * @return The builder's instance.
+	 * @see #config(String, double)
+	 * @see #constant(String, double)
+	 * @see #constant(String, Tensor)
+	 * @see #out(String)
+	 */
 	public ModelBuilder operation(String desc) {
 		
 		//System.out.println(desc);
@@ -455,7 +518,7 @@ public class ModelBuilder {
 			component = new Log();
 			arg0 = splt[3];
 		}
-		else if(splt[2].equals("debug")) {
+		else if(splt[2].equals("monitor")) {
 			component = this.get(splt[3]);
 			component.debugging = true;
 		}
@@ -536,6 +599,13 @@ public class ModelBuilder {
 		return this;
 	}
 	
+	/**
+	 * Asserts that all components parsed into a call graph with
+	 * {@link #operation(String)} are eventually used by at least one {@link #out(String)}
+	 * component.
+	 * @return The builder's instance.
+	 * @throws RuntimeException if not all execution graph branches lead to declared outputs.
+	 */
 	public ModelBuilder assertBackwardValidity() {
 		HashSet<NNOperation> allFoundComponents = new HashSet<NNOperation>();
 		Stack<NNOperation> pending = new Stack<NNOperation>();
@@ -566,11 +636,20 @@ public class ModelBuilder {
 		
 		return this;
 	}
-	
+	/**
+	 * Creates a description of the builded model's internal execution graph.
+	 * @return A <code>String</code>.
+	 * @see #print()
+	 */
 	public String describe() {
 		getModel();
 		return routing;
 	}
+	/**
+	 * Exports the builded model's execution graph into a <it>.dot</it> format
+	 * representation.
+	 * @return A <code>String</code> to be pasted into GraphViz for visualization.
+	 */
 	public String getExecutionGraphDot() {
 		getModel();
 		String ret = "//Can visualize at: https://dreampuf.github.io/GraphvizOnline";

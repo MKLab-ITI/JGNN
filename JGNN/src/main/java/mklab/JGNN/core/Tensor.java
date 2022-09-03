@@ -84,7 +84,24 @@ public abstract class Tensor implements Iterable<Long> {
 				throw new RuntimeException("Did not find a finite value");
 	}
 	protected abstract void allocate(long size);
+	/**
+	 * If the subclassed tensor allows it, release all memory it takes up
+	 * so that the garbage collector will eventually clean it up. This
+	 * memory will be released anyway by Java once there are no more
+	 * references to the object.
+	 * @see #persist()
+	 * @deprecated This method may not be present in future versions
+	 *  of the library, depending on whether memory reuse proves useful or nor.
+	 */
 	public abstract void release();
+	/**
+	 * If supported by the subclassed tensor, invalidates calls to
+	 * {@link #release()} so that memory is a de-allocated only when
+	 * object references expire.
+	 * @see #release()
+	 * @deprecated This method may not be present in future versions
+	 *  of the library, depending on whether memory reuse proves useful or nor.
+	 */
 	public abstract void persist();
 	/**
 	 * Assign a value to a tensor element. All tensor operations use this function to wrap

@@ -64,8 +64,8 @@ public class Dataset {
 	
 	/**
 	 * Retrieves the features of a single node.
-	 * @param node
-	 * @return
+	 * @param node The node.
+	 * @return A list of String features.
 	 */
 	public ArrayList<String> getNodeFeatures(long node) {
 		if(nodeFeatures.isEmpty())

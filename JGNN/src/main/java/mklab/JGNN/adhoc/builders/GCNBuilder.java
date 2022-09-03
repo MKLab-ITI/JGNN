@@ -7,6 +7,13 @@ import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.nn.ModelBuilder;
 
+/**
+ * This extends the capabilities of {@link LayeredBuilder} to use
+ * for node classification. It accepts the adjacency graph in the constructor,
+ * to be used with the name <it>A</it> in operations or layer definitions,
+ * and node features.
+ * @author Emmanouil Krasanakis
+ */
 public class GCNBuilder extends ModelBuilder {
 	private int layer = 0;
 	private HashMap<String, Integer> rememberAs = new HashMap<String, Integer>();
@@ -15,7 +22,6 @@ public class GCNBuilder extends ModelBuilder {
 		config("features", numFeatures);
 		constant("A", adjacency);
 		constant("h0", features);
-		var("nodes");
 	}
 	public GCNBuilder rememberAs(String layerId) {
 		rememberAs.put(layerId, layer);
@@ -31,6 +37,7 @@ public class GCNBuilder extends ModelBuilder {
 		return operation(expression);
 	}
 	public GCNBuilder classify() {
+		var("nodes");
 		layer("h{l+1}=h{l}[nodes]");
 		layer("h{l+1}=softmax(h{l}, row)");
 		out("h"+layer);

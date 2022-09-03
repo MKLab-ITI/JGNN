@@ -12,10 +12,18 @@ import mklab.JGNN.core.Tensor;
 public class BinaryCrossEntropy extends Loss {
 	private double epsilon;
 	
+	/**
+	 * Initializes binary cross entropy with 1.E-12 epsilon value.
+	 * @see #BinaryCrossEntropy(double)
+	 */
 	public BinaryCrossEntropy() {
 		this(1.E-12);
 	}
-	
+	/**
+	 * Initializes binary cross entropy with and epsilon value 
+	 * to bound its outputs in the range [log(epsilon), -log(epsilon)] instead of (-inf, inf).
+	 * @param epsilon A very small positive <code>double</code>.
+	 */
 	public BinaryCrossEntropy(double epsilon) {
 		this.epsilon = epsilon;
 	}

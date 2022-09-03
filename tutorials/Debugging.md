@@ -6,6 +6,7 @@ and how to make sense of error messages to fix erroneous architectures.
 1. [Name checking](#name-checking)
 2. [Debugging execution DAGs](#debugging-execution-dags)
 3. [Debugging logical errors](#debugging-logical-errors)
+4. [Monitoring operations](#monitoring-operations)
 
 ## Name checking
 When parsing operations, values should be assigned to variables before
@@ -123,3 +124,24 @@ they coincide with the multiplication's inputs, but this will not always be the 
 The important point, is to go back to the execution tree and see during which exact operation
 this variable is defined. There, we will undoubtedly find that some dimension had 64 instead
 of 32 elements or conversely.
+
+## Monitoring operations
+In addition to all other debugging mechanisms, JGNN presents a way to view when
+forward and backward operations of specific code components are executed and with what kinds
+of arguments.
+This can be particularly useful when testing new components in real (complex) architectures.
+
+The practice consists of calling a *monitor(...)* function within operations.
+This does not affect what expressions do and only enables printing execution tree operations
+on operation components. For example, to monitor the outcome of matrix multiplication within 
+the following operation:
+
+```java
+builder.operation("h = relu(x@matrix(features, 64) + vector(64))")
+```
+
+it should be converted to:
+
+```java
+builder.operation("h = relu(monitor(x@matrix(features, 64)) + vector(64))")
+```

@@ -18,7 +18,12 @@ import mklab.JGNN.core.util.Range;
 public class AccessRow extends Tensor {
 	private Matrix matrix;
 	private long row;
-	
+
+	/**
+	 * Instantiates a see-through access of a matrix row.
+	 * @param matrix The base matrix.
+	 * @param col Which row to access.
+	 */
 	public AccessRow(Matrix matrix, long row) {
 		super(matrix.getCols());
 		this.matrix = matrix;
