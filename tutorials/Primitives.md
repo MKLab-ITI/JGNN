@@ -1,9 +1,9 @@
 # Primitives
 Primitive operations found in other tutorials suffice for most 
-machine learning operations. However, you may need to process
+use cases. However, you may need to process
 neural inputs, postprocess learning outcomes, create custom 
 parameters, contribute to the library with more components,
-or or make derivative works based on native java vector and matrix
+o make derivative works based on native java vector and matrix
 arithmetics.
 
 This tutorial lists JGNN primitives and explains how to work with them.

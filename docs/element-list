@@ -1,5 +1,3 @@
-classification
-mklab.JGNN
 mklab.JGNN.adhoc.builders
 mklab.JGNN.core
 mklab.JGNN.core.distribution
@@ -17,6 +15,3 @@ mklab.JGNN.nn.inputs
 mklab.JGNN.nn.operations
 mklab.JGNN.nn.optimizers
 mklab.JGNN.nn.pooling
-nodeClassification
-primitives
-tutorial

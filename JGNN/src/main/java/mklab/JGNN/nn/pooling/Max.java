@@ -8,6 +8,13 @@ import mklab.JGNN.nn.NNOperation;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.tensor.DenseTensor;
 
+
+/**
+ * Implements a {@link NNOperation} that performs row-wise or column-wise
+ * maximum reduction on vector tensors or matrices.
+ * 
+ * @author Emmanouil Krasanakis
+ */
 public class Max extends NNOperation {
 	private boolean colMode;
 	public Max() {

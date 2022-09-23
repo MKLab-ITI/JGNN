@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import mklab.JGNN.core.Loss;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.Memory;
 import mklab.JGNN.core.Slice;

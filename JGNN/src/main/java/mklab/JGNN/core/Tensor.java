@@ -403,6 +403,26 @@ public abstract class Tensor implements Iterable<Long> {
 		return res;
 	}
 	/**
+	 * Computes the exponential minus 1 of tensor elements.
+	 * @return A new Tensor that stores the outcome of finding the operation on each element.
+	 */
+	public final Tensor expMinusOne() {
+		Tensor res = zeroCopy();
+		for(long i : getNonZeroElements())
+			res.put(i, Math.exp(get(i)));
+		return res;
+	}
+	/**
+	 * Sets the exponential minus 1 of tensor elements.
+	 * @return  <code>this</code> Tensor instance.
+	 */
+	public final Tensor selfExpMinusOne() {
+		Tensor res = this;
+		for(long i : getNonZeroElements())
+			res.put(i, Math.exp(get(i)));
+		return res;
+	}
+	/**
 	 * Computes the logarithm of tensor elements.
 	 * @return A new Tensor that stores the outcome of finding the logarithm of the absolute of each element.
 	 */
@@ -749,9 +769,20 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @param start The start of the range.
 	 * @param end The end of the range.
 	 * @return A {@link DenseTensor} with size end-start
+	 * @see #fromRange(long)
 	 */
 	public static Tensor fromRange(long start, long end) {
 		return new DenseTensor(new Range(start, end));
+	}
+	/**
+	 * Creates a dense tensor holding the desired range [0, 1, ..., end-1].
+	 * This allocates a new tensor.
+	 * @param end The end of the range.
+	 * @return A {@link DenseTensor} with size end-start
+	 * @see #fromRange(long, long)
+	 */
+	public static Tensor fromRange(long end) {
+		return fromRange(0, end);
 	}
 	/**
 	 * Converts a tensor of {@link #size()}==1 to double. Throws an exception otherwise.

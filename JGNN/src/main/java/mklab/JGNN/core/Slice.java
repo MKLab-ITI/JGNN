@@ -31,6 +31,10 @@ public class Slice implements Iterable<Long> {
 		return new Slice(ids.subList(from, end));
 	}
 	
+	public Matrix samplesAsFeatures(){
+		return Tensor.fromRange(0, size()).asColumn();
+	}
+	
 	public Slice range(double from, double end) {
 		if(from<1)
 			from = (int)(from*size());

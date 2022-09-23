@@ -18,15 +18,26 @@ import mklab.JGNN.core.util.Range;
 public class AccessSubtensor extends Tensor {
 	private Tensor baseTensor;
 	private long begin;
-	
+
+	/**
+	 * Instantiates a see-through access of a tensor elements.
+	 * @param baseTensor The base tensor whose elements to access.
+	 * @param begin The first element to access. (This is retrieved by <code>get(0)</code>.)
+	 */
 	public AccessSubtensor(Tensor baseTensor, long begin) {
 		this(baseTensor, begin, baseTensor.size());
 	}
+	/**
+	 * Instantiates a see-through access of a tensor elements.
+	 * @param baseTensor The base tensor whose elements to access.
+	 * @param begin The first element to access. (This is retrieved by <code>get(0)</code>.)
+	 * @param end The non-inclusive last element. (The subtensor has size <code>begin-end</code>.)
+	 */
 	public AccessSubtensor(Tensor baseTensor, long begin, long end) {
 		super(end-begin);
 		if(baseTensor==null)
 			throw new IllegalArgumentException("SubTensor cannot wrap a null base tensor");
-		if(begin>end)
+		if(begin>=end)
 			throw new IllegalArgumentException("SubTensor cannot start after its end");
 		if(begin<0)
 			throw new IllegalArgumentException("SubTensor cannot start before zero");

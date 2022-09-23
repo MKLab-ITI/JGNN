@@ -18,7 +18,7 @@ import mklab.JGNN.nn.inputs.Constant;
 public class LRelu extends NNOperation {
 	@Override
 	protected Tensor forward(List<Tensor> inputs) {
-		if(inputs.size()!=1)
+		if(inputs.size()!=2)
 			throw new IllegalArgumentException();
 		Tensor x = inputs.get(0);
 		Tensor ret = x.zeroCopy();

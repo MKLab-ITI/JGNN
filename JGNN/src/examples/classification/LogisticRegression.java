@@ -1,42 +1,37 @@
 package classification;
 
+import mklab.JGNN.adhoc.Dataset;
+import mklab.JGNN.adhoc.IdConverter;
+import mklab.JGNN.adhoc.ModelBuilder;
+import mklab.JGNN.adhoc.datasets.Citeseer;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.nn.Model;
-import mklab.JGNN.nn.ModelBuilder;
 import mklab.JGNN.nn.ModelTraining;
+import mklab.JGNN.nn.loss.Accuracy;
+import mklab.JGNN.nn.loss.BinaryCrossEntropy;
 import mklab.JGNN.core.Slice;
 import mklab.JGNN.core.Tensor;
-import mklab.JGNN.core.loss.Accuracy;
-import mklab.JGNN.core.loss.BinaryCrossEntropy;
 import mklab.JGNN.core.matrix.DenseMatrix;
 import mklab.JGNN.core.tensor.DenseTensor;
-import mklab.JGNN.data.IdConverter;
-import mklab.JGNN.data.datasets.Dataset;
-import mklab.JGNN.data.datasets.Datasets;
 import mklab.JGNN.nn.optimizers.GradientDescent;
 
 /**
- * <b>Tasks</b>	       : node classification<br>
- * <b>Algorithms</b>   : logistic regression<br>
- * <b>Datasets</b>     : Lymphography<br>
- * <b>Demonstrates</b> : dataset parsing, {@link ModelBuilder}, {@link ModelTraining}, accuracy evaluation<br>
+ * Demonstrates classification with logistic regression.
  * 
  * @author Emmanouil Krasanakis
  */
 public class LogisticRegression {
 
 	public static void main(String[] args) {
-		Dataset dataset = new Datasets.Lymphography();
-		IdConverter nodes = dataset.nodes();
-		Matrix labels = nodes.oneHot(dataset.getLabels()).setDimensionName("samples", "labels");
-		Matrix features = nodes.oneHot(dataset.getFeatures()).setDimensionName("samples", "features");
+		Dataset dataset = new Citeseer();
+		IdConverter nodes = dataset.samples();
 		
-		System.out.println("Nodes\t: "+dataset.nodes().size());
-		System.out.println("Labels\t: "+labels.describe());
-		System.out.println("Features: "+features.describe());
-		
-		long numFeatures = features.getCols();
-		long numClasses = labels.getCols();
+		System.out.println("Nodes\t: "+dataset.samples().size());
+		System.out.println("Labels\t: "+dataset.labels().describe());
+		System.out.println("Features: "+dataset.features().describe());
+
+		long numFeatures = dataset.features().getCols();
+		long numClasses = dataset.labels().getCols();
 		ModelBuilder modelBuilder = new ModelBuilder()
 				.var("x")
 				.param("w", new DenseMatrix(numFeatures, numClasses)
@@ -47,7 +42,7 @@ public class LogisticRegression {
 				.out("yhat")
 				.print();
 		
-		Slice nodeIds = dataset.nodes().getIds().shuffle(100);
+		Slice nodeIds = dataset.samples().getSlice().shuffle(100);
 		
 		
 		long tic = System.currentTimeMillis();
@@ -58,13 +53,16 @@ public class LogisticRegression {
 				.setParallelizedStochasticGradientDescent(true)
 				.setLoss(new BinaryCrossEntropy())
 				.setValidationLoss(new Accuracy())
-				.train(modelBuilder.getModel(), features, labels, nodeIds.range(0, 0.6), nodeIds.range(0.6, 0.8));
+				.train(modelBuilder.getModel(), 
+						dataset.features(), 
+						dataset.labels(), 
+						nodeIds.range(0, 0.6), nodeIds.range(0.6, 0.8));
 		long toc = System.currentTimeMillis();
 
 		double acc = 0;
 		for(Long node : nodeIds.range(0.8, 1)) {
-			Matrix nodeFeatures = features.accessRow(node).asRow();
-			Matrix nodeLabels = labels.accessRow(node).asRow();
+			Matrix nodeFeatures = dataset.features().accessRow(node).asRow();
+			Matrix nodeLabels = dataset.features().accessRow(node).asRow();
 			Tensor output = model.predict(nodeFeatures).get(0);
 			acc += (output.argmax()==nodeLabels.argmax()?1:0);
 		}

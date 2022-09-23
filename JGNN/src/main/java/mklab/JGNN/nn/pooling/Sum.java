@@ -1,6 +1,7 @@
 package mklab.JGNN.nn.pooling;
 
 import java.util.List;
+
 import java.util.Map.Entry;
 
 import mklab.JGNN.core.Matrix;
@@ -8,6 +9,12 @@ import mklab.JGNN.nn.NNOperation;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.tensor.DenseTensor;
 
+/**
+ * Implements a {@link NNOperation} that performs row-wise or column-wise
+ * sum reduction on vector tensors or matrices.
+ * 
+ * @author Emmanouil Krasanakis
+ */
 public class Sum extends NNOperation {
 	private boolean colMode;
 	public Sum() {

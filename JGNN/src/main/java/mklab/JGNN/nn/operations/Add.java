@@ -1,6 +1,5 @@
 package mklab.JGNN.nn.operations;
 
-import java.util.Arrays;
 import java.util.List;
 
 import mklab.JGNN.core.Matrix;

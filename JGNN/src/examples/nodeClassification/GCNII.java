@@ -4,21 +4,21 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
 
-import mklab.JGNN.adhoc.builders.GCNBuilder;
+import mklab.JGNN.adhoc.IdConverter;
+import mklab.JGNN.adhoc.ModelBuilder;
+import mklab.JGNN.adhoc.parsers.GCNBuilder;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.nn.Model;
-import mklab.JGNN.nn.ModelBuilder;
 import mklab.JGNN.nn.ModelTraining;
 import mklab.JGNN.nn.NNOperation;
 import mklab.JGNN.core.Slice;
 import mklab.JGNN.core.Tensor;
-import mklab.JGNN.core.loss.Accuracy;
-import mklab.JGNN.core.loss.CategoricalCrossEntropy;
 import mklab.JGNN.core.matrix.SparseMatrix;
 import mklab.JGNN.core.matrix.WrapRows;
 import mklab.JGNN.core.tensor.SparseTensor;
-import mklab.JGNN.data.IdConverter;
 import mklab.JGNN.nn.initializers.XavierNormal;
+import mklab.JGNN.nn.loss.Accuracy;
+import mklab.JGNN.nn.loss.CategoricalCrossEntropy;
 import mklab.JGNN.nn.optimizers.Adam;
 
 public class GCNII {
@@ -88,7 +88,7 @@ public class GCNII {
 				.setValidationLoss(new CategoricalCrossEntropy());
 		
 		long tic = System.currentTimeMillis();
-		Slice nodes = nodes2Ids.getIds().shuffle(100);
+		Slice nodes = nodes2Ids.getSlice().shuffle(100);
 		Model model = modelBuilder.getModel()
 				.init(new XavierNormal())
 				.train(trainer,

@@ -2,18 +2,22 @@ package primitives;
 
 import java.util.Arrays;
 
+import mklab.JGNN.adhoc.ModelBuilder;
 import mklab.JGNN.core.Matrix;
-import mklab.JGNN.nn.ModelBuilder;
+import mklab.JGNN.nn.loss.BinaryCrossEntropy;
 import mklab.JGNN.core.Tensor;
-import mklab.JGNN.core.loss.BinaryCrossEntropy;
 import mklab.JGNN.core.matrix.DenseMatrix;
 import mklab.JGNN.core.tensor.DenseTensor;
 import mklab.JGNN.nn.optimizers.Adam;
 import mklab.JGNN.nn.optimizers.BatchOptimizer;
 import mklab.JGNN.nn.optimizers.Regularization;
 
+/**
+ * Demonstrates custom initialization of parameters.
+ * 
+ * @author Emmanouil Krasanakis
+ */
 public class SimpleNetwork {
-
 	public static void main(String[] args) throws Exception {
 		int dims = 2;
 		ModelBuilder modelBuilder = new ModelBuilder()
@@ -30,7 +34,6 @@ public class SimpleNetwork {
 		Tensor y = x1.multiply(2);
 		
 		BatchOptimizer optimizer = new BatchOptimizer(new Regularization(new Adam(0.01), -0.00));
-		// when no output is passed to training, the output is considered to be an error
 		for(int i=0;i<10000;i++) {
 			for(int j=0;j<10;j++)
 				modelBuilder.getModel().train(new BinaryCrossEntropy(), optimizer, 
@@ -39,6 +42,5 @@ public class SimpleNetwork {
 			optimizer.updateAll();
 			System.out.println(modelBuilder.runModel(Matrix.fromDouble(0.5)).get("yhat").getPrediction());
 		}
-		//run the wrapped model and obtain an internal variable prediction
 	}
 }

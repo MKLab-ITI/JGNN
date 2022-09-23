@@ -6,6 +6,12 @@ import mklab.JGNN.core.Matrix;
 import mklab.JGNN.nn.NNOperation;
 import mklab.JGNN.core.Tensor;
 
+/**
+ * Implements a {@link NNOperation} that performs row-wise or column-wise
+ * softmax on vector tensors or matrices.
+ * 
+ * @author Emmanouil Krasanakis
+ */
 public class SoftMax extends NNOperation {
 	private boolean colMode;
 	public SoftMax() {
