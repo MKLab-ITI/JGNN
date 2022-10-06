@@ -170,9 +170,9 @@ public class ModelBuilder {
 					}
 					else {
 						String[] dims = type.substring(type.indexOf('(')+1, type.lastIndexOf(')')).split(",");
-						String[] dimRowParts = dims[0].strip().split("\\s", 2);
+						String[] dimRowParts = dims[0].trim().split("\\s", 2);
 						int dimRow = Integer.parseInt(dimRowParts[dimRowParts.length-1]);
-						String[] dimColParts = dims[1].strip().split("\\s", 2);
+						String[] dimColParts = dims[1].trim().split("\\s", 2);
 						int dimCol = Integer.parseInt(dimColParts[dimColParts.length-1]);
 						tensor = isDense?new DenseMatrix(dimRow, dimCol):new SparseMatrix(dimRow, dimCol);
 						if(dimRowParts.length>1)
