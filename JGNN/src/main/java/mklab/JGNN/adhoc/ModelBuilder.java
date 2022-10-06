@@ -71,6 +71,11 @@ public class ModelBuilder {
 	public ModelBuilder(Model model) {
 		this.model = model;
 	}
+	/**
+	 * Retrieves the model currently built by the builder.
+	 * This can changed depending on additional building method calls.
+	 * @return A {@link Model} instance.
+	 */
 	public Model getModel() {
 		return model;
 	}
@@ -873,7 +878,7 @@ public class ModelBuilder {
 		return routing;
 	}
 	/**
-	 * Exports the builded model's execution graph into a <it>.dot</it> format
+	 * Exports the builded model's execution graph into a <i>.dot</i> format
 	 * representation.
 	 * @return A <code>String</code> to be pasted into GraphViz for visualization.
 	 */

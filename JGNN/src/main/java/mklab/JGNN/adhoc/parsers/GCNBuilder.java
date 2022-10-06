@@ -10,7 +10,7 @@ import mklab.JGNN.adhoc.ModelBuilder;
 /**
  * This extends the capabilities of {@link LayeredBuilder} to use
  * for node classification. It accepts the adjacency graph in the constructor,
- * to be used with the name <it>A</it> in operations or layer definitions,
+ * to be used with the name <i>A</i> in operations or layer definitions,
  * and node features.
  * @author Emmanouil Krasanakis
  */
@@ -22,6 +22,12 @@ public class GCNBuilder extends ModelBuilder {
 	 */
 	public GCNBuilder() {
 	}
+	/**
+	 * Creates a graph neural network builder from an 
+	 * normalized adjacency matrix and a node feature matrix.
+	 * @param adjacency The pre-normalized adjacency matrix.
+	 * @param features The node feature matrix.
+	 */
 	public GCNBuilder(Matrix adjacency, Matrix features) {
 		long numFeatures = features.getCols();
 		config("features", numFeatures);

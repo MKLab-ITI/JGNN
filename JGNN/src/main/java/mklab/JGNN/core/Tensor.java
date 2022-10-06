@@ -653,7 +653,7 @@ public abstract class Tensor implements Iterable<Long> {
 		return pos;
 	}
 	/**
-	 * A string serialization of the tensor that can be used by the constructor {@link #Tensor(String)} to create an identical copy.
+	 * A string serialization of the tensor that can be used by the constructor {@link DenseTensor#DenseTensor(String)} to create an identical copy.
 	 * @return A serialization of the tensor.
 	 */
 	@Override

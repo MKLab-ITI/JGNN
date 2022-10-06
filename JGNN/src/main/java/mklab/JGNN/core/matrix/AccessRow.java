@@ -22,7 +22,7 @@ public class AccessRow extends Tensor {
 	/**
 	 * Instantiates a see-through access of a matrix row.
 	 * @param matrix The base matrix.
-	 * @param col Which row to access.
+	 * @param row Which row to access.
 	 */
 	public AccessRow(Matrix matrix, long row) {
 		super(matrix.getCols());
