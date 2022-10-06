@@ -1,6 +1,6 @@
 # :zap: Neural networks
 For this example, we refer to the same dataset and experimentation 
-methodology as in the in the [Learning](tutorials/Learning.md) tutorial.
+methodology as in the in the [learning](tutorials/Learning.md) tutorial.
 But we will see how to easily create a multilayer perceptron.
 We cover the following topics:
 
@@ -88,7 +88,7 @@ dimensions for error checking. For `dropout,matrix,vector` you can also use the 
 
 ## Save and load architectures
 Saving a model needs to be done via its builder. Saving stores the whole parameter
-state in a specified Java path can be done per:
+state in a specified Java path per:
 
 ```java
 modelBuilder.save(Paths.get("file.jgnn"));

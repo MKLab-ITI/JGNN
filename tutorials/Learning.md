@@ -86,7 +86,7 @@ These basically handle shuffled sample identifiers. You can use integers instead
 doubles in the `range` method to reference a fixed fixed instead of fractional slice sizes.
 
 ```java
-Slice samples = dataset.nodes().getIds().shuffle();
+Slice samples = dataset.samples().getSlice().shuffle();
 Slice train = samples.range(0, 0.5);
 Slice valid = samples.range(0.5, 0.75);
 Slice test = samples.range(0.75, 1);
