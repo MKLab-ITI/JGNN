@@ -19,7 +19,7 @@ learning, such as on Android, without specific hardware or firmware.
 
 # :zap: Quickstart
 To install the latest working version, you can include it as Maven or Gradle dependency by following the instructions of its JitPack distribution:
-[![](https://jitpack.io/v/maniospas/jgnn.svg)](https://jitpack.io/#maniospas/jgnn)
+[![](https://jitpack.io/v/MKLab-ITI/JGNN.svg)](https://jitpack.io/#MKLab-ITI/JGNN)
 
 ```java
 Dataset dataset = new Datasets.CiteSeer();
