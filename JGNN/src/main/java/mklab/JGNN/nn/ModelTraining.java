@@ -134,7 +134,7 @@ public class ModelTraining {
 				for(Parameter parameter : model.getParameters()) 
 					minLossParameters.put(parameter, parameter.get().copy());
 			}
-			System.out.println("Epoch "+epoch+" with loss "+totalLoss);
+			//System.out.println("Epoch "+epoch+" with loss "+totalLoss);
 			currentPatience -= 1;
 			if(currentPatience==0)
 				break;

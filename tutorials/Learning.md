@@ -19,7 +19,7 @@ Let's set dimension names to force logical integrity checks of arithmetic operat
 (`null` names can match anything), for example during matrix addition or multiplication.
 
 ```java
-Dataset dataset = new Datasets.Lymphography();
+Dataset dataset = new Datasets.Citeseer();
 IdConverter nodeIdConverter = dataset.nodes();
 Matrix labels = nodeIdConverter.oneHot(dataset.getLabels()).setDimensionName("samples", "classes");
 Matrix features = nodeIdConverter.oneHot(dataset.getFeatures()).setDimensionName("samples", "features");

@@ -4,7 +4,7 @@ import mklab.JGNN.adhoc.Dataset;
 
 public class Pubmed extends Dataset {
 	public Pubmed() {
-		loadFeatures("downloads/cora/cora.feats");
-		loadGraph("downloads/cora/cora.graph");
+		loadFeatures("downloads/pubmed/pubmed.csv");
+		loadGraph("downloads/pubmed/pubmed.graph");
 	}
 }

@@ -3,7 +3,7 @@ Primitive operations found in other tutorials suffice for most
 use cases. However, you may need to process
 neural inputs, postprocess learning outcomes, create custom 
 parameters, contribute to the library with more components,
-o make derivative works based on native java vector and matrix
+or make derivative works based on native java vector and matrix
 arithmetics.
 
 This tutorial lists JGNN primitives and explains how to work with them.
@@ -110,8 +110,8 @@ Operation | Type | Comments
 `Matrix matmul(Matrix with)` | arithmetic | Outputs the matrix multiplication **this \* with**. There is no in-place matrix multiplication.
 `Matrix matmul(Matrix with, boolean transposeSelf, boolean transposeWith)` | arithmetic | Does not perform memory allocation to compute transpositions.
 `Matrix external(Tensor horizontal, Tensor vertical)` | static method | External product of two tensors. Is a dense matrix.
-`Matrix laplacian()` | in-place arithmetic | The symmetrically normalized Laplacian.
-`Matrix setToLaplacian()` | in-place arithmetic | The symmetrically normalized Laplacian.
+`Matrix symmetricNormalization()` | in-place arithmetic | The symmetrically normalized matrix.
+`Matrix setToSymmetricNormalization()` | in-place arithmetic | The symmetrically normalized matrix.
 `Matrix setMainDiagonal(double value)` | in-place arithmetic | Sets diagonal elements.
 `Matrix setDiagonal(long diagonal, double value)` | in-place arithmetic | Sets diagonal elements.
 `Matrix put(long row, long col, double value)` | element access | NaN values throw exceptions. Is in-place.
@@ -141,3 +141,5 @@ backtracking changes (even for see-through data types, such as the outcome of as
 :bulb: Matrices effectively have three dimension names: for their rows, columns, and inner
 data as long as they are treated as tensors.
  
+ 
+[NEXT: Debugging](Debugging.md)

@@ -54,7 +54,7 @@ Exception in thread "main" java.lang.RuntimeException: The component class mklab
 	at nodeClassification.APPNP.main(APPNP.java:45)
 ```
 For example, this indicates that the component *_tmp102*  and we should look 
-at the execution tre
+at the execution tree to understand its role.
 
 
 ## Debugging logical errors
@@ -116,7 +116,7 @@ be able to fix whatever is causing this.
 To do this, we continue reading and see the message
 `During the forward pass of class mklab.JGNN.nn.operations.MatMul: _tmp4 = null`.
 This tells us that the problem occurs when trying to calculate *_tmp4*
-which currently is currently assigned a *null* tensor as value (this is pretty normal,
+which is currently assigned a *null* tensor as value (this is pretty normal,
 as the forward pass has not yet already concluded for that variable to assume a value).
 Some more information is there to see what the operation's inputs are like - in this case
 they coincide with the multiplication's inputs, but this will not always be the case.
@@ -126,7 +126,7 @@ this variable is defined. There, we will undoubtedly find that some dimension ha
 of 32 elements or conversely.
 
 ## Monitoring operations
-In addition to all other debugging mechanisms, JGNN presents a way to view when
+In addition to all other debugging mechanisms, JGNN presents a way to show when
 forward and backward operations of specific code components are executed and with what kinds
 of arguments.
 This can be particularly useful when testing new components in real (complex) architectures.

@@ -24,7 +24,6 @@ public class LogisticRegression {
 
 	public static void main(String[] args) {
 		Dataset dataset = new Citeseer();
-		IdConverter nodes = dataset.samples();
 		
 		System.out.println("Nodes\t: "+dataset.samples().size());
 		System.out.println("Labels\t: "+dataset.labels().describe());

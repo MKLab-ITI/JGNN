@@ -1,17 +1,18 @@
 # :zap: Neural networks
 For this example, we refer to the same dataset and experimentation 
-methodology as in the in the [Basic concepts](tutorials/Introduction.md)
+methodology as in the in the [Learning](tutorials/Learning.md) tutorial.
 But we will see how to easily create a multilayer perceptron.
 We cover the following topics:
 
 1. [Building layers](#building-layers)
 2. [Deep architectures](#deep-architectures)
 3. [Writing operations](#writing-operations)
+4. [Save and load architectures](#save-and-load-architectures)
 
 *Full implementations can be found in the [examples](../JGNN/src/examples/tutorial/NN.java).*
 
 ## Building layers
-The class building layered architectures (`LayeredBuilder`) improves base builder
+The class for building layered architectures (`LayeredBuilder`) improves base builder
 functionalities by introducing methods like `.layer(String)`. This
 is an extension of normal `.operation(String)` definitions, 
 with the addition that specifically the expressions `{l}` and `{l+1}` are replaced 
@@ -84,5 +85,24 @@ set the numbers as hyperparameters.
 
 Prefer using hyperparameters for matrix and vector creation, as these transfer their names to respective
 dimensions for error checking. For `dropout,matrix,vector` you can also use the short names `drop,mat,vec`.
+
+## Save and load architectures
+Saving a model needs to be done via its builder. Saving stores the whole parameter
+state in a specified Java path can be done per:
+
+```java
+modelBuilder.save(Paths.get("file.jgnn"));
+```
+
+A new builder (of the same type as the one that saved the model) 
+can be constructed given the save Path per:
+
+```java
+modelBuilder = (LayeredBuilder)ModelBuilder.load(Paths.get("file.jgnn"));
+```
+
+You can continue working with the loaded builder, for example by adding more
+layers if needed, and you can call its `.getModel()` per normal.
+
 
 [NEXT: Graph neural networks](GNN.md)
