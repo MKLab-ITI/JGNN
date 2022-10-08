@@ -158,7 +158,7 @@ and the corresponding labels constitute the outputs. Sampling from those identif
 JGNN provides helper methods to design the training process per:
 
 ```java
-Slice nodes = dataset.samples().getSlice().shuffle(100);  # or nodes = new Slice(0, numNodes).shuffle(100);
+Slice nodes = dataset.samples().getSlice().shuffle(100);  // or nodes = new Slice(0, numNodes).shuffle(100);
 Model model = modelBuilder()
 	.getModel()
 	.init(...)
