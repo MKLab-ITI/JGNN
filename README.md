@@ -22,58 +22,51 @@ To install the latest working version, you can include it as Maven or Gradle dep
 [![](https://jitpack.io/v/MKLab-ITI/JGNN.svg)](https://jitpack.io/#MKLab-ITI/JGNN)
 
 ```java
-Dataset dataset = new Datasets.CiteSeer();
-Matrix labels = dataset.nodes().oneHot(dataset.getLabels());
-Matrix features = dataset.nodes().oneHotFromBinary(dataset.getFeatures());
+Dataset dataset = new Cora();
+dataset.graph().setMainDiagonal(1).setToSymmetricNormalization();
 
-Matrix adjacency = new SparseMatrix(dataset.nodes().size(), dataset.nodes().size());
-for(Entry<Long, Long> interaction : dataset.getInteractions()) 
-	adjacency
-		.put(interaction.getKey(), interaction.getValue(), 1)
-		.put(interaction.getValue(), interaction.getKey(), 1);
-adjacency.setMainDiagonal(1).setToSymmetricNormalization();
-
-long numClasses = labels.getCols();
-ModelBuilder appnp = new GCNBuilder(adjacency, features)
+long numClasses = dataset.labels().getCols();
+ModelBuilder modelBuilder = new GCNBuilder(dataset.graph(), dataset.features())
 		.config("reg", 0.005)
+		.config("hidden", 16)
 		.config("classes", numClasses)
-		.config("hidden", hidden)
 		.layer("h{l+1}=relu(h{l}@matrix(features, hidden, reg)+vector(hidden))")
 		.layer("h{l+1}=h{l}@matrix(hidden, classes)+vector(classes)")
 		.rememberAs("0")
 		.constant("a", 0.9)
 		.layerRepeat("h{l+1} = a*(dropout(A, 0.5)@h{l})+(1-a)*h{0}", 10)
-		.classify();				;
+		.classify();
 
 ModelTraining trainer = new ModelTraining()
 		.setOptimizer(new Adam(0.01))
 		.setEpochs(300)
 		.setPatience(100)
 		.setLoss(new CategoricalCrossEntropy())
-		.setValidationLoss(new Accuracy());
+		.setValidationLoss(new CategoricalCrossEntropy());
 
-Slice nodes = dataset.nodes().getIds().shuffle(100);
-Model model = appnp.getModel()
+Slice nodes = dataset.samples().getSlice().shuffle(100);
+Model model = modelBuilder.getModel()
 		.init(new XavierNormal())
 		.train(trainer,
-				Tensor.fromRange(0, nodes.size()).asColumn(), 
-				labels, nodes.range(0, 0.2), nodes.range(0.2, 0.4));
+				nodes.samplesAsFeatures(), 
+				dataset.labels(), 
+				nodes.range(0, 0.6), 
+				nodes.range(0.6, 0.8));
 
-
-Matrix output = model.predict(Tensor.fromRange(0, nodes.size()).asColumn()).get(0).cast(Matrix.class);
+Matrix output = model.predict(nodes.samplesAsFeatures()).get(0).cast(Matrix.class);
 double acc = 0;
-for(Long node : nodes.range(0.4, 1)) {
-	Matrix nodeLabels = labels.accessRow(node).asRow();
+for(Long node : nodes.range(0.8, 1)) {
+	Matrix nodeLabels = dataset.labels().accessRow(node).asRow();
 	Tensor nodeOutput = output.accessRow(node).asRow();
 	acc += nodeOutput.argmax()==nodeLabels.argmax()?1:0;
 }
-System.out.println("Acc\t "+acc/nodes.range(0.4, 1).size());
+System.out.println("Acc\t "+acc/nodes.range(0.8, 1).size());
 ```
 
 # :thumbsup: Contributing
 Feel free to contribute in any way, for example through the [issue tracker](https://github.com/MKLab-ITI/JGNN/issues).
 Please check out the [contribution guidelines](CONTRIBUTING.md) 
-to bring modifications to the code base.
+when bringing modifications to the code base.
  
 # :notebook: Citation
 TBD

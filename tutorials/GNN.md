@@ -1,8 +1,8 @@
 # :zap: Graph neural networks
 
 Graph neural networks (GNNs) extend the concept of base [neural networks](tutorials/NN.md).
-You can write any GNN with the base neural model builder (`LayerBuilder`), but JGNN provides
-some premade design choices that simplifies the process for node classification.
+You can already write any GNN with the base neural model builder (`LayerBuilder`), 
+but JGNN provides some premade design choices that simplifies the process for node classification.
 
 1. [Initializing a GNN builder](#initializing-a-gnn-builder)
 2. [GNN concepts](#gnn-concepts)
@@ -13,29 +13,29 @@ some premade design choices that simplifies the process for node classification.
 
 ## Initializing a GNN builder
 The class for buildign GNN architectures (`GCNBuilder`) extends the generic 
-`LayerBuilder` for neural networks but is instead initialized with a
-normalized square adjacency matrix A and a feature matrix h0 
-(this is not to be confused with any potential h{0}). 
-Given that you will most likely use layer definitions, you only need 
+`LayerBuilder` for neural networks. The only difference is that now we initialize it with a
+square matrix A, which is typically a normalization of the adjacency matrix, and a feature matrix h0 
+(this is different than the symbol h{0}). 
+Given that you will most likely use normal neural layers, you only need 
 to remember that in symbolic parsing A corresponds to the adjacency matrix
-and that layer representations should be annotated with h. We may make a more 
-customizeable version of the builder in the future, but this will always be
+and that layer representations should be annotated with h{l}. We may make a more 
+customizeable version of the builder in the future, but these symbols will always be
 the default. Preferrably, each row of the feature matrix should correspond to the features
-of one node/sample. The adjacency matrix can -and usually should-
+of one node/sample. The normalized adjacency matrix can -and usually should-
 be sparse to save on memory.
 
-Most GNNs perform the renormalization trick (by adding 1 to the diagonal) and
-perform symmetric normalization of the adjacency matrix too.
+Most GNNs perform the renormalization trick (by adding 1 to the diagonal)
+before applying symmetric normalization on the adjacency matrix.
 Assuming no existing self-loops, the following snippet shows how to apply those
-concepts on existing adjacency matrices. Note that in-place arithmetics are used,
-with means that the raw matrix data are directly altered:
+transformations on adjacency matrices, such as ones obtained from `Dadaset.graph()`. 
+The snippet use in-place arithmetics to directly alter raw matrix data:
 
 ```java
 adjacency.setMainDiagonal(1).setToSymmetricNormalization();
 ```
 
 Finally, you can instantiate the builder by providing the adjacency and feature
-matrives per:
+matrices per:
 
 ```java
 GCNBuilder modelBuilder = new GCNBuilder(adjacency, features);
@@ -44,40 +44,54 @@ GCNBuilder modelBuilder = new GCNBuilder(adjacency, features);
 Sending specific tensors to the builder's consructor
 does not restrict you from editing or replacing them later, 
 even after architectures have been trained.
-For example, you can add node edges later by editing the adjacency matrix
-per:
+For example, you can add node edges later by editing an element of the 
+adjacency matrix per:
 
 ```java
 ((Constant)modelBuilder.get("A")).put(from, to, value);
 ```
 
-## GNN concepts
-The base operation of GNNs is to propagate node information to node neighbors.
-Normally this can be achieved with a simple matrix multiplication on the previous layer
-node features per `.layer("h{l+1}=A @ h{l}")`
 
-Many architectures also perform edge dropout, which is as simply as applying dropout
-on the adjacency matrix on each layer, for example per `.layer("h{l+1}=dropout(A,0.5) @ h{l}")`.
+## GNN concepts
+
+The base operation of GNNs is to propagate node representations to neighbors via graph edges,
+where they are aggregated - typically summed per normalized adjacency matrix edge weights.
+This can be achieved with a simple matrix multiplication on the previous layer's
+node features per `.layer("h{l+1}=A @ h{l}")`. In practice, you will often want to 
+add more operations on the propagation, such as passing it through a dense layer. 
+For example, the original GCN architecture defines layers of the form:
+
+```java
+.layer("h{l+1}=relu(A@(h{l}@matrix(features, hidden, reg))+vector(hidden))")
+.layer("h{l+1}=A@(h{l}@matrix(hidden, classes, reg))+vector(classes)")			
+```
+
+Most architectures nowadays also perform edge dropout, which is as simple as applying dropout
+on the adjacency matrix values on each layer per:
+
+```java
+.layer("h{l+1}=dropout(A,0.5) @ h{l}")
+```
 
 Recent areas of heterogenous graph research also explicitly use the graph laplacian,
-which you can insert into the architecture as a normal constant per `.constant("L", adjacency.negative().cast(Matrix.class).setMainDiagonal(1))`.
-
-Even more complex concepts can be modelled with edge attention that gathers and
+which you can insert into the architecture as a normal constant per `.constant("L", adjacency.negative().cast(Matrix.class).setMainDiagonal(1))`. Even more complex concepts 
+can be modelled with edge attention that gathers and
 perform the dot product of edge nodes to provide new edge weights, exponentiating
 non-zero weights with *nexp* and applying row-wise L1 transformation. This yields
 an adjacency matrix weighting unique to the layer per `.operation("A{l}" = L1(nexp(att(A, h{l})))")`.
-
-:warning: It is recommended that you stay away from these kinds complex architectures
+Nonetheless, it is recommended that you stay away from these kinds complex architectures
 when learning from large graphs, as JGNN is designed to be lightweight and not fast.
 Consider using GPU GNNs if 1-2% accuracy gains matter enough to make your application
 several folds slower.
 
 
 ## Adding a classification layer
-This far, we touched on propagation mechanisms of GNNs considering that all nodes 
-exhibit features. However, training data are typically available only for certain nodes.
-We thus need a mechanism that can retrieve the top neural layer predictions for certain nodes.
-If we only had a neural network this would have been achieved with the gather operation on the
+This far, we touched on propagation mechanisms of GNNs, which consider the features of all nodes.
+However, when moving to a node classification setting,
+training data labels are typically available only for certain nodes.
+We thus need a mechanism that can retrieve the top neural layer predictions for certain nodes
+and pass them through a softmax activation.
+This can already be achieved in terms of neural model definitions with the gather operation on the
 top layer's softmax activation on a set of node indexes per:
 
 ```java
@@ -86,12 +100,17 @@ top layer's softmax activation on a set of node indexes per:
 .operation("ouput = h{l}[nodes]")
 ```
 
+Recall that h{l} always points to the top layer when writting a new layer.
+
+
 This way, the built model takes as inputs a set of nodes, perform the forward pass of the
 architecture and then selects the provided nodes to use as outputs (and backpropagate from).
 **All** nodes are needed for training because they are made aware of each other via the
 graph's structure.
 
-The above classification definitioln pattern is generated by calling a `.classify()` method.
+To simplify how node classification architectures are defined,
+the above symbolic snippet is automatically generated and applied by calling the 
+`.classify()` method of the `GCNBuilder` instead.
 
 ## Example architecture
 

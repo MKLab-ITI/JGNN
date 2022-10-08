@@ -66,7 +66,5 @@ public class APPNP {
 			acc += nodeOutput.argmax()==nodeLabels.argmax()?1:0;
 		}
 		System.out.println("Acc\t "+acc/nodes.range(0.8, 1).size());
-
-		modelBuilder.save(Paths.get("file.jgnn"));
 	}
 }

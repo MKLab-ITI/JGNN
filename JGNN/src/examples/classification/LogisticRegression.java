@@ -1,7 +1,6 @@
 package classification;
 
 import mklab.JGNN.adhoc.Dataset;
-import mklab.JGNN.adhoc.IdConverter;
 import mklab.JGNN.adhoc.ModelBuilder;
 import mklab.JGNN.adhoc.datasets.Citeseer;
 import mklab.JGNN.core.Matrix;
