@@ -1,8 +1,8 @@
 # :zap: Graph neural networks
 
 Graph neural networks (GNNs) extend the concept of base [neural networks](tutorials/NN.md).
-You can already write any GNN with the base neural model builder (`LayerBuilder`), 
-but JGNN provides some premade design choices that simplifies the process for node classification.
+You can already write any GNN with the base the `LayerBuilder` class for designing neural models, 
+but JGNN provides some common design choices that simplify the process for node classification.
 
 1. [Initializing a GNN builder](#initializing-a-gnn-builder)
 2. [GNN concepts](#gnn-concepts)
@@ -12,19 +12,20 @@ but JGNN provides some premade design choices that simplifies the process for no
 
 
 ## Initializing a GNN builder
-The class for buildign GNN architectures (`GCNBuilder`) extends the generic 
-`LayerBuilder` for neural networks. The only difference is that now we initialize it with a
+The `GCNBuilder` class for building GNN architectures extends the generic 
+`LayerBuilder` with common graph neural network operations. 
+The only difference is that now we initialize it with a
 square matrix A, which is typically a normalization of the adjacency matrix, and a feature matrix h0 
 (this is different than the symbol h{0}). 
 Given that you will most likely use normal neural layers, you only need 
-to remember that in symbolic parsing A corresponds to the adjacency matrix
+to remember that in symbolic parsing A will correspond to the adjacency matrix
 and that layer representations should be annotated with h{l}. We may make a more 
-customizeable version of the builder in the future, but these symbols will always be
+customizeable version of the builder in the future, but these symbols will always remain
 the default. Preferrably, each row of the feature matrix should correspond to the features
 of one node/sample. The normalized adjacency matrix can -and usually should-
 be sparse to save on memory.
 
-Most GNNs perform the renormalization trick (by adding 1 to the diagonal)
+Most GNNs perform the renormalization trick by adding a self-loop
 before applying symmetric normalization on the adjacency matrix.
 Assuming no existing self-loops, the following snippet shows how to apply those
 transformations on adjacency matrices, such as ones obtained from `Dadaset.graph()`. 
@@ -48,7 +49,8 @@ For example, you can add node edges later by editing an element of the
 adjacency matrix per:
 
 ```java
-((Constant)modelBuilder.get("A")).put(from, to, value);
+Matrix adjacency = ((Constant)modelBuilder.get("A")).get(); // retrieves constant's value from the architecture
+adjacency.put(from, to, value);
 ```
 
 
