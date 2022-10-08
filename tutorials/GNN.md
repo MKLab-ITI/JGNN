@@ -91,10 +91,10 @@ several folds slower.
 This far, we touched on propagation mechanisms of GNNs, which consider the features of all nodes.
 However, when moving to a node classification setting,
 training data labels are typically available only for certain nodes.
-We thus need a mechanism that can retrieve the top neural layer predictions for certain nodes
+We thus need a mechanism that can retrieve the predictions of the top neural layer for certain nodes
 and pass them through a softmax activation.
-This can already be achieved in terms of neural model definitions with the gather operation on the
-top layer's softmax activation on a set of node indexes per:
+This can already be achieved with normal neural model definitions using the gather bracket operation
+after declaring a variable of which nodes to retrieve:
 
 ```java
 .var("nodes")
@@ -118,7 +118,8 @@ the above symbolic snippet is automatically generated and applied by calling the
 
 As an example of how to define a full GNN with symbolic parsing, let us define
 the well-known APPNP architecture. This comprises two normal dense layers and then
-propagates their predictions through the graph structure. To define the architecture,
+propagates their predictions through the graph structure with a fixed-depth approximation
+of the personalized PageRank algorithm. To define the architecture,
 let us consider a `Dataset dataset` loaded by the library, for which we normalize the 
 adjacency matrix and send everything to the GNN builder class. We let the outcome of
 the first two dense layers to be remembered as `h{0}` (this is *not* `h0`), define 
@@ -144,6 +145,7 @@ ModelBuilder modelBuilder = new GCNBuilder(dataset.graph(), dataset.features())
 
 
 ## GNN training
+
 GNN classification models can be backpropagated by considering a list of node indeces and desired
 predictions for those nodes. However, you can also use the interfaces discussed in the
 [learning](tutorials/Learning.md) tutorial to automate the training process and control it
@@ -154,10 +156,9 @@ Recall that training needs to call the model's method
 The important question is what to consider as training inputs and outputs, given that node features
 and the graph are passed to the `GCNBuilder` constructor.
 
-The answer is that the (ordered) list of node identifiers *0,1,2,...* constitutes the training inputs
-and the corresponding labels constitute the outputs. Sampling from those identifiers to obtain 
-
-JGNN provides helper methods to design the training process per:
+The answer is that the (ordered) list of all node identifiers *0,1,2,...* constitutes the training inputs
+and the corresponding labels constitute the outputs. You can create a slice of identifiers 
+and you can use JGNN to design the training process per:
 
 ```java
 Slice nodes = dataset.samples().getSlice().shuffle(100);  // or nodes = new Slice(0, numNodes).shuffle(100);
