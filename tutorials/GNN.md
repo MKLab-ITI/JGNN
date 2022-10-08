@@ -152,13 +152,13 @@ Recall that training needs to call the model's method
 The important question is what to consider as training inputs and outputs, given that node features
 and the graph are passed to the `GCNBuilder` constructor.
 
-The answe is that the (ordered) list of node identifiers *0,1,2,...* constitutes the training inputs
+The answer is that the (ordered) list of node identifiers *0,1,2,...* constitutes the training inputs
 and the corresponding labels constitute the outputs. Sampling from those identifiers to obtain 
 
 JGNN provides helper methods to design the training process per:
 
 ```java
-Slice nodes = dataset.samples().getSlice().shuffle(100);
+Slice nodes = dataset.samples().getSlice().shuffle(100);  # or nodes = new Slice(0, numNodes).shuffle(100);
 Model model = modelBuilder()
 	.getModel()
 	.init(...)
