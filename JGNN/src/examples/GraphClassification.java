@@ -18,7 +18,7 @@ import mklab.JGNN.nn.optimizers.Adam;
 import mklab.JGNN.nn.optimizers.BatchOptimizer;
 
 public class GraphClassification {
-	// THIS IS A PRELIMINARY EXAMPLE ON GRAPH CLASSIFICATION, IT WILL BE IMPROVED IN THE FUTURE
+
 	public static void main(String[] args) throws Exception {
 		IdConverter nodeLabelIds = new IdConverter();
 		nodeLabelIds.getOrCreateId("A");
@@ -81,8 +81,7 @@ public class GraphClassification {
 
 		/**
 		 * DEFINING THE ARCHITECTURE 
-		 */
-		
+		 */	
 		ModelBuilder builder = new LayeredBuilder()
 			    .var("A")  
 			    .config("features", nodeLabelIds.size())
@@ -97,28 +96,26 @@ public class GraphClassification {
 		Loss loss = new CategoricalCrossEntropy();
 		for(int epoch=0; epoch<300; epoch++) {
 			// gradient update
-		    for(int graphId=0; graphId<graphLabels.size(); graphId++) {
-		         Matrix adjacency = graphMatrices.get(graphId);
-		         Matrix features= nodeFeatures.get(graphId);
-		         Tensor graphLabel = graphLabels.get(graphId); 
-		         model.train(loss, optimizer, 
-		              Arrays.asList(features, adjacency), 
-		              Arrays.asList(graphLabel));
-		    }
+			for(int graphId=0; graphId<graphLabels.size(); graphId++) {
+			     Matrix adjacency = graphMatrices.get(graphId);
+			     Matrix features= nodeFeatures.get(graphId);
+			     Tensor graphLabel = graphLabels.get(graphId); 
+			     model.train(loss, optimizer, 
+			          Arrays.asList(features, adjacency), 
+			          Arrays.asList(graphLabel));
+			}
 			optimizer.updateAll();
 			// measure accuracy (on train data)
 			double acc = 0;
-		    for(int graphId=0; graphId<graphLabels.size(); graphId++) {
-		         Matrix adjacency = graphMatrices.get(graphId);
-		         Matrix features= nodeFeatures.get(graphId);
-		         Tensor graphLabel = graphLabels.get(graphId); 
-		         if(model.predict(Arrays.asList(features, adjacency)).get(0).argmax()==graphLabel.argmax())
-		        	 acc += 1;
-		    }
-		    System.out.println(acc/graphLabels.size());
+			for(int graphId=0; graphId<graphLabels.size(); graphId++) {
+			     Matrix adjacency = graphMatrices.get(graphId);
+			     Matrix features= nodeFeatures.get(graphId);
+			     Tensor graphLabel = graphLabels.get(graphId); 
+			     if(model.predict(Arrays.asList(features, adjacency)).get(0).argmax()==graphLabel.argmax())
+			    	 acc += 1;
+			}
+			System.out.println(acc/graphLabels.size());
 		}
-		
-		
 		
 	}
 }
