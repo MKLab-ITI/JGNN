@@ -18,7 +18,7 @@ import mklab.JGNN.nn.optimizers.Adam;
 import mklab.JGNN.nn.optimizers.BatchOptimizer;
 
 public class GraphClassification {
-
+	// THIS IS A PRELIMINARY EXAMPLE ON GRAPH CLASSIFICATION, IT WILL BE IMPROVED IN THE FUTURE
 	public static void main(String[] args) throws Exception {
 		IdConverter nodeLabelIds = new IdConverter();
 		nodeLabelIds.getOrCreateId("A");
@@ -34,6 +34,9 @@ public class GraphClassification {
 		ArrayList<Matrix> nodeFeatures = new ArrayList<Matrix>();
 		ArrayList<Tensor> graphLabels = new ArrayList<Tensor>();
 		
+		/**
+		 * CREATING DATA
+		 */
 		graphMatrices.add(new SparseMatrix(3, 3)
 				.put(0, 1, 1).put(1, 0, 1)
 				.put(1, 2, 1).put(2, 1, 1)
@@ -75,6 +78,11 @@ public class GraphClassification {
 				.put(2, nodeLabelIds.getId("C"), 1));
 		graphLabels.add(new DenseTensor(graphLabelIds.size()).put(graphLabelIds.getId("1"), 1));
 		
+
+		/**
+		 * DEFINING THE ARCHITECTURE 
+		 */
+		
 		ModelBuilder builder = new LayeredBuilder()
 			    .var("A")  
 			    .config("features", nodeLabelIds.size())
@@ -88,6 +96,7 @@ public class GraphClassification {
 		BatchOptimizer optimizer = new BatchOptimizer(new Adam(0.01));
 		Loss loss = new CategoricalCrossEntropy();
 		for(int epoch=0; epoch<300; epoch++) {
+			// gradient update
 		    for(int graphId=0; graphId<graphLabels.size(); graphId++) {
 		         Matrix adjacency = graphMatrices.get(graphId);
 		         Matrix features= nodeFeatures.get(graphId);
@@ -97,6 +106,7 @@ public class GraphClassification {
 		              Arrays.asList(graphLabel));
 		    }
 			optimizer.updateAll();
+			// measure accuracy (on train data)
 			double acc = 0;
 		    for(int graphId=0; graphId<graphLabels.size(); graphId++) {
 		         Matrix adjacency = graphMatrices.get(graphId);
