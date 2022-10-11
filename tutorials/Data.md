@@ -67,7 +67,7 @@ for(Entry<Long, Long> edge : edges)
 :bulb: Don't forget to normalize or apply the renormalization trick (self-edges) on matrices 
 if these are needed by your algorithm, for instance by calling `adjacency.setMainDiagonal(1).setToSymmetricNormalization();`
 
-## Managing identifier
+## Managing identifiers
 The above snippets all reference node identifiers. To help you with managing these, JGNN
 provides an `IdConverter` class. You can convert hashable objects (e.g. Strings) to identifiers
 by calling `IdConverter.getOrCreateId(object)`. The same functionality is also helpful 
