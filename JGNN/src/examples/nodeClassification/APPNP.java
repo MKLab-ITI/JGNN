@@ -45,6 +45,7 @@ public class APPNP {
 				.setOptimizer(new Adam(0.01))
 				.setEpochs(300)
 				.setPatience(100)
+				.setVerbose(true)
 				.setLoss(new CategoricalCrossEntropy())
 				.setValidationLoss(new CategoricalCrossEntropy());
 		

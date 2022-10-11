@@ -105,4 +105,4 @@ You can continue working with the loaded builder, for example by adding more
 layers if needed, and you can call its `.getModel()` per normal.
 
 
-[NEXT: Graph neural networks](GNN.md)
+[NEXT: Graph neural networks for node classification](GNN.md)

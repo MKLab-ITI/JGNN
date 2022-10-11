@@ -7,7 +7,9 @@ Tutorials cover the following subjects:
 ## Introduction
 1. [Learning](Learning.md)
 2. [Neural networks](NN.md)
-3. [Graph neural networks](GNN.md)
+3. [GNNs for node classification](GNN.md)
+3. [GNNs for graph classification](GraphClassification.md)
+4. [Data creation](Data.md)
 
 ## Advanced topics
 4. [Primitives](Primitives.md)

@@ -1,7 +1,7 @@
 # :zap: Learning
 
 For demonstration purposes, we will create a custom model to make predictions 
-on the Lymphography dataset. This implements the following:
+on the Citeseer dataset. This implements the following:
 
 1. [Dataset loading](#dataset-loading)
 2. [Model definition](#model-definition)
@@ -11,27 +11,23 @@ on the Lymphography dataset. This implements the following:
 *Full implementations can be found in the [examples](../JGNN/src/examples/tutorial/Learning.java).*
 
 ## Dataset loading
-First, we load the dataset (it is automatically downloaded) and use the `IdConverter` class
-to get label and feature matrices. To save memory, these are sparse. 
-Matrices could also be programmatically generated in either sparse or dense form (according 
-to memory vs speed considerations) with primitive operations.
+First, we load the dataset (it is automatically downloaded) and use its methods
+to retrieve sample features and labels. Data can also be manually generated with primitive operations.
+For instructions on how to define your own data look at the [data creation](Data.md) later on.
+
 Let's set dimension names to force logical integrity checks of arithmetic operations
 (`null` names can match anything), for example during matrix addition or multiplication.
 
 ```java
-Dataset dataset = new Datasets.Citeseer();
-IdConverter nodeIdConverter = dataset.nodes();
-Matrix labels = nodeIdConverter.oneHot(dataset.getLabels()).setDimensionName("samples", "classes");
-Matrix features = nodeIdConverter.oneHot(dataset.getFeatures()).setDimensionName("samples", "features");
+Dataset dataset = new Citeseer();
+Matrix features = dataset.features();
+Matrix labels = dataset.labels();
 ```
-
-:bulb: To maintain the same naming convention between traditional and graph neural networks, 
-data samples are refferred to as *nodes* .
 
 ## Model definition
 We first retrieve the number of features and class labels that will help us define our model. Note 
 that matrix dimensions and elements are `long` numbers. Dense matrices can only
-store up to MaxInt, but this convention makes large sparce matrices interoperable.
+store up to MaxInt, but this convention makes them interoperable with large sparce matrices.
 
 ```java
 long numFeatures = features.getCols();
@@ -45,7 +41,7 @@ has four important methods:
 <br>c) `operation` to parse symbolic operations
 <br>d) `out` to define output variables
 
-We can retrieve the defined model at anytime with the builder's `getModel()` method. 
+We can retrieve the defined model at anytime with the builder's `.getModel()` method. 
 Until that point, models are incrementally constructed with functional programming.
 For this example, we define a two-layer perceptron, with a relu hidden layer and 
 a row-wide softmax activation. Learnable matrices and vectors could be defined manually,
@@ -76,7 +72,8 @@ System.out.println(modelBuilder.getExecutionGraphDot());
 ```
 
 Copying-and-pasting the outputted description to [GraphvizOnline](https://dreampuf.github.io/GraphvizOnline/) creates the following visualization
-of the execution graph:
+of the execution graph. A more detailed overview of potential debugging actions
+is presented later in in the [debugging](Debugging.md) tutorial.
 
 ![Example execution graph](graphviz.png)
 
@@ -86,13 +83,13 @@ These basically handle shuffled sample identifiers. You can use integers instead
 doubles in the `range` method to reference a fixed fixed instead of fractional slice sizes.
 
 ```java
-Slice samples = dataset.samples().getSlice().shuffle();
+Slice samples = dataset.samples().getSlice().shuffle();  // or samples = new Slice(0, labels.getRows()).shuffle();
 Slice train = samples.range(0, 0.5);
 Slice valid = samples.range(0.5, 0.75);
 Slice test = samples.range(0.75, 1);
 ```
 
-Next, we set up create a treaning strategy given an Adam optimizer, 
+Next, we set up create a leaning strategy given an Adam optimizer, 
 a binary cross-entropy loss, and validation loss patience of 100 epochs:
 
 

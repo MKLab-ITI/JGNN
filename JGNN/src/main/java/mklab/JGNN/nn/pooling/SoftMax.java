@@ -149,7 +149,15 @@ public class SoftMax extends NNOperation {
 			return ret;
 		}
 		else {
-			throw new RuntimeException("Not implemented yet softmax for non-matrix inputs");
+			Tensor ret = output.zeroCopy();
+			double colSum = 0;
+			for(long row=0;row<ret.size();row++)
+				colSum += output.get(row)*error.get(row);
+			for(long row=0;row<ret.size();row++) {
+				double val = output.get(row);
+				ret.put(row, (val*(1-val)*error.get(row)-(colSum-val*error.get(row))*val));
+			}
+			return ret;
 		}
 	}
 }

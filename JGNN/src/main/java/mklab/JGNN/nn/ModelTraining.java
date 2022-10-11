@@ -28,8 +28,13 @@ public class ModelTraining {
 	private boolean paralellization = false;
 	private boolean stochasticGradientDescent = false;
 	private Loss loss, validationLoss;
+	private boolean verbose = false;
 	
 	public ModelTraining() {
+	}
+	public ModelTraining setVerbose(boolean verbose) {
+		this.verbose = verbose;
+		return this;
 	}
 	public ModelTraining setLoss(Loss loss) {
 		this.loss = loss;
@@ -80,6 +85,7 @@ public class ModelTraining {
 		HashMap<Parameter, Tensor> minLossParameters = new HashMap<Parameter, Tensor>();
 		int currentPatience = patience;
 		for(int epoch=0;epoch<epochs;epoch++) {
+			//long tic = System.currentTimeMillis();
 			if(!stochasticGradientDescent)
 				trainingSamples.shuffle(epoch);
 			double[] batchLosses = new double[numBatches];
@@ -93,6 +99,7 @@ public class ModelTraining {
 						.setDimensionName(features.getRowName(), features.getColName());
 				Matrix trainLabels = new WrapRows(labels.accessRows(trainingSamples.range(start, end)));
 						//.setDimensionName(labels.getRowName(), labels.getColName());
+				//System.out.println(System.currentTimeMillis()-tic);
 				Runnable batchCode = new Runnable() {
 					@Override
 					public void run() {
@@ -108,6 +115,7 @@ public class ModelTraining {
 					ThreadPool.getInstance().submit(batchCode);
 				else
 					batchCode.run();
+				//System.out.println(System.currentTimeMillis()-tic);
 			}
 			if(paralellization)
 				ThreadPool.getInstance().waitForConclusion();
@@ -134,7 +142,8 @@ public class ModelTraining {
 				for(Parameter parameter : model.getParameters()) 
 					minLossParameters.put(parameter, parameter.get().copy());
 			}
-			//System.out.println("Epoch "+epoch+" with loss "+totalLoss);
+			if(verbose)
+				System.out.println("Epoch "+epoch+" with loss "+totalLoss);
 			currentPatience -= 1;
 			if(currentPatience==0)
 				break;

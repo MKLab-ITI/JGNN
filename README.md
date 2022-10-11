@@ -21,12 +21,19 @@ learning, such as on Android, without specific hardware or firmware.
 To install the latest working version, you can include it as Maven or Gradle dependency by following the instructions of its JitPack distribution:
 [![](https://jitpack.io/v/MKLab-ITI/JGNN.svg)](https://jitpack.io/#MKLab-ITI/JGNN)
 
+As a good out-of-the-box graph neural network for node classification, you can try the 
+following architecture. To create your own graph adjacency matrices,
+node features, and labels look at the [data creation](tutorials/Data.md) tutorial.
+
 ```java
 Dataset dataset = new Cora();
-dataset.graph().setMainDiagonal(1).setToSymmetricNormalization();
+Matrix adjacency = dataset.graph().setMainDiagonal(1).setToSymmetricNormalization();
+Matrix nodeFeatures = dataset.features();
+Matrix nodeLabels = dataset.labels();
+Slice nodes = new Slice(0, nodeLabels.getRows()).shuffle(100);
+long numClasses = nodeLabels.getCols();
 
-long numClasses = dataset.labels().getCols();
-ModelBuilder modelBuilder = new GCNBuilder(dataset.graph(), dataset.features())
+ModelBuilder modelBuilder = new GCNBuilder(adjacency, nodeFeatures)
 		.config("reg", 0.005)
 		.config("hidden", 16)
 		.config("classes", numClasses)
@@ -44,12 +51,11 @@ ModelTraining trainer = new ModelTraining()
 		.setLoss(new CategoricalCrossEntropy())
 		.setValidationLoss(new CategoricalCrossEntropy());
 
-Slice nodes = dataset.samples().getSlice().shuffle(100);
 Model model = modelBuilder.getModel()
 		.init(new XavierNormal())
 		.train(trainer,
 				nodes.samplesAsFeatures(), 
-				dataset.labels(), 
+				nodeLabels, 
 				nodes.range(0, 0.6), 
 				nodes.range(0.6, 0.8));
 

@@ -14,6 +14,10 @@ public class LayeredBuilder extends ModelBuilder {
 	public LayeredBuilder(String inputName) {
 		var(inputName);
 	}
+	public LayeredBuilder var(String inputName) {
+		super.var(inputName);
+		return this;
+	}
 	public LayeredBuilder rememberAs(String layerId) {
 		rememberAs.put(layerId, layer);
 		return this;

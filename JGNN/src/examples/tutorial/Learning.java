@@ -3,6 +3,7 @@ package tutorial;
 import mklab.JGNN.adhoc.Dataset;
 import mklab.JGNN.adhoc.ModelBuilder;
 import mklab.JGNN.adhoc.datasets.Citeseer;
+import mklab.JGNN.adhoc.datasets.Cora;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.nn.Model;
 import mklab.JGNN.nn.ModelTraining;
@@ -20,7 +21,7 @@ import mklab.JGNN.nn.optimizers.Adam;
  */
 public class Learning {
 	public static void main(String[] args) {
-		Dataset dataset = new Citeseer();
+		Dataset dataset = new Cora();
 		Matrix labels = dataset.labels().setDimensionName("samples", "labels");
 		Matrix features = dataset.features().setDimensionName("samples", "features");
 		
@@ -29,11 +30,12 @@ public class Learning {
 
 		Slice sampleIds = dataset.samples().getSlice().shuffle();
 		ModelTraining trainer = new ModelTraining()
-			.setOptimizer(new Adam(0.1))
-			.setEpochs(3000)
+			.setOptimizer(new Adam(0.01))
+			.setEpochs(10)
 			.setPatience(100)
-			.setNumBatches(10)
-			.setParallelizedStochasticGradientDescent(true)
+			.setNumBatches(1)
+			.setVerbose(true)
+			.setParallelizedStochasticGradientDescent(false)
 			.setLoss(new BinaryCrossEntropy());
 		
 		ModelBuilder modelBuilder = new ModelBuilder()
@@ -41,8 +43,8 @@ public class Learning {
 				.config("classes", numClasses)
 				.config("regularize", 1.E-5)
 				.var("x")
-				.operation("h = relu(x@matrix(features, 64, regularize)+vector(64))")
-				.operation("yhat = softmax(h@matrix(64, classes)+vector(classes), row)")
+				.operation("h = relu(x@matrix(features, 16, regularize)+vector(16))")
+				.operation("yhat = softmax(h@matrix(16, classes)+vector(classes), row)")
 				.out("yhat")
 				.assertBackwardValidity();
 		
@@ -51,8 +53,8 @@ public class Learning {
 				.getModel()
 				.init(new XavierNormal())
 				.train(trainer, features, labels, 
-						sampleIds.range(0, 0.5), 
-						sampleIds.range(0.5, 0.75));
+						sampleIds.range(0, 0.1), 
+						sampleIds.range(0.2, 0.4));
 		
 		double acc = 0;
 		for(Long node : sampleIds.range(0.75, 1)) {
