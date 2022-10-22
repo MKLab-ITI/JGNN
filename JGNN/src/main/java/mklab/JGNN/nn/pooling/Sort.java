@@ -1,20 +1,34 @@
 package mklab.JGNN.nn.pooling;
 
+import java.util.HashMap;
 import java.util.List;
 
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.Tensor;
+import mklab.JGNN.core.ThreadPool;
 import mklab.JGNN.nn.NNOperation;
 
 public class Sort extends NNOperation {
-	private int k = 0;
+	private final int k;
 	private String name = null;
-	private long[] cache = null;
+	private HashMap<Integer, long[]> caches = new HashMap<Integer, long[]>();
+	protected long[] cache() {
+		int threadId = ThreadPool.getCurrentThreadId();
+		long[] ret;
+		synchronized(caches) {
+			ret = caches.get(threadId);
+		}
+		if(ret==null) {
+			synchronized(caches) {
+				caches.put(threadId, ret = new long[k]);
+			}
+		}
+		return ret;
+	}
 	
 	public Sort(int k) {
 		super();
 		this.k = k;
-		cache = new long[k];
 	}
 	
 	public Sort setDimensionName(String name) {
@@ -38,7 +52,7 @@ public class Sort extends NNOperation {
 		long originalFrom = from;
 		if(compare(middle, from2, indexes, values))
 			return;
-		//System.out.println("merging\n  "+indexes.accessSubtensor(0, middle+1).toString()+"\n  "+indexes.accessSubtensor(middle+1));
+		long[] cache = cache();
 		while(pos<k) {
 			if(from<=middle && (from2>to || compare(from, from2, indexes, values))) {
 				cache[pos] = (long) indexes.get(from);
@@ -67,9 +81,7 @@ public class Sort extends NNOperation {
 	protected Tensor forward(List<Tensor> inputs) {
 		Matrix input = inputs.get(0).cast(Matrix.class);
 		Tensor order = Tensor.fromRange(input.getRows());
-		//System.out.println(input.toString());
 		sort(order, input, 0, input.getRows()-1);
-		//System.out.println(order);
 		return order.accessSubtensor(0, k).setDimensionName(name);
 	}
 
