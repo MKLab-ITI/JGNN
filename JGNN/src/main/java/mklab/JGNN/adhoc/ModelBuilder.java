@@ -39,8 +39,10 @@ import mklab.JGNN.nn.operations.Log;
 import mklab.JGNN.nn.operations.MatMul;
 import mklab.JGNN.nn.operations.Multiply;
 import mklab.JGNN.nn.operations.Repeat;
+import mklab.JGNN.nn.operations.Reshape;
 import mklab.JGNN.nn.operations.Transpose;
 import mklab.JGNN.nn.pooling.SoftMax;
+import mklab.JGNN.nn.pooling.Sort;
 import mklab.JGNN.nn.pooling.Sum;
 import mklab.JGNN.nn.pooling.Attention;
 import mklab.JGNN.nn.pooling.Max;
@@ -521,6 +523,8 @@ public class ModelBuilder {
 									|| configurations.containsKey(arg) 
 									|| (newDesc.endsWith(" matrix ") && isDouble(arg)) 
 									|| (newDesc.endsWith(" vector ") && isDouble(arg)) 
+									|| (newDesc.endsWith(" sort ") && isDouble(arg)) 
+									|| (newDesc.endsWith(" reshape ") && isDouble(arg))
 									|| arg.equals("col") || arg.equals("row")) 
 								args += arg;
 							else {
@@ -700,6 +704,19 @@ public class ModelBuilder {
 					.setDimensionName(isDouble(splt[3])?null:splt[3]));
 			routing = prevRouting;
 			return this;
+		}
+		else if(splt[2].equals("sort")) {
+			component = new Sort((int)(splt.length>4?parseConfigValue(splt[4]):0))
+					.setDimensionName(splt.length<=4 || isDouble(splt[4])?null:splt[4]);
+			arg0 = splt[3];
+		}
+		else if(splt[2].equals("reshape")) {
+			component = new Reshape((long)(splt.length>4?parseConfigValue(splt[4]):1),
+					(long)(splt.length>5?parseConfigValue(splt[5]):1))
+					.setDimensionName(splt.length>4&&isDouble(splt[4])?null:splt[4],
+							splt.length<=5 || isDouble(splt[5])?null:splt[5]
+							);
+			arg0 = splt[3];
 		}
 		else if(splt[2].equals("relu")) {
 			component = new Relu();
@@ -893,7 +910,7 @@ public class ModelBuilder {
 		for(NNOperation component : components.values()) 
 			if(model.getOutputs().contains(component)) {
 				ret+="\n   "+component.getDescription()
-					+"[label=\""+component.getDescription()+" = "+component.getClass().getSimpleName()+"\", shape=doubleoctagon]";
+					+"[label=\""+component.getDescription()+" = "+component.getSimpleDescription()+"\", shape=doubleoctagon]";
 			}
 			else if(component instanceof Variable)
 				ret+="\n   "+component.getDescription()+"[color=red,shape=octagon]";
@@ -933,10 +950,10 @@ public class ModelBuilder {
 			
 			}
 			else if(component.getDescription().startsWith("_")){
-				ret+="\n   "+component.getDescription()+"[label="+component.getClass().getSimpleName()+"]";
+				ret+="\n   "+component.getDescription()+"[label=\""+component.getSimpleDescription()+"\"]";
 			}
 			else
-				ret+="\n   "+component.getDescription()+"[label=\""+component.getDescription()+" = "+component.getClass().getSimpleName()+"\"]";
+				ret+="\n   "+component.getDescription()+"[label=\""+component.getDescription()+" = "+component.getSimpleDescription()+"\"]";
 			
 		ret += "\n}";
 		return ret;

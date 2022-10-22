@@ -27,7 +27,7 @@ public class DenseMatrix extends Matrix {
 	}
 	@Override
 	public Matrix zeroCopy(long rows, long cols) {
-		return new DenseMatrix(rows, cols);
+		return new DenseMatrix(rows, cols).setDimensionName(getRowName(), getColName());
 	}
 	@Override
 	protected void allocate(long size) {

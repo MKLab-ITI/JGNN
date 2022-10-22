@@ -3,6 +3,8 @@ package nodeClassification;
 import mklab.JGNN.adhoc.Dataset;
 import mklab.JGNN.adhoc.ModelBuilder;
 import mklab.JGNN.adhoc.datasets.Citeseer;
+import mklab.JGNN.adhoc.datasets.Cora;
+import mklab.JGNN.adhoc.datasets.Pubmed;
 import mklab.JGNN.adhoc.parsers.GCNBuilder;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.nn.Model;
@@ -32,14 +34,15 @@ public class GCN {
 				.layer("h{l+1}=relu(dropout(A, 0.5)@(h{l}@matrix(features, hidden, reg))+vector(hidden))")
 				.layer("h{l+1}=dropout(A, 0.5)@(h{l}@matrix(hidden, classes, reg))+vector(classes)")
 				.classify()
-				.assertBackwardValidity();				;
+				.assertBackwardValidity();
 		
 		ModelTraining trainer = new ModelTraining()
 				.setOptimizer(new Adam(0.01))
 				.setEpochs(300)
 				.setPatience(100)
+				.setVerbose(true)
 				.setLoss(new CategoricalCrossEntropy())
-				.setValidationLoss(new Accuracy());
+				.setValidationLoss(new CategoricalCrossEntropy());
 		
 		long tic = System.currentTimeMillis();
 		Slice nodes = dataset.samples().getSlice().shuffle(100);

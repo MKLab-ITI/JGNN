@@ -330,4 +330,12 @@ public abstract class NNOperation {
 	}
 	protected abstract Tensor forward(List<Tensor> inputs);
 	protected abstract Tensor partial(int inputId, List<Tensor> inputs, Tensor output, Tensor error);
+	
+	/**
+	 * Provides a simple description to show when drawing .dot format diagrams.
+	 * @return A string description, usually the component's class name.
+	 */
+	public String getSimpleDescription() {
+		return getClass().getSimpleName();
+	}
 }

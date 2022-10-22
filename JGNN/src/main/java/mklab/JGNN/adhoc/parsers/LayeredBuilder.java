@@ -63,6 +63,11 @@ public class LayeredBuilder extends ModelBuilder {
 		return this;
 	}
 	public LayeredBuilder operation(String desc) {
+		desc = desc
+				.replace("{l+1}", ""+(layer+1))
+			    .replace("{l}", ""+layer);
+		for(String layerId : rememberAs.keySet())
+			desc = desc.replace("{"+layerId+"}", ""+rememberAs.get(layerId));
 		super.operation(desc);
 		return this;
 	}

@@ -86,10 +86,15 @@ public class GraphClassification {
 			    .var("A")  
 			    .config("features", nodeLabelIds.size())
 			    .config("classes", graphLabelIds.size())
-			    .layer("h{l+1}=relu(A@(h{l}@matrix(features, 16)))") 
-			    .layer("h{l+1}=relu(A@(h{l}@matrix(16, classes)))") 
-			    .layer("h{l+1}=softmax(mean(h{l}, row))")
-			    .out("h{l}"); 
+			    .config("reduced", 2)
+			    .config("hidden", 16)
+			    .layer("h{l+1}=relu(A@(h{l}@matrix(features, hidden)))") 
+			    .layer("h{l+1}=relu(A@(h{l}@matrix(hidden, hidden)))")
+			    .operation("s{l}=sort(h{l}, reduced)")
+			    //.layer("h{l+1}=reshape(h{l}[s{l}],1,reducedFeatures)@matrix(reducedFeatures, classes)")
+			    .layer("h{l+1}=softmax(sum(h{l}[s{l}]@matrix(hidden, classes), row))")
+			    .out("h{l}");
+		System.out.println(builder.getExecutionGraphDot());
 		
 		Model model = builder.getModel().init(new XavierNormal());
 		BatchOptimizer optimizer = new BatchOptimizer(new Adam(0.01));
@@ -97,9 +102,9 @@ public class GraphClassification {
 		for(int epoch=0; epoch<300; epoch++) {
 			// gradient update
 			for(int graphId=0; graphId<graphLabels.size(); graphId++) {
-			     Matrix adjacency = graphMatrices.get(graphId);
-			     Matrix features= nodeFeatures.get(graphId);
-			     Tensor graphLabel = graphLabels.get(graphId); 
+			     Matrix adjacency = graphMatrices.get(graphId).setDimensionName("nodes", "nodes");
+			     Matrix features = nodeFeatures.get(graphId).setDimensionName("nodes", "features");
+			     Tensor graphLabel = graphLabels.get(graphId).setDimensionName("classes").asRow(); 
 			     model.train(loss, optimizer, 
 			          Arrays.asList(features, adjacency), 
 			          Arrays.asList(graphLabel));

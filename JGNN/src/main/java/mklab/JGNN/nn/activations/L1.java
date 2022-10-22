@@ -8,6 +8,13 @@ import mklab.JGNN.nn.NNOperation;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.tensor.DenseTensor;
 
+
+/**
+ * Implements a {@link NNOperation} that performs a L1 transformation of its single input
+ * by row or column.
+ * 
+ * @author Emmanouil Krasanakis
+ */
 public class L1 extends NNOperation {
 	private boolean colMode;
 	public L1() {

@@ -51,6 +51,7 @@ public class LogisticRegression {
 				.setParallelizedStochasticGradientDescent(true)
 				.setLoss(new BinaryCrossEntropy())
 				.setValidationLoss(new Accuracy())
+				.setVerbose(true)
 				.train(modelBuilder.getModel(), 
 						dataset.features(), 
 						dataset.labels(), 

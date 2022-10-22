@@ -19,7 +19,7 @@ public class Gather extends NNOperation {
 			throw new IllegalArgumentException();
 		Tensor index = inputs.get(0);
 		Matrix H = (Matrix) inputs.get(1);
-		Matrix ret = new DenseMatrix(index.size(), H.getCols());
+		Matrix ret = H.zeroCopy(index.size(), H.getCols()).setRowName(index.getDimensionName());
 		for(int i=0;i<index.size();i++) {
 			int pos = (int)index.get(i);
 			for(int j=0;j<H.getCols();j++)

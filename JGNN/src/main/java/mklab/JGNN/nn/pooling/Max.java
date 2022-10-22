@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.nn.NNOperation;
 import mklab.JGNN.core.Tensor;
+import mklab.JGNN.core.matrix.DenseMatrix;
 import mklab.JGNN.core.tensor.DenseTensor;
 
 
@@ -31,7 +32,7 @@ public class Max extends NNOperation {
 			throw new IllegalArgumentException();
 		if(colMode && inputs.get(0) instanceof Matrix) {
 			Matrix matrix = (Matrix) inputs.get(0);
-			Tensor ret = new DenseTensor(matrix.getCols());
+			Tensor ret = new DenseMatrix(1, matrix.getCols());
 			for(Entry<Long, Long> entry : matrix.getNonZeroEntries()) {
 				long row = entry.getKey();
 				long col = entry.getValue();
@@ -41,7 +42,7 @@ public class Max extends NNOperation {
 		}
 		else if(!colMode && inputs.get(0) instanceof Matrix) {
 			Matrix matrix = (Matrix) inputs.get(0);
-			Tensor ret = new DenseTensor(matrix.getRows());
+			Tensor ret = new DenseMatrix(matrix.getRows(), 1);
 			for(Entry<Long, Long> entry : matrix.getNonZeroEntries()) {
 				long row = entry.getKey();
 				long col = entry.getValue();

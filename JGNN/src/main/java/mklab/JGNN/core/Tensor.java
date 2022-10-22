@@ -266,6 +266,18 @@ public abstract class Tensor implements Iterable<Long> {
 		return res;
 	}
 	/**
+	 * Performs a sparse assignment.
+	 * @param tensor The tensor whose elements to copy (it's not affected).
+	 * @return <code>this</code> Tensor instance.
+	 * @see #assign(Tensor)
+	 */
+	public final Tensor assign(Tensor tensor) {
+		assertMatching(tensor);
+		for(long i : tensor.getNonZeroElements())
+			put(i, tensor.get(i));
+		return this;
+	}
+	/**
 	 * @param tensor The tensor to add with
 	 * @return a new Tensor that stores the outcome of addition
 	 */
