@@ -87,7 +87,7 @@ public class GraphClassification {
 			    .config("features", nodeLabelIds.size())
 			    .config("classes", graphLabelIds.size())
 			    .config("reduced", 2)
-			    .config("hidden", 16)
+			    .config("hidden", 4)
 			    .layer("h{l+1}=relu(A@(h{l}@matrix(features, hidden)))") 
 			    .layer("h{l+1}=relu(A@(h{l}@matrix(hidden, hidden)))")
 			    .operation("s{l}=sort(h{l}, reduced)")

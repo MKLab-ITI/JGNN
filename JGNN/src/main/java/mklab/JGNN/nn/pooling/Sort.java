@@ -28,7 +28,7 @@ public class Sort extends NNOperation {
 		long col = values.getCols()-1;
 		while(col>0 && values.get(pos1, col)==values.get(pos2, col))
 			col -= 1;
-		return values.get(pos1, col) < values.get(pos2, col);
+		return values.get(pos1, col) > values.get(pos2, col);
 	}
 	
 	protected void merge(Tensor indexes, Matrix values, long from, long to, long middle) {
