@@ -1,3 +1,4 @@
+package graphClassification;
 
 
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ import mklab.JGNN.nn.loss.CategoricalCrossEntropy;
 import mklab.JGNN.nn.optimizers.Adam;
 import mklab.JGNN.nn.optimizers.BatchOptimizer;
 
-public class GraphClassification {
+public class MeanPooling {
 
 	public static void main(String[] args) throws Exception {
 		IdConverter nodeLabelIds = new IdConverter();

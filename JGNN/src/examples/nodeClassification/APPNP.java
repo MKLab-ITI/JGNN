@@ -3,7 +3,7 @@ package nodeClassification;
 
 import mklab.JGNN.adhoc.Dataset;
 import mklab.JGNN.adhoc.ModelBuilder;
-import mklab.JGNN.adhoc.datasets.Cora;
+import mklab.JGNN.adhoc.datasets.Citeseer;
 import mklab.JGNN.adhoc.datasets.Pubmed;
 import mklab.JGNN.adhoc.parsers.GCNBuilder;
 import mklab.JGNN.core.Matrix;

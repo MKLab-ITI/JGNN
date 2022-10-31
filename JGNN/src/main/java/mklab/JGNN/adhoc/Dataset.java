@@ -1,7 +1,13 @@
 package mklab.JGNN.adhoc;
 
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import mklab.JGNN.core.Matrix;
@@ -25,6 +31,23 @@ public class Dataset {
 	private IdConverter class2Ids;
 	private Matrix labels;
 	private Matrix graph;
+	
+	protected void downloadIfNotExists(String file, String url) {
+		if(Files.exists(Paths.get(file)))
+			return;
+		System.out.println("First time requesting: "+url+"\nDownloading to: "+file);
+		try {
+			Files.createDirectories(Paths.get(file).getParent());
+			ReadableByteChannel readableByteChannel = Channels.newChannel(new URL(url).openStream());
+			try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
+				fileOutputStream.getChannel()
+				  .transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+			}
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
 	
 	protected void loadFeatures(String file) {
 		nodes = new IdConverter();
