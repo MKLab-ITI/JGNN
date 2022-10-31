@@ -18,7 +18,7 @@ import mklab.JGNN.core.tensor.SparseTensor;
 
 /**
  * This class provides the backbone with which to define datasets.
- * It also presents common operations.
+ * It provides common operations for downloading and importing data.
  * @author Emmanouil Krasanakis
  * @see #samples()
  * @see #features()
@@ -116,8 +116,8 @@ public class Dataset {
 		return class2Ids;
 	}
 	/**
-	 * Retrieves the dataset's
-	 * @return
+	 * Retrieves the dataset's feature matrix.
+	 * @return A nodes x features {@link Matrix}.
 	 */
 	public Matrix features() {
 		return features;

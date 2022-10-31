@@ -18,6 +18,11 @@ import mklab.JGNN.core.util.Range2D;
  */
 public class ColumnRepetition extends Matrix {
 	protected Tensor column;
+	/**
+	 * Instantiates a matrix repeating a tensor to be treated as a column.
+	 * @param times The number of times the column should be repeated.
+	 * @param column The column {@link Tensor}.
+	 */
 	public ColumnRepetition(long times, Tensor column) {
 		super(times, column.size());
 		this.column = column;

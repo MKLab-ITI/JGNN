@@ -2,6 +2,10 @@ package mklab.JGNN.adhoc.datasets;
 
 import mklab.JGNN.adhoc.Dataset;
 
+/**
+ * Downloads and constructs the Cora node classification {@link Dataset}.
+ * @author Emmanouil Krasanakis
+ */
 public class Cora extends Dataset {
 	public Cora() {
 		downloadIfNotExists("downloads/cora/cora.feats", 

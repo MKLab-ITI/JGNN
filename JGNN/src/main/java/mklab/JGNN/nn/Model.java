@@ -26,15 +26,34 @@ import mklab.JGNN.nn.operations.Dropout;
 public class Model {
 	private ArrayList<Variable> inputs = new ArrayList<Variable>();
 	private ArrayList<NNOperation> outputs = new ArrayList<NNOperation>();
-	
+	/**
+	 * Instantiates an empty model.
+	 * @deprecated Prefer using model builders for symbolic model definitions.
+	 */
 	public Model() {
 	}
-	
+	/**
+	 * Apply the provided initializer on the model to set first values to its
+	 * parameters.
+	 * @param initializer An {@link Initializer}.
+	 * @return The model's instance.
+	 */
 	public Model init(Initializer initializer) {
 		initializer.apply(this);
 		return this;
 	}
 	
+	/**
+	 * Trains the model by appropriately calling 
+	 * {@link ModelTraining#train(Model, Matrix, Matrix, Slice, Slice)}
+	 * with the provided parameters.
+	 * @param trainer The {@link ModelTraining} instance in charge of the training.
+	 * @param features A training feature {@link Matrix}, where each sample resides in one row.
+	 * @param labels A training label {@link Matrix} corresponding to features.
+	 * @param trainingSamples A slice of samples to use for training.
+	 * @param validationSamples A slice of samples to use for validation.
+	 * @return The model's instance.
+	 */
 	public Model train(
 			ModelTraining trainer,
 			Matrix features, 
@@ -44,6 +63,13 @@ public class Model {
 		return trainer.train(this, features, labels, trainingSamples, validationSamples);
 	}
 	
+	/**
+	 * Retrieves a list of operations by traversing the model's execution
+	 * graph with the depth-first algorithm in the <b>inverse</b> edge 
+	 * order (starting from the outputs). This can be used by {@link Initializer}
+	 * classes to push non-linearities to earlier layers.
+	 * @return A list of {@link NNOperation}.
+	 */
 	public ArrayList<NNOperation> getDepthLastOperations(){
 		ArrayList<NNOperation> operations = new ArrayList<NNOperation>();
 		ArrayList<NNOperation> pending = new ArrayList<NNOperation>();
@@ -62,6 +88,10 @@ public class Model {
 		return operations;
 	}
 	
+	/**
+	 * Retrieves a list of all parameters eventually leading to the model's outputs.
+	 * @return A list of {@link Parameter}.
+	 */
 	public ArrayList<Parameter> getParameters(){
 		ArrayList<Parameter> parameters = new ArrayList<Parameter>();
 		ArrayList<NNOperation> pending = new ArrayList<NNOperation>();
@@ -85,8 +115,13 @@ public class Model {
 		return parameters;
 	}
 	
-
-	public Model setTraining(boolean training){
+	/**
+	 * Toggles the training mode of the model. When in training mode,
+	 * some outputs (e.g. those dependent on dropout) become stochastic.
+	 * @param training Whether training mode should be toggled on or off.
+	 * @return The mode's instance.
+	 */
+	protected Model setTraining(boolean training){
 		ArrayList<NNOperation> pending = new ArrayList<NNOperation>();
 		HashSet<NNOperation> visited = new HashSet<NNOperation>();
 		for(NNOperation output : outputs) {

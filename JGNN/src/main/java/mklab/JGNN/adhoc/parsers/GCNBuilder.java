@@ -8,11 +8,13 @@ import mklab.JGNN.core.Tensor;
 import mklab.JGNN.adhoc.ModelBuilder;
 
 /**
- * This extends the capabilities of {@link LayeredBuilder} to use
+ * Extends the capabilities of {@link LayeredBuilder} to use
  * for node classification. It accepts the adjacency graph in the constructor,
- * to be used with the name <i>A</i> in operations or layer definitions,
+ * to be used with the symbol <i>A</i> in operations or layer definitions,
  * and node features.
+ * 
  * @author Emmanouil Krasanakis
+ * @see #classify()
  */
 public class GCNBuilder extends ModelBuilder {
 	private int layer = 0;
@@ -64,6 +66,12 @@ public class GCNBuilder extends ModelBuilder {
 		rememberAs.put(layerId, layer);
 		return this;
 	}
+	/**
+	 * Applies an {@link #operation(String)} and increases the layer identifier count.
+	 * @param expression A parsable expression.
+	 * @return <code>this</code> builder.
+	 * @see #layerRepeat(String, int)
+	 */
 	public GCNBuilder layer(String expression) {
 		expression = expression
 				.replace("{l+1}", ""+(layer+1))
@@ -74,6 +82,11 @@ public class GCNBuilder extends ModelBuilder {
 		super.operation(expression);
 		return this;
 	}
+	/**
+	 * Adds a classification layer that gather the number of inputs nodes
+	 * and applies softmax on all of them.
+	 * @return <code>this</code> builder.
+	 */
 	public GCNBuilder classify() {
 		var("nodes");
 		layer("h{l+1}=h{l}[nodes]");
@@ -81,6 +94,16 @@ public class GCNBuilder extends ModelBuilder {
 		out("h"+layer);
 		return this;
 	}
+	/**
+	 * Repeats a {@link #layer(String)} definition a number of times.
+	 * Ideal for building deep architectures.
+	 * @param expression The expression to repeat for each layer.
+	 * @param times The number of times to repeat the expression.
+	 * @return <code>this</code> builder.
+	 * 
+	 * @see #futureConfigs(String, Function, int)
+	 * @see #futureConstants(String, Function, int)
+	 */
 	public GCNBuilder layerRepeat(String expression, int times) {
 		for(int i=0;i<times;i++)
 			layer(expression);
@@ -115,6 +138,18 @@ public class GCNBuilder extends ModelBuilder {
 		super.operation(desc);
 		return this;
 	}
+	/**
+	 * Defines a number of {@link #config(String, double)} symbols involving a <code>{l}</code>
+	 * notation, for example so that they can be used during {@link #layerRepeat(String, int)}. 
+	 * @param config The configuration symbols (these should involve <code>{l}</code>).
+	 * @param func A lambda Java function to calculate the configuration's value. This takes
+	 *  as input an integer (starting from 0 for the current layer) and adds one for each
+	 *  subsequently declared symbol.
+	 * @param depth The number of future layers expected to use the symbols.
+	 * @return <code>this</code> builder.
+	 * 
+	 * @see #futureConstants(String, Function, int)
+	 */
 	public GCNBuilder futureConfigs(String config, Function<Integer, Double> func, int depth) {
 		for(int layer=this.layer;layer<this.layer+depth;layer++) {
 			String expression = config.replace("{l}", ""+layer);
@@ -122,11 +157,40 @@ public class GCNBuilder extends ModelBuilder {
 		}
 		return this;
 	}
+	/**
+	 * Defines a number of {@link #constant(String, double)} symbols involving a <code>{l}<code>
+	 * notation, for example so that they can be used during {@link #layerRepeat(String, int)}. 
+	 * @param constantName The configuration symbols (these should involve <code>{l}</code>).
+	 * @param func A lambda Java function to calculate the constant's value. This takes
+	 *  as input an integer (starting from 0 for the current layer) and adds one for each
+	 *  subsequently declared symbol.
+	 * @param depth The number of future layers expected to use the constant.
+	 * @return <code>this</code> builder.
+	 * 
+	 * @see #futureConstants(String, Function, int)
+	 */
 	public GCNBuilder futureConstants(String constantName, Function<Integer, Double> func, int depth) {
 		for(int layer=this.layer;layer<this.layer+depth;layer++) {
 			String expression = constantName.replace("{l}", ""+layer);
 			constant(expression, func.apply(layer-this.layer));
 		}
+		return this;
+	}
+	/**
+	 * Concatenates horizontally the output of a number of given layers,
+	 * starting from the last one and going backwards. (For concatenation
+	 * of specific layers just use <code>concat</code> within normal operations.)
+	 * @param depth The number of given layers to concatenate.
+	 * @return <code>this</code> builder.
+	 */
+	public GCNBuilder concat(int depth) {
+		String expression = "";
+		for(int i=layer;i>layer-depth;i--) {
+			if(!expression.isEmpty())
+				expression += " | ";
+			expression += "h"+i;
+		}
+		layer("h{l+1} = "+expression);
 		return this;
 	}
 }

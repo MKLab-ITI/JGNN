@@ -18,6 +18,11 @@ import mklab.JGNN.core.util.Range2D;
  */
 public class RowRepetition extends Matrix {
 	protected Tensor row;
+	/**
+	 * Instantiates a matrix repeating a tensor to be treated as a row.
+	 * @param column The row {@link Tensor}.
+	 * @param times The number of times the row should be repeated.
+	 */
 	public RowRepetition(Tensor row, long times) {
 		super(row.size(), times);
 		this.row = row;

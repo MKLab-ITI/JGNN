@@ -5,8 +5,9 @@ import java.util.List;
 
 import mklab.JGNN.core.Slice;
 import mklab.JGNN.core.util.Range;
+
 /**
- * Converts back-and-forth between objects and unique ids and automates one-hot encoding.
+ * Converts back-and-forth between objects and unique ids.
  * @author Emmanouil Krasanakis
  */
 public class IdConverter {
@@ -68,7 +69,7 @@ public class IdConverter {
 	 * Retrieves an identifier.
 	 * @param object An object with a registered identifier.
 	 * @return A <code>long</code> identifier.
-	 * @exception Exception, if the identifiers does not exist.
+	 * @exception Exception if the identifiers does not exist.
 	 * @see #getOrCreateId(Object)
 	 */
 	public long getId(Object object) {

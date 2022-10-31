@@ -8,7 +8,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * This class provides thread execution pool utilities while keeping track of thread
- * identifiers for use by thread-specific {@link NNOperation}.
+ * identifiers for use by thread-specific {@link mklab.JGNN.nn.NNOperation}.
+ * Threads scheduling relies on Java's {@link ThreadPoolExecutor}.
  * 
  * @author Emmanouil Krasanakis
  */
@@ -19,6 +20,10 @@ public class ThreadPool {
 	private int maxThreads;
 
 	private static ThreadPool instance = new ThreadPool(Runtime.getRuntime().availableProcessors());
+	/**
+	 * Retrieves the singleton {@link ThreadPool} instance used by JGNN.
+	 * @return A {@link ThreadPool}.
+	 */
 	public static ThreadPool getInstance() {
 		return instance; 
 	}
@@ -33,6 +38,12 @@ public class ThreadPool {
 				return i;
 		return -1;//new RuntimeException("Could not retrieve an unused thread id");*/
 	}
+	/**
+	 * Submits a runnable to be executed at some future point by a thread,
+	 * for example via <code>ThreadPool.getInstance().submit(new Runnable(){public void run(){...}});</code>.
+	 * @param runnable A Java {@link Runnable}.
+	 * @see #waitForConclusion()
+	 */
 	public synchronized void submit(Runnable runnable) {
 		Thread thread = new Thread() {
 			@Override
@@ -65,7 +76,10 @@ public class ThreadPool {
 		return ret==null?-1:(int)ret;
 	}
 	/**
-	 * Waits until all threads in the pool have finished.
+	 * Waits until all threads in the pool have finished. This concludes only
+	 * if all submitted runnable conclude.
+	 * 
+	 * @see #submit(Runnable)
 	 */
 	public void waitForConclusion() {
 		executor.shutdown();

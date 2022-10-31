@@ -2,6 +2,10 @@ package mklab.JGNN.adhoc.datasets;
 
 import mklab.JGNN.adhoc.Dataset;
 
+/**
+ * Downloads and constructs the Pubmed node classification {@link Dataset}.
+ * @author Emmanouil Krasanakis
+ */
 public class Pubmed extends Dataset {
 	public Pubmed() {
 		downloadIfNotExists("downloads/pubmed/pubmed.feats", 

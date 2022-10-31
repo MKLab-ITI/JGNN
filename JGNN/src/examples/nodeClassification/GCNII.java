@@ -10,7 +10,6 @@ import mklab.JGNN.nn.ModelTraining;
 import mklab.JGNN.core.Slice;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.nn.initializers.XavierNormal;
-import mklab.JGNN.nn.loss.Accuracy;
 import mklab.JGNN.nn.loss.CategoricalCrossEntropy;
 import mklab.JGNN.nn.optimizers.Adam;
 

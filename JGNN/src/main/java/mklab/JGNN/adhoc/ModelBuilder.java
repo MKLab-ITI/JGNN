@@ -276,6 +276,12 @@ public class ModelBuilder {
 			throw new IllegalArgumentException("Component name "+name+" not declared");
 	}
 	
+	/**
+	 * Declares a component with the given name to be used as an input 
+	 * of the managed model.
+	 * @param name The name of the component.
+	 * @return The builder's instance.
+	 */
 	public ModelBuilder var(String name) {
 		assertValidName(name);
 		Variable variable = new Variable();
@@ -355,7 +361,7 @@ public class ModelBuilder {
 	}
 
 	/**
-	 * Declares a learnable {@link Paramater} component with the given name,
+	 * Declares a learnable {@link mklab.JGNN.nn.inputs.Paramater} component with the given name,
 	 * zero regularization, and initial value.
 	 * @param name The name to be assigned to the new component.
 	 * @param value The initial value to be assigned to the parameter. Exact values
@@ -411,10 +417,10 @@ public class ModelBuilder {
 	}
 	
 	/**
-	 * Retrieves the {@link NNComponent} registered with the provided
+	 * Retrieves the {@link NNOperation} registered with the provided
 	 * name, for example to investigates its value.
 	 * @param name The name of the component.
-	 * @return A {@link NNComponent}.
+	 * @return A {@link NNOperation}.
 	 */
 	public NNOperation get(String name) {
 		return components.get(name);

@@ -11,6 +11,7 @@ import java.util.WeakHashMap;
  * A memory management systems for thread-safe allocation and release of arrays of doubles.
  * Soft references to allocated arrays kept so that released ones can be reused by future
  * allocation calls without explicitly initializing memory.
+ * 
  * @author Emmanouil Krasanakis
  */
 public class Memory {

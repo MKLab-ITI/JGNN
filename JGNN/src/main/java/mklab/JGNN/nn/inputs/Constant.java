@@ -4,7 +4,7 @@ import mklab.JGNN.nn.Optimizer;
 import mklab.JGNN.core.Tensor;
 
 /**
- * Implements a {@link mklab.JGNN.core.NNOperation} that holds a constant tensor.
+ * Implements a {@link mklab.JGNN.nn.NNOperation} that holds a constant tensor.
  * This value *is not affected by learning* but can be manually updated with the {@link #setTo(Tensor)} method.
  * 
  * @author Emmanouil Krasanakis

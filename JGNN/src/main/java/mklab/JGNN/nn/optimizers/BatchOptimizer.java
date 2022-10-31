@@ -33,7 +33,7 @@ public class BatchOptimizer implements Optimizer {
 	}
 	/**
 	 * Initializes a {@link BatchOptimizer} that accumulates derivatives and updates them
-	 * after a fixed number of updates.
+	 * with {@link #updateAll()} after every fixed number of updates.
 	 * @param baseOptimizer The base optimizer with which to perform the derivative updates.
 	 * @param batchSize The number of updates at which to pass the average accumulation to the base optimizer.
 	 */
@@ -41,6 +41,10 @@ public class BatchOptimizer implements Optimizer {
 		this.baseOptimizer = baseOptimizer;
 		this.batchSize = batchSize;
 	}
+	/**
+	 * Updates all tracked variables with pending batch calculations using the
+	 * wrapped optimizer. This overrides any potential waiting over pre-specified batch sizes.
+	 */
 	public void updateAll() {
 		for(Tensor value : new ArrayList<Tensor>(derivativeAccumulation.keySet())) 
 			synchronized(value) {

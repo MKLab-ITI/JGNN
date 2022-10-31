@@ -833,6 +833,13 @@ public abstract class Tensor implements Iterable<Long> {
 	public String describe() {
 		return "Tensor ("+(dimensionName==null?"":(dimensionName+" "))+size()+")";
 	}
+	/**
+	 * Performs the equivalent of Java's typecasting that fits
+	 * in functional interfaces.
+	 * @param <Type> The automatically inferred type of the class.
+	 * @param type The class to cast to.
+	 * @return <code>this</code> Tensor instance typecast to the given type.
+	 */
 	@SuppressWarnings("unchecked")
 	public <Type> Type cast(Class<Type> type) {
 		return (Type)this;

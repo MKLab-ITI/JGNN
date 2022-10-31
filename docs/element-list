@@ -1,4 +1,5 @@
 classification
+graphClassification
 mklab.JGNN
 mklab.JGNN.adhoc
 mklab.JGNN.adhoc.datasets

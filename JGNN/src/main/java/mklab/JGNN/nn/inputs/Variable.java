@@ -5,7 +5,7 @@ import mklab.JGNN.nn.Optimizer;
 import mklab.JGNN.core.Tensor;
 
 /**
- * Implements a {@link NNOperation} that represents {@link mklab.JGNN.core.Model} inputs.
+ * Implements a {@link NNOperation} that represents {@link mklab.JGNN.nn.Model} inputs.
  * Its values can be set using the {@link #setTo(Tensor)} method.
  * 
  * @author Emmanouil Krasanakis
