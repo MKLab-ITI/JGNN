@@ -7,18 +7,17 @@ based on their structure.
 2. [Defining the architecture](#defining-the-architecture)
 3. [Training the architecture](#training-the-architecture)
 4. [Sort pooling](#sort-pooling)
-5. [Parallelized training](#parallelized training)
+5. [Parallelized training](#parallelized-training)
 
 ## Organizing data
 
 To define architectures for graph classification,
-we can make use of the generic `LayeredBuilder` architecture to define
-a simple neural architecture for classifying graphs. The main difference compared
-to traditional neural training is that training inputs do not all exhibit the 
+we can make use of the generic `LayeredBuilder` class. The main difference compared
+to traditional neural networks is that architecture inputs do not all exhibit the 
 same size (e.g. some graphs may have more nodes than others) and therefore they
 can not be organized into tensors of common dimensions.
 
-Instead, let us presume that graphs to train from are to be stored in the following lists:
+Instead, let us presume that training data are stored in the following lists:
 
 ```java	
 ArrayList<Matrix> adjacencyMatrices = new ArrayList<Matrix>();
@@ -55,7 +54,7 @@ ModelBuilder builder = new LayeredBuilder()
 
 ## Training the architecture
 
-For the time being, training architectures like the above on the prepared data needs to
+For the time being, training architectures like the above on the prepared data should
 manually call the backpropagation for each epoch and each graph in the training
 batch. To do this, we first retrieve the model and initialize its parameters:
 
@@ -95,7 +94,7 @@ for(int epoch=0; epoch<300; epoch++) {
 
 ## Sort pooling
 
-Up to now, the example code performs a simple mean pooling across all graph
+Up to now, the example code performs a naive mean pooling across all graph
 node features. However, this can prove insufficient for the top layers and
 more sophisticated pooling mechanisms can be deployed to let GNNs differentiate
 between the structural positioning of nodes to be pooled. 
@@ -145,7 +144,7 @@ meanining, as the same propagation mechanism needs to be run on the same
 graph in parallel. But this process yields substantial speedup for *graph*
 classificaiton.
 
-Parallelization can make use of the thread pooling JGNN provides to perform
+Parallelization can make use of JGNN's thread pooling to perform
 gradients, wait for the conclusion of submitted tasks, and then apply all gradient
 updates. This is achieved by declaring a batch optimizer to gather all the gradients.
 

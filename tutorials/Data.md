@@ -1,7 +1,7 @@
 # :zap: Data creation
 
 If you have been following the tutorial, we have only used automatically downloaded datasets till now.
-In practice, you will want to use your own data. Thi tutorial covers typical code patterns on doing so.
+In practice, you will want to use your own data. This tutorial covers typical code patterns on doing so.
 
 1. [Creating preallocated feature matrices](#creating-preallocated-feature-matrices)
 2. [Converting lists of tensors to matrices](#converting-lists-of-tensors=to-matrices)
@@ -14,7 +14,7 @@ dense feature matrices with the following code. This uses the bare minimum memor
 to construct the feature matrix. If features are dense (do not have a lot of zeroes), 
 you could also consider using the `DenseMatrix` class instead of initializing a sparse matrix
 - the two classes are interoperable and have the same constructor arguments
- so that the rest of the code remains the same.
+ so that the rest of the code in the tutorials remains the same.
 
 ```java
 Matrix features = new SparseMatrix(numNodes, numFeatures);
@@ -65,7 +65,7 @@ for(Entry<Long, Long> edge : edges)
 ```
 
 :bulb: Don't forget to normalize or apply the renormalization trick (self-edges) on matrices 
-if these are needed by your algorithm, for instance by calling `adjacency.setMainDiagonal(1).setToSymmetricNormalization();`
+if these are needed by your algorithm, for instance by calling `adjacency.setMainDiagonal(1).setToSymmetricNormalization();` after matrix construction.
 
 ## Managing identifiers
 The above snippets all reference node identifiers. To help you with managing these, JGNN

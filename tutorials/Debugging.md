@@ -25,8 +25,8 @@ Exception in thread "main" java.lang.RuntimeException: Symbol hl not defined.
 
 ## Debugging execution DAGs
 Model builders are responsible for creating directed acyclic graphs (DAGs) 
-in models they are managing (these are not to be confused graph inputs GNNs
-are management). During parsing, builders may create temporary variables, which 
+in models they are managing (these are not to be confused with graph inputs GNNs
+are managing). During parsing, builders may create temporary variables, which 
 start with the `_tmp` prefix and are followed by a number, and linking components
 to others that use them.
 
