@@ -27,15 +27,16 @@ ArrayList<Tensor> graphLabels = new ArrayList<Tensor>();
 
 ## Defining the architecture
 
-The `LayeredBuilder` already introduce the input variable *h0* for sample features.
+The `LayeredBuilder` already introduces the input variable *h0* for sample features.
 We can use to it to pass node features to the architectures, so we only need to add 
 a second input storing the (sparse) adjacency matrix per `.var("A")`. We can proceed
-to define a GNN architecture, for instance as explained in 
+to define a GNN architecture, for instance as explained in previous tutorials.
 
 This time, though, we do not aim to classify nodes but the whole graph. For this reason,
 we need to pool top layer node representations, for instance by averaging them
-across all nodes per `.layer("h{l+1}=softmax(mean(h{l}, row))")`. Note that we apply
-the softmax per normal. Finally, we need to set up the top layer as the built model's
+across all nodes per `.layer("h{l+1}=softmax(mean(h{l}, row))")`. Remember to apply
+a softmax activation for classification tasks.
+Finally, we need to set up the top layer as the built model's
 output per `.out("h{l}")`. 
 
 An example architecture following these principles is the following:
@@ -54,15 +55,15 @@ ModelBuilder builder = new LayeredBuilder()
 
 ## Training the architecture
 
-For the time being, training architectures like the above on the prepared data should
+For the time being, training architectures like the above on prepared data should
 manually call the backpropagation for each epoch and each graph in the training
-batch. To do this, we first retrieve the model and initialize its parameters:
+batch. To do this, first retrieve the model and initialize its parameters:
 
 ```java
 Model model = builder.getModel().init(new XavierNormal());
 ```
 
-Next, we need to define a loss function and set up a batch optimization
+Next, define a loss function and set up a batch optimization
 strategy wrapping any base optimizer and accumulating parameter updates until
 `BatchOptimizer.updateAll()` is called later on:
 
@@ -107,8 +108,8 @@ an arbitrarily selected feature (in our implementation: the last one, with the p
 feature being used to break ties and so on). The idea is the the selected feature
 determines *important* nodes whose information can be adopted by others.
 
-To apply the following operations JGNN provides independent node sorting, gathering
-node latent representations and reshaping matrices into row or column tensors with
+To apply the above operations, JGNN provides independent operations to sort nodes, gather
+node latent representations, and reshape matrices into row or column tensors with
 learnable transformations to class outputs. These components are demonstrated in the 
 following code snippet:
 
@@ -137,12 +138,12 @@ ModelBuilder builder = new LayeredBuilder()
 
 ## Parallelized training
 
-A final aspect to keep in mind for graph classification is that you can make 
+To speed up graph classification, you can make 
 use of JGNN's parallelization capabilities to calculate gradients across 
 multiple threads. Doing this for tasks like node classification holds little
 meanining, as the same propagation mechanism needs to be run on the same 
-graph in parallel. But this process yields substantial speedup for *graph*
-classificaiton.
+graph in parallel. But this process yields substantial speedup for the *graph*
+classificaiton problem we tackle in this tutorial.
 
 Parallelization can make use of JGNN's thread pooling to perform
 gradients, wait for the conclusion of submitted tasks, and then apply all gradient
