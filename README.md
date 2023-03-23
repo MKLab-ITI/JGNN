@@ -1,6 +1,11 @@
 # JGNN
 A native Java library for Graph Neural Networks.
 
+# :cyclone: Changes from earlier versions
+* Renamed `GCNBuilder` to `FastBuilder`
+* Added attention and message passing components.
+* Added sort pooling and graph classification.
+
 # :dart: About
 Graph Neural Networks (GNNs) are getting more and more popular;
 they can reason from relational information and perform inference from small datasets.
