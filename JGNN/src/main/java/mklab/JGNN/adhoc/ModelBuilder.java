@@ -31,20 +31,23 @@ import mklab.JGNN.nn.inputs.Constant;
 import mklab.JGNN.nn.inputs.Parameter;
 import mklab.JGNN.nn.inputs.Variable;
 import mklab.JGNN.nn.operations.Add;
+import mklab.JGNN.nn.operations.Attention;
 import mklab.JGNN.nn.operations.Complement;
 import mklab.JGNN.nn.operations.Concat;
 import mklab.JGNN.nn.operations.Dropout;
+import mklab.JGNN.nn.operations.From;
 import mklab.JGNN.nn.operations.Gather;
 import mklab.JGNN.nn.operations.Log;
 import mklab.JGNN.nn.operations.MatMul;
 import mklab.JGNN.nn.operations.Multiply;
+import mklab.JGNN.nn.operations.Reduce;
 import mklab.JGNN.nn.operations.Repeat;
 import mklab.JGNN.nn.operations.Reshape;
+import mklab.JGNN.nn.operations.To;
 import mklab.JGNN.nn.operations.Transpose;
 import mklab.JGNN.nn.pooling.SoftMax;
 import mklab.JGNN.nn.pooling.Sort;
 import mklab.JGNN.nn.pooling.Sum;
-import mklab.JGNN.nn.pooling.Attention;
 import mklab.JGNN.nn.pooling.Max;
 import mklab.JGNN.nn.pooling.Mean;
 
@@ -802,6 +805,19 @@ public class ModelBuilder {
 		else if(splt[2].equals("transpose")) {
 			component = new Transpose();
 			arg0 = splt[3];
+		}
+		else if(splt[2].equals("from")) {
+			component = new From();
+			arg0 = splt[3];
+		}
+		else if(splt[2].equals("to")) {
+			component = new To();
+			arg0 = splt[3];
+		}
+		else if(splt[2].equals("reduce")) {
+			component = new Reduce();
+			arg0 = splt[3];
+			arg1 = splt[4];
 		}
 		else if(splt[3].equals("|")) {
 			component = new Concat();

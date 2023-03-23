@@ -1,4 +1,4 @@
-package mklab.JGNN.nn.pooling;
+package mklab.JGNN.nn.operations;
 import java.util.List;
 import java.util.Map.Entry;
 import mklab.JGNN.core.Matrix;

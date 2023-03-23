@@ -313,6 +313,19 @@ public abstract class Tensor implements Iterable<Long> {
 		return res;
 	}
 	/**
+	 * Performs in-memory weighted addition to the Tensor, storing the result in itself.
+	 * @param tensor The tensor to add (it's not affected).
+	 * @param weight The weight to multiply the added tensor's elements with during addition.
+	 * @return <code>this</code> Tensor instance.
+	 */
+	public final Tensor selfAdd(Tensor tensor, double weight) {
+		assertMatching(tensor);
+		Tensor res = this;
+		for(long i : tensor.getNonZeroElements())
+			res.put(i, get(i)+weight*tensor.get(i));
+		return res;
+	}
+	/**
 	 * Performs in-memory addition to the Tensor, storing the result in itself.
 	 * @param value The value to add to each tensor element.
 	 * @return <code>this</code> Tensor instance.
