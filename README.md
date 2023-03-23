@@ -33,7 +33,7 @@ Matrix nodeLabels = dataset.labels();
 Slice nodes = new Slice(0, nodeLabels.getRows()).shuffle(100);
 long numClasses = nodeLabels.getCols();
 
-ModelBuilder modelBuilder = new GCNBuilder(adjacency, nodeFeatures)
+ModelBuilder modelBuilder = new FastBuilder(adjacency, nodeFeatures)
 		.config("reg", 0.005)
 		.config("hidden", 16)
 		.config("classes", numClasses)

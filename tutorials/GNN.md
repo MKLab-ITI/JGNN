@@ -12,7 +12,7 @@ but JGNN provides some common design choices that simplify the process for node 
 
 
 ## Initializing a GNN builder
-The `GCNBuilder` class for building GNN architectures extends the generic 
+The `FastBuilder` class for building GNN architectures extends the generic 
 `LayerBuilder` with common graph neural network operations. 
 The only difference is that now we initialize it with a
 square matrix A, which is typically a normalization of the adjacency matrix, and a feature matrix h0 
@@ -39,7 +39,7 @@ Finally, you can instantiate the builder by providing the adjacency and feature
 matrices per:
 
 ```java
-GCNBuilder modelBuilder = new GCNBuilder(adjacency, features);
+FastBuilder modelBuilder = new FastBuilder(adjacency, features);
 ```
 
 Sending specific tensors to the builder's consructor
@@ -112,7 +112,7 @@ graph's structure.
 
 To simplify how node classification architectures are defined,
 the above symbolic snippet is automatically generated and applied by calling the 
-`.classify()` method of the `GCNBuilder` instead.
+`.classify()` method of the `FastBuilder` instead.
 
 ## Example architecture
 
@@ -131,7 +131,7 @@ with the same `layer` and `layerRepeat` methods as neural builders.
 dataset.graph().setMainDiagonal(1).setToSymmetricNormalization();
 long numClasses = dataset.labels().getCols();
 
-ModelBuilder modelBuilder = new GCNBuilder(dataset.graph(), dataset.features())
+ModelBuilder modelBuilder = new FastBuilder(dataset.graph(), dataset.features())
 				.config("reg", 0.005)
 				.config("hidden", 16)
 				.config("classes", numClasses)
@@ -154,7 +154,7 @@ in a fixed manner.
 Recall that training needs to call the model's method 
 `.train(optimizer, features, labels, train, valid)`.
 The important question is what to consider as training inputs and outputs, given that node features
-and the graph are passed to the `GCNBuilder` constructor.
+and the graph are passed to the `FastBuilder` constructor.
 
 The answer is that the (ordered) list of all node identifiers *0,1,2,...* constitutes the training inputs
 and the corresponding labels constitute the outputs. You can create a slice of identifiers 

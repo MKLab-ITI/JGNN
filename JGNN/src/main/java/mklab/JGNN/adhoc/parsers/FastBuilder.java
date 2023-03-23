@@ -16,13 +16,13 @@ import mklab.JGNN.adhoc.ModelBuilder;
  * @author Emmanouil Krasanakis
  * @see #classify()
  */
-public class GCNBuilder extends ModelBuilder {
+public class FastBuilder extends ModelBuilder {
 	private int layer = 0;
 	private HashMap<String, Integer> rememberAs = new HashMap<String, Integer>();
 	/**
 	 * @deprecated This constructor should only be used by loading.
 	 */
-	public GCNBuilder() {
+	public FastBuilder() {
 	}
 	/**
 	 * Creates a graph neural network builder from an 
@@ -30,7 +30,7 @@ public class GCNBuilder extends ModelBuilder {
 	 * @param adjacency The pre-normalized adjacency matrix.
 	 * @param features The node feature matrix.
 	 */
-	public GCNBuilder(Matrix adjacency, Matrix features) {
+	public FastBuilder(Matrix adjacency, Matrix features) {
 		long numFeatures = features.getCols();
 		config("features", numFeatures);
 		constant("A", adjacency);
@@ -62,7 +62,7 @@ public class GCNBuilder extends ModelBuilder {
 	 * @param layerId An identifier to remember the last layer's output as.
 	 * @return The model builder.
 	 */
-	public GCNBuilder rememberAs(String layerId) {
+	public FastBuilder rememberAs(String layerId) {
 		rememberAs.put(layerId, layer);
 		return this;
 	}
@@ -72,7 +72,7 @@ public class GCNBuilder extends ModelBuilder {
 	 * @return <code>this</code> builder.
 	 * @see #layerRepeat(String, int)
 	 */
-	public GCNBuilder layer(String expression) {
+	public FastBuilder layer(String expression) {
 		expression = expression
 				.replace("{l+1}", ""+(layer+1))
 			    .replace("{l}", ""+layer);
@@ -87,7 +87,7 @@ public class GCNBuilder extends ModelBuilder {
 	 * and applies softmax on all of them.
 	 * @return <code>this</code> builder.
 	 */
-	public GCNBuilder classify() {
+	public FastBuilder classify() {
 		var("nodes");
 		layer("h{l+1}=h{l}[nodes]");
 		layer("h{l+1}=softmax(h{l}, row)");
@@ -104,32 +104,32 @@ public class GCNBuilder extends ModelBuilder {
 	 * @see #futureConfigs(String, Function, int)
 	 * @see #futureConstants(String, Function, int)
 	 */
-	public GCNBuilder layerRepeat(String expression, int times) {
+	public FastBuilder layerRepeat(String expression, int times) {
 		for(int i=0;i<times;i++)
 			layer(expression);
 		return this;
 	}
-	public GCNBuilder config(String name, double value) {
+	public FastBuilder config(String name, double value) {
 		super.config(name, value);
 		return this;
 	}
-	public GCNBuilder param(String name, Tensor value) {
+	public FastBuilder param(String name, Tensor value) {
 		super.param(name, value);
 		return this;
 	}
-	public GCNBuilder constant(String name, double value) {
+	public FastBuilder constant(String name, double value) {
 		super.constant(name, value);
 		return this;
 	}
-	public GCNBuilder constant(String name, Tensor value) {
+	public FastBuilder constant(String name, Tensor value) {
 		super.constant(name, value);
 		return this;
 	}
-	public GCNBuilder param(String name, double regularization, Tensor value) {
+	public FastBuilder param(String name, double regularization, Tensor value) {
 		super.param(name, regularization, value);
 		return this;
 	}
-	public GCNBuilder operation(String desc) {
+	public FastBuilder operation(String desc) {
 		desc = desc
 				.replace("{l+1}", ""+(layer+1))
 			    .replace("{l}", ""+layer);
@@ -150,7 +150,7 @@ public class GCNBuilder extends ModelBuilder {
 	 * 
 	 * @see #futureConstants(String, Function, int)
 	 */
-	public GCNBuilder futureConfigs(String config, Function<Integer, Double> func, int depth) {
+	public FastBuilder futureConfigs(String config, Function<Integer, Double> func, int depth) {
 		for(int layer=this.layer;layer<this.layer+depth;layer++) {
 			String expression = config.replace("{l}", ""+layer);
 			config(expression, func.apply(layer-this.layer));
@@ -169,7 +169,7 @@ public class GCNBuilder extends ModelBuilder {
 	 * 
 	 * @see #futureConstants(String, Function, int)
 	 */
-	public GCNBuilder futureConstants(String constantName, Function<Integer, Double> func, int depth) {
+	public FastBuilder futureConstants(String constantName, Function<Integer, Double> func, int depth) {
 		for(int layer=this.layer;layer<this.layer+depth;layer++) {
 			String expression = constantName.replace("{l}", ""+layer);
 			constant(expression, func.apply(layer-this.layer));
@@ -183,7 +183,7 @@ public class GCNBuilder extends ModelBuilder {
 	 * @param depth The number of given layers to concatenate.
 	 * @return <code>this</code> builder.
 	 */
-	public GCNBuilder concat(int depth) {
+	public FastBuilder concat(int depth) {
 		String expression = "";
 		for(int i=layer;i>layer-depth;i--) {
 			if(!expression.isEmpty())

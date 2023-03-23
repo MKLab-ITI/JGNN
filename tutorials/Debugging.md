@@ -13,7 +13,7 @@ When parsing operations, values should be assigned to variables before
 subsequent use. Model builders check for unused variables and raise 
 respective runtime exceptions.
 
-For example, for a `GCNBuilder` that tries to parse the expression
+For example, for a `FastBuilder` that tries to parse the expression
 `.layer("h{l+1}=relu(hl@matrix(features, 32, reg)+vector(32))")`,
 where we remind that the layer definition is an enhanced version of
 operation declaration, and `hl` is a typographical error of `h{l}`, 

@@ -3,7 +3,7 @@ package nodeClassification;
 import mklab.JGNN.adhoc.Dataset;
 import mklab.JGNN.adhoc.ModelBuilder;
 import mklab.JGNN.adhoc.datasets.Citeseer;
-import mklab.JGNN.adhoc.parsers.GCNBuilder;
+import mklab.JGNN.adhoc.parsers.FastBuilder;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.nn.Model;
 import mklab.JGNN.nn.ModelTraining;
@@ -21,7 +21,7 @@ public class HetGCN {
 		dataset.graph().setMainDiagonal(1).setToSymmetricNormalization();
 		
 		long numClasses = dataset.labels().getCols();
-		ModelBuilder modelBuilder = new GCNBuilder(dataset.graph(), dataset.features())
+		ModelBuilder modelBuilder = new FastBuilder(dataset.graph(), dataset.features())
 				.config("reg", 0.005)
 				.config("classes", numClasses)
 				.config("hidden", numClasses)

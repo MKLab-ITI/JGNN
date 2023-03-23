@@ -4,8 +4,7 @@ package nodeClassification;
 import mklab.JGNN.adhoc.Dataset;
 import mklab.JGNN.adhoc.ModelBuilder;
 import mklab.JGNN.adhoc.datasets.Citeseer;
-import mklab.JGNN.adhoc.datasets.Pubmed;
-import mklab.JGNN.adhoc.parsers.GCNBuilder;
+import mklab.JGNN.adhoc.parsers.FastBuilder;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.nn.Model;
 import mklab.JGNN.nn.ModelTraining;
@@ -22,14 +21,14 @@ import mklab.JGNN.nn.optimizers.Adam;
  */
 public class APPNP {
 	public static void main(String[] args) throws Exception {
-		Dataset dataset = new Pubmed();
+		Dataset dataset = new Citeseer();
 		dataset.graph().setMainDiagonal(1).setToSymmetricNormalization();
 		dataset.graph().setDimensionName("nodes", "nodes");
 		dataset.features().setDimensionName("nodes", "features");
 		dataset.labels().setDimensionName("nodes", "labels");
 		
 		long numClasses = dataset.labels().getCols();
-		ModelBuilder modelBuilder = new GCNBuilder(dataset.graph(), dataset.features())
+		ModelBuilder modelBuilder = new FastBuilder(dataset.graph(), dataset.features())
 				.config("reg", 0.005)
 				.config("hidden", 64)
 				.config("classes", numClasses)
