@@ -81,7 +81,7 @@ Tensor normalized = new DenseTensor(10).setToOnes().setToNormalized();
 
 ## Vector initialization
 
-You can initialize either a dense tensor with the expression `Tensor denseTensor = new mklab.JGNN.tensor.DenseTensor(long size)` .
+You can initialize a dense tensor with the expression `Tensor denseTensor = new mklab.JGNN.tensor.DenseTensor(long size)` .
 If there are many zero elements expected, or if sizes go beyond the max integer limit Java imposes on array sizes (and hence a dense representation can not be stored as an array), a sparse tensor can be used per `Tensor sparseTensor = new mklab.JGNN.tensor.SparseTensor(long size)`. For example, one-hot encodings for classification problems can be generated with the following code. This creates a dense tensor with *numClasses* elements and puts at element *classId* the value 1:
 
 ```java

@@ -12,8 +12,8 @@ In practice, you will want to use your own data. This tutorial covers typical co
 If you know the number of nodes or data samples and features a-priori, you can create
 dense feature matrices with the following code. This uses the bare minimum memory necessary
 to construct the feature matrix. If features are dense (do not have a lot of zeroes), 
-you could also consider using the `DenseMatrix` class instead of initializing a sparse matrix
-- the two classes are interoperable and have the same constructor arguments
+you could also consider using the `DenseMatrix` class instead of initializing a sparse 
+matrix - the two classes are interoperable and have the same constructor arguments
  so that the rest of the code in the tutorials remains the same.
 
 ```java
@@ -53,7 +53,7 @@ Matrix features = new WrapRows(rows).toSparse(); // or toDense
 ## Constructing graph adjacency matrices
 Creating adjacency matrices is similar to creating preallocated features matrices. 
 **Always** use the sparse format for adjacency matrices.
-Note that many GNNs work by considering bidirectional (i.e. non-directed) edges,
+Note that many GNNs work by considering bidirectional (i.e., non-directed) edges,
 so that if you add an edge you also need to add the oposite one.
 
 An example snippet on how to create a symmetric adjacency matrix:
@@ -69,7 +69,7 @@ if these are needed by your algorithm, for instance by calling `adjacency.setMai
 
 ## Managing identifiers
 The above snippets all reference node identifiers. To help you with managing these, JGNN
-provides an `IdConverter` class. You can convert hashable objects (e.g. Strings) to identifiers
+provides an `IdConverter` class. You can convert hashable objects (e.g., Strings) to identifiers
 by calling `IdConverter.getOrCreateId(object)`. The same functionality is also helpful 
 for one-hot encoding of class labels. If you want to search only for previously registered identifiers, 
 for example to catch logical errors, you can use `IdConverter.get(object)`.

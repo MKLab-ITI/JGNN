@@ -7,9 +7,8 @@ but JGNN provides some common design choices that simplify the process for node 
 1. [Initializing a GNN builder](#initializing-a-gnn-builder)
 2. [GNN concepts](#gnn-concepts)
 3. [Adding a classification layer](#adding-a-classification-layer)
-3. [Example architecture](#example-architecture)
+4. [Example architecture](#example-architecture)
 5. [GNN training](#gnn-training)
-
 
 ## Initializing a GNN builder
 The `FastBuilder` class for building GNN architectures extends the generic 
@@ -57,8 +56,11 @@ adjacency.put(from, to, value);
 ## GNN concepts
 
 The base operation of GNNs is to propagate node representations to neighbors via graph edges,
-where they are aggregated - typically summed per normalized adjacency matrix edge weights.
-This can be achieved with a simple matrix multiplication on the previous layer's
+where they are aggregated. Aggeration typically consists of a weighted average 
+per the normalized adjacency matrix edge weights, which propagates information
+while respecting spectral graph characteristics. Other types of aggregation
+are can be found in the more advanced tutorial for [Message passing GNNs](Message.md).
+Spectral aggregation can be achieved with a simple matrix multiplication on the previous layer's
 node features per `.layer("h{l+1}=A @ h{l}")`. In practice, you will often want to 
 add more operations on the propagation, such as passing it through a dense layer. 
 For example, the original GCN architecture defines layers of the form:

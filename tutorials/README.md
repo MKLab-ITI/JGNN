@@ -14,3 +14,4 @@ Tutorials cover the following subjects:
 ## Advanced topics
 4. [Primitives](Primitives.md)
 5. [Debugging](Debugging.md)
+6. [Message passing GNNs](Message.md)

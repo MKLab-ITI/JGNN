@@ -145,3 +145,5 @@ it should be converted to:
 ```java
 builder.operation("h = relu(monitor(x@matrix(features, 64)) + vector(64))")
 ```
+
+[NEXT: Message passing GNNs](Message.md)
