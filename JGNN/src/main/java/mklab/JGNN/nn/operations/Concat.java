@@ -22,7 +22,7 @@ public class Concat extends NNOperation {
 		cols0.addAll(cols1);
 		if(inputs.get(0).cast(Matrix.class).getRowName()!=inputs.get(1).cast(Matrix.class).getRowName())
 			throw new RuntimeException("Cannot concatenate: "+inputs.get(0).describe()+" and "+inputs.get(1).describe());
-		return new WrapCols(cols0).setDimensionName(inputs.get(0).cast(Matrix.class).getRowName(), null);
+		return new WrapCols(cols0).setZeroCopyType(inputs.get(0).cast(Matrix.class)).setDimensionName(inputs.get(0).cast(Matrix.class).getRowName(), null);
 		/*Matrix matrix0 = (Matrix)inputs.get(0);
 		Matrix matrix1 = (Matrix)inputs.get(1);
 		if(matrix0.getRows()!=matrix1.getRows())

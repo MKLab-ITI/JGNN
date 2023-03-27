@@ -27,6 +27,11 @@ public class To extends NNOperation {
 	}
 	
 	@Override
+	public boolean isCachable() {
+		return true;
+	}
+	
+	@Override
 	protected Tensor partial(int inputId, List<Tensor> inputs, Tensor output, Tensor error) {
 		throw new UnsupportedOperationException("Cannot iterate over non-constant matrices");
 	}

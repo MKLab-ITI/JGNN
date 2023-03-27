@@ -3,7 +3,7 @@ package nodeClassification;
 
 import mklab.JGNN.adhoc.Dataset;
 import mklab.JGNN.adhoc.ModelBuilder;
-import mklab.JGNN.adhoc.datasets.Citeseer;
+import mklab.JGNN.adhoc.datasets.Cora;
 import mklab.JGNN.adhoc.parsers.FastBuilder;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.nn.Model;
@@ -21,7 +21,7 @@ import mklab.JGNN.nn.optimizers.Adam;
  */
 public class APPNP {
 	public static void main(String[] args) throws Exception {
-		Dataset dataset = new Citeseer();
+		Dataset dataset = new Cora();
 		dataset.graph().setMainDiagonal(1).setToSymmetricNormalization();
 		dataset.graph().setDimensionName("nodes", "nodes");
 		dataset.features().setDimensionName("nodes", "features");

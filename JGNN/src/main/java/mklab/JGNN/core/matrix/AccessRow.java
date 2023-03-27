@@ -19,7 +19,6 @@ public class AccessRow extends Tensor {
 	private Matrix matrix;
 	private long row;
 	private long estimateNonZeroes;
-
 	/**
 	 * Instantiates a see-through access of a matrix row.
 	 * @param matrix The base matrix.

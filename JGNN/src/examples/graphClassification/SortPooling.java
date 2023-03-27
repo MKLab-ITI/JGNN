@@ -67,7 +67,7 @@ public class SortPooling {
             }
             ThreadPool.getInstance().waitForConclusion();  // wait for all gradients to compute
             optimizer.updateAll();  // apply gradients on model parameters
-           
+            
             double acc = 0.0;
             for(int graphId=0; graphId<dtest.graphs.size(); graphId++) {
                 Matrix adjacency = dtest.graphs.get(graphId);

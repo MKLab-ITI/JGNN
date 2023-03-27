@@ -1,7 +1,8 @@
 # JGNN
 A native Java library for Graph Neural Networks.
 
-# :cyclone: Changes from earlier versions
+# :cyclone: Changes from 1.0.0
+* Up to 30% less memory and running time
 * Renamed `GCNBuilder` to `FastBuilder`
 * Neighbor attention and message passing
 * Sort pooling and graph classification

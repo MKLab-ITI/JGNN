@@ -37,8 +37,9 @@ public class Gather extends NNOperation {
 		Matrix derivative = H.zeroCopy().cast(Matrix.class);
 		for(int i=0;i<index.size();i++) {
 			int pos = (int)index.get(i);
-			for(int j=0;j<H.getCols();j++) 
-				derivative.put(pos, j, derivative.get(pos, j) + errorMatrix.get(i, j));
+			derivative.accessRow(pos).selfAdd(errorMatrix.accessRow(i));
+			//for(int j=0;j<H.getCols();j++) 
+			//	derivative.put(pos, j, derivative.get(pos, j) + errorMatrix.get(i, j));
 		}
 		return derivative;
 	}
