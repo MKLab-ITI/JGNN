@@ -2,9 +2,7 @@ package nodeClassification;
 
 import mklab.JGNN.adhoc.Dataset;
 import mklab.JGNN.adhoc.ModelBuilder;
-import mklab.JGNN.adhoc.datasets.Citeseer;
 import mklab.JGNN.adhoc.datasets.Cora;
-import mklab.JGNN.adhoc.datasets.Pubmed;
 import mklab.JGNN.adhoc.parsers.FastBuilder;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.nn.Model;
@@ -12,7 +10,6 @@ import mklab.JGNN.nn.ModelTraining;
 import mklab.JGNN.core.Slice;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.nn.initializers.XavierNormal;
-import mklab.JGNN.nn.loss.Accuracy;
 import mklab.JGNN.nn.loss.CategoricalCrossEntropy;
 import mklab.JGNN.nn.optimizers.Adam;
 
@@ -23,7 +20,7 @@ import mklab.JGNN.nn.optimizers.Adam;
  */
 public class GCN {
 	public static void main(String[] args) throws Exception {
-		Dataset dataset = new Citeseer();
+		Dataset dataset = new Cora();
 		dataset.graph().setMainDiagonal(1).setToSymmetricNormalization();
 		
 		long numClasses = dataset.labels().getCols();

@@ -21,6 +21,7 @@ import mklab.JGNN.core.util.Range2D;
  */
 public class WrapRows extends Matrix {
 	private List<Tensor> rows;
+	private Matrix zeroCopyType;
 	public WrapRows(Tensor... rows) {
 		this(Arrays.asList(rows));
 	}
@@ -31,12 +32,23 @@ public class WrapRows extends Matrix {
 			row.assertMatching(rows.get(0));
 		setRowName(rows.get(0).getDimensionName());
 	}
+	/**
+	 * Sets a prototype matrix from which to borrow copying operations.
+	 * @param zeroCopyType A {@link Matrix} instance from which to borrow {@link #zeroCopy(long, long)}.
+	 * @return <code>this</code> object
+	 */
+	public WrapRows setZeroCopyType(Matrix zeroCopyType) {
+		this.zeroCopyType = zeroCopyType;
+		return this;
+	}
 	@Override
 	public Iterable<Entry<Long, Long>> getNonZeroEntries() {
 		return new Range2D(0, getRows(), 0, getCols());
 	}
 	@Override
 	public Matrix zeroCopy(long rows, long cols) {
+		if(zeroCopyType!=null)
+			return zeroCopyType.zeroCopy(rows, cols);
 		if(cols!=getRows() && rows!=getRows())
 			throw new UnsupportedOperationException();
 		ArrayList<Tensor> newRows = new ArrayList<Tensor>();

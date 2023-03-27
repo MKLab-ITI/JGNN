@@ -676,7 +676,7 @@ public abstract class Matrix extends Tensor {
 		List<Tensor> ret = new ArrayList<Tensor>();
 		for(long row : rows)
 			ret.add(accessRow(row));
-		return new WrapRows(ret);
+		return new WrapRows(ret).setZeroCopyType(this);
 	}
 	/**
 	 * Organizes specific matrix columns to a list of tensors that share entries.
@@ -694,7 +694,7 @@ public abstract class Matrix extends Tensor {
 		List<Tensor> ret = new ArrayList<Tensor>();
 		for(long col=0;col<getCols();col++)
 			ret.add(accessCol(col));
-		return new WrapCols(ret);
+		return new WrapCols(ret).setZeroCopyType(this);
 	}
 
 	/**
@@ -713,7 +713,7 @@ public abstract class Matrix extends Tensor {
 		List<Tensor> ret = new ArrayList<Tensor>();
 		for(long row=0;row<rows.size();row++)
 			ret.add(accessRow((long)rows.get(row)));
-		return new WrapRows(ret);
+		return new WrapRows(ret).setZeroCopyType(this);
 	}
 	/**
 	 * Organizes matrix columns to a list of tensors that share entries.
@@ -731,7 +731,7 @@ public abstract class Matrix extends Tensor {
 		ArrayList<Tensor> ret = new ArrayList<Tensor>();
 		for(long col=0;col<cols.size();col++)
 			ret.add(accessCol((long)cols.get(col)));
-		return new WrapCols(ret);
+		return new WrapCols(ret).setZeroCopyType(this);
 	}
 
 	/**

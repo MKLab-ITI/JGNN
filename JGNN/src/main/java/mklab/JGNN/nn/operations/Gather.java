@@ -5,7 +5,6 @@ import java.util.List;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.nn.NNOperation;
 import mklab.JGNN.core.Tensor;
-import mklab.JGNN.core.matrix.DenseMatrix;
 
 /**
  * Implements a {@link NNOperation} that performs the equivalent of TensorFlow's gather operation.
@@ -17,7 +16,8 @@ public class Gather extends NNOperation {
 	protected Tensor forward(List<Tensor> inputs) {
 		if(inputs.size()!=2)
 			throw new IllegalArgumentException();
-		Tensor index = inputs.get(0);
+		return inputs.get(1).cast(Matrix.class).accessRows(inputs.get(0));
+		/*Tensor index = inputs.get(0);
 		Matrix H = (Matrix) inputs.get(1);
 		Matrix ret = H.zeroCopy(index.size(), H.getCols()).setRowName(index.getDimensionName());
 		for(int i=0;i<index.size();i++) {
@@ -25,7 +25,7 @@ public class Gather extends NNOperation {
 			for(int j=0;j<H.getCols();j++)
 				ret.put(i, j, ret.get(i, j) + H.get(pos, j));
 		}
-		return ret;
+		return ret;*/
 	}
 	@Override
 	protected Tensor partial(int inputId, List<Tensor> inputs, Tensor output, Tensor error) {

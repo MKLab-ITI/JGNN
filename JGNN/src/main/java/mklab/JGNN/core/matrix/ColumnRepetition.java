@@ -1,12 +1,11 @@
 package mklab.JGNN.core.matrix;
 
-import java.util.ArrayList;
+import java.util.AbstractMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.Tensor;
-import mklab.JGNN.core.util.Range2D;
 
 /**
  * Defines a matrix whose columns are all a copy of a {@link Tensor}.
@@ -17,6 +16,58 @@ import mklab.JGNN.core.util.Range2D;
  * @see RowRepetition
  */
 public class ColumnRepetition extends Matrix {
+	protected class Repeat1DIterator implements Iterator<Long>, Iterable<Long> {
+		private Iterator<Long> iterator;
+		private long current;
+		public Repeat1DIterator() {
+			this.iterator = column.iterator();
+			current = 0;
+		}
+		@Override
+		public boolean hasNext() {
+			return current<getCols()-1 || iterator.hasNext();
+		}
+		@Override
+		public Long next() {
+			if(!iterator.hasNext()) {
+				current += 1;
+				iterator = column.iterator();
+			}
+			long pos = iterator.next();
+			return pos+current*getRows();
+		}
+		@Override
+		public Iterator<Long> iterator() {
+			return this;
+		}
+	}
+
+	protected class Repeat2DIterator implements Iterator<Entry<Long, Long>>, Iterable<Entry<Long, Long>> {
+		private Iterator<Long> iterator;
+		private long current;
+		public Repeat2DIterator() {
+			this.iterator = column.iterator();
+			current = 0;
+		}
+		@Override
+		public boolean hasNext() {
+			return current<getCols() || iterator.hasNext();
+		}
+		@Override
+		public Entry<Long, Long> next() {
+			if(!iterator.hasNext()) {
+				current += 1;
+				iterator = column.iterator();
+			}
+			long pos = iterator.next();
+			return new AbstractMap.SimpleEntry<Long,Long>(Long.valueOf(pos), Long.valueOf(current));
+		}
+		@Override
+		public Iterator<Entry<Long, Long>> iterator() {
+			return this;
+		}
+	}
+	
 	protected Tensor column;
 	/**
 	 * Instantiates a matrix repeating a tensor to be treated as a column.
@@ -53,20 +104,11 @@ public class ColumnRepetition extends Matrix {
 
 	@Override
 	public Iterator<Long> traverseNonZeroElements() {
-		ArrayList<Long> nonZeros = new ArrayList<Long>();
-		for(long row=0;row<getRows();row++)
-			for(long col : column.getNonZeroElements())
-				nonZeros.add(row+col*getRows());
-		return nonZeros.iterator();
+		return new Repeat1DIterator();
 	}
 	@Override
 	public Iterable<Entry<Long, Long>> getNonZeroEntries() {
-		return new Iterable<Entry<Long, Long>>() {
-			@Override
-			public Iterator<Entry<Long, Long>> iterator() {
-				return new Range2D(0, getRows(), 0, getCols());
-			}
-		};
+		return new Repeat2DIterator();
 	}
 	@Override
 	public void release() {
