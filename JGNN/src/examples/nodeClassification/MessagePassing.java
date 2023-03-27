@@ -23,7 +23,7 @@ import mklab.JGNN.nn.optimizers.Adam;
 public class MessagePassing {
 	public static void main(String[] args) throws Exception {
 		Dataset dataset = new Cora();
-		//dataset.graph().setMainDiagonal(1).setToSymmetricNormalization();
+		dataset.graph().setMainDiagonal(1).setToSymmetricNormalization();
 		
 		long numClasses = dataset.labels().getCols();
 		ModelBuilder modelBuilder = new FastBuilder(dataset.graph(), dataset.features())

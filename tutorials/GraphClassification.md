@@ -9,6 +9,8 @@ based on their structure.
 4. [Sort pooling](#sort-pooling)
 5. [Parallelized training](#parallelized-training)
 
+*Full implementations can be found in the [examples](../JGNN/src/examples/graphClassification/SortPooling.java).*
+
 ## Organizing data
 
 To define architectures for graph classification,

@@ -10,6 +10,8 @@ but JGNN provides some common design choices that simplify the process for node 
 4. [Example architecture](#example-architecture)
 5. [GNN training](#gnn-training)
 
+*Full implementations can be found in the [examples](../JGNN/src/examples/nodeClassification/APPNP.java).*
+
 ## Initializing a GNN builder
 The `FastBuilder` class for building GNN architectures extends the generic 
 `LayerBuilder` with common graph neural network operations. 
