@@ -15,7 +15,6 @@ import mklab.JGNN.core.Tensor;
  * Does not allocate additional elements. Editing the matrix edits
  * the original tensors and conversely.
  * <br>
- * @implSpec TODO for future versions to not use dense matrix iterators. 
  * @author Emmanouil Krasanakis
  */
 public class WrapCols extends Matrix {
@@ -74,15 +73,23 @@ public class WrapCols extends Matrix {
 	
 	private List<Tensor> cols;
 	private Matrix zeroCopyType;
+	private long estimateNonZeroes;
 	public WrapCols(Tensor... cols) {
 		this(Arrays.asList(cols));
 	}
 	public WrapCols(List<Tensor> cols) {
 		super(cols.get(0).size(), cols.size());
 		this.cols = cols;
-		for(Tensor col : cols) 
+		estimateNonZeroes = 0;
+		for(Tensor col : cols) { 
 			col.assertMatching(cols.get(0));
+			estimateNonZeroes += col.estimateNumNonZeroElements();
+		}
 		setColName(cols.get(0).getDimensionName());
+	}
+	@Override
+	public long estimateNumNonZeroElements() {
+		return estimateNonZeroes;
 	}
 	/**
 	 * Sets a prototype matrix from which to borrow copying operations.

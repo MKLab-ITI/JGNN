@@ -36,6 +36,11 @@ public class AccessCol extends Tensor {
 	}
 	
 	@Override
+	public long estimateNumNonZeroElements() {
+		return estimateNonZeroes;
+	}
+	
+	@Override
 	protected void allocate(long size) {
 	}
 

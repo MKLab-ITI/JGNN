@@ -170,7 +170,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @see #assertMatching(Tensor)
 	 */
 	protected boolean isMatching(Tensor other) {
-		return size==other.size() && (dimensionName==null || other.getDimensionName()==null || dimensionName==other.getDimensionName());
+		return size==other.size() && (dimensionName==null || other.getDimensionName()==null || dimensionName.equals(other.getDimensionName()));
 	}
 	/**
 	 * Creates a tensor of the same class with the same size and all element set to zero.
