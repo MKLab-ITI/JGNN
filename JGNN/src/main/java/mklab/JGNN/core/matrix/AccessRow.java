@@ -18,6 +18,7 @@ import mklab.JGNN.core.util.Range;
 public class AccessRow extends Tensor {
 	private Matrix matrix;
 	private long row;
+	private long estimateNonZeroes;
 
 	/**
 	 * Instantiates a see-through access of a matrix row.
@@ -29,8 +30,14 @@ public class AccessRow extends Tensor {
 		this.matrix = matrix;
 		this.row = row;
 		this.setDimensionName(matrix.getRowName());
+		this.estimateNonZeroes = matrix.estimateNumNonZeroElements()/matrix.getRows();
 		if(row<0 || row>=matrix.getRows())
 			throw new IllegalArgumentException("Row "+row+" does not exist in "+matrix.describe());
+	}
+	
+	@Override
+	public long estimateNumNonZeroElements() {
+		return estimateNonZeroes;
 	}
 	
 	@Override

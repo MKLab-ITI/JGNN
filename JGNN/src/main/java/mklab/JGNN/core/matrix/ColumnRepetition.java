@@ -51,7 +51,7 @@ public class ColumnRepetition extends Matrix {
 		}
 		@Override
 		public boolean hasNext() {
-			return current<getCols() || iterator.hasNext();
+			return current<getCols()-1 || iterator.hasNext();
 		}
 		@Override
 		public Entry<Long, Long> next() {

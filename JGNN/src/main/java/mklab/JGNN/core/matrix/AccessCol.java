@@ -18,6 +18,7 @@ import mklab.JGNN.core.util.Range;
 public class AccessCol extends Tensor {
 	private Matrix matrix;
 	private long col;
+	private long estimateNonZeroes;
 	
 	/**
 	 * Instantiates a see-through access of a matrix column.
@@ -28,6 +29,7 @@ public class AccessCol extends Tensor {
 		super(matrix.getRows());
 		this.matrix = matrix;
 		this.col = col;
+		this.estimateNonZeroes = matrix.estimateNumNonZeroElements()/matrix.getCols();
 		this.setDimensionName(matrix.getColName());
 		if(col<0 || col>=matrix.getCols())
 			throw new IllegalArgumentException("Column "+col+" does not exist in "+matrix.describe());
