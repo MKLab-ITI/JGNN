@@ -28,14 +28,14 @@ public class WrapRows extends Matrix {
 		}
 		@Override
 		public boolean hasNext() {
+			while(!iterator.hasNext() && current<rows.size()-1) {
+				current += 1;
+				iterator = rows.get((int)current).iterator();
+			}
 			return current<rows.size()-1 || iterator.hasNext();
 		}
 		@Override
 		public Long next() {
-			if(!iterator.hasNext()) {
-				current += 1;
-				iterator = rows.get((int)current).iterator();
-			}
 			long pos = iterator.next();
 			return current+pos*getRows();
 		}
@@ -54,14 +54,14 @@ public class WrapRows extends Matrix {
 		}
 		@Override
 		public boolean hasNext() {
+			while(!iterator.hasNext() && current<rows.size()-1) {
+				current += 1;
+				iterator = rows.get((int)current).iterator();
+			}
 			return current<rows.size()-1 || iterator.hasNext();
 		}
 		@Override
 		public Entry<Long, Long> next() {
-			if(!iterator.hasNext()) {
-				current += 1;
-				iterator = rows.get((int)current).iterator();
-			}
 			long pos = iterator.next();
 			return new AbstractMap.SimpleEntry<Long,Long>(Long.valueOf(current), Long.valueOf(pos));
 		}

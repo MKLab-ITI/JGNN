@@ -50,6 +50,7 @@ public class MLP {
 				.setNumBatches(20)
 				.setParallelizedStochasticGradientDescent(true)
 				.setLoss(new BinaryCrossEntropy())
+				.setVerbose(true)
 				.setValidationLoss(new Accuracy())
 				.train(new XavierNormal().apply(modelBuilder.getModel()), 
 						dataset.features(), 
