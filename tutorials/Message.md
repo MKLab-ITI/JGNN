@@ -7,8 +7,7 @@ using [simpler GNNs](GNN.md) when possible.
 1. [Message passing principles](#message-passing-principles)
 2. [Creating messages](#creating-messages)
 3. [Receiving messages](#receiving-messages)
-4. [Example architecture](#example-architecture)
-5. [Neighbor attention](#neighbor-attention)
+4. [Neighbor attention](#neighbor-attention)
 
 ## Message passing principles
 Message passing considers a setting where each edge is responsible for appropriately
@@ -22,7 +21,7 @@ several settings of interest.
 In the more general sense, messages can be matrices whose rows correspond to edges
 and columns to edge features. In the simplest scenario, you can create such matrices
 by gathering the features of edge source and destination nodes by accessing 
-the resspective elements of a feature matrix *H{l}*. Doing so requires that you 
+the resspective elements of a feature matrix *h{l}*. Doing so requires that you 
 first obtain edge source indexes *src=from(A)* and destination indexes *dst=to(A)* 
 where *A* is an adjacency matrix. Thus, you can construct edge features per:
 
@@ -30,7 +29,7 @@ where *A* is an adjacency matrix. Thus, you can construct edge features per:
 modelBuilder
 	.operation("src=from(A)")
 	.operation("dst=to(A)")
-	.operation("message{l}=H{l}[src] | H{l}[dst]");
+	.operation("message{l}=h{l}[src] | h{l}[dst]");
 ```
 
 The model builder parses *|* as the horizontal concatenation expression. You can 
@@ -72,8 +71,15 @@ modelBuilder
 where *2feats{l}* is configured to a matching number of dimensions as the sum 
 of the number of columns of *h{l}* and *transformed_message{l}*.
 
-## Example architecture
-TODO
-
 ## Neighbor attention
-TODO
+A common realization of message passing GNNs is via sparse-dense matrix multiplication
+to emulate neighbor attention per: *A.(h<sup>T</sup>h)* where *A* is a sparse
+adjacency matrix, *.* is the Hadamard product (element-by-element multiplication)
+and *h* a dense matrix whose rows hold respective node representations. 
+JGNN implements this operation and you can include it in symbolic definitions with the
+expression `att(A, h)`. Its implementation is considerably more lightweight
+than the equivalent message passing mechanism.
+
+True neighbor attention in the style of gated attention networks can be implemented
+by exponantiating all non-zero elements of the adjacency matrix and performing row-wise
+normalization per `L1(nexp(att(A, h)))`.

@@ -22,7 +22,7 @@ public class GCN {
 	public static void main(String[] args) throws Exception {
 		Dataset dataset = new Cora();
 		dataset.graph().setMainDiagonal(1).setToSymmetricNormalization();
-		
+
 		long numClasses = dataset.labels().getCols();
 		ModelBuilder modelBuilder = new FastBuilder(dataset.graph(), dataset.features())
 				.config("reg", 0.005)
