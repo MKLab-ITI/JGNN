@@ -528,6 +528,33 @@ public abstract class Matrix extends Tensor {
 		return this;
 	}
 	
+
+	/**
+	 * Sets the Matrix to its asymmetrically normalized transformation 
+	 * by appropriately adjusting its element values.
+	 * @return <code>this</code> Matrix instance.
+	 * @see #symmetricNormalization()
+	 */
+	public Matrix setToASymmetricNormalization() {
+		HashMap<Long, Double> outDegrees = new HashMap<Long, Double>();
+		HashMap<Long, Double> inDegrees = new HashMap<Long, Double>();
+		for(Entry<Long,Long> element : getNonZeroEntries()) {
+			long row = element.getKey();
+			long col = element.getValue();
+			double value = get(row, col);
+			outDegrees.put(row, outDegrees.getOrDefault(row, 0.)+value);
+			inDegrees.put(col, inDegrees.getOrDefault(col, 0.)+value);
+		}
+		for(Entry<Long,Long> element : getNonZeroEntries()) {
+			long row = element.getKey();
+			long col = element.getValue();
+			double div = inDegrees.get(col);
+			if(div!=0)
+				put(row, col, get(row, col)/div);
+		}
+		return this;
+	}
+	
 	/**
 	 * Retrieves either the given row or column as a trensor.
 	 * @param index The dimension index to access.

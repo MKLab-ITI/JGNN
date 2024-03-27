@@ -286,8 +286,9 @@ public abstract class Tensor implements Iterable<Long> {
 		if(density()<tensor.density()) 
 			return tensor.add(this);
 		Tensor res = copy();
-		for(long i : tensor.getNonZeroElements())
+		for(long i : tensor.getNonZeroElements()) {
 			res.put(i, get(i)+tensor.get(i));
+		}
 		return res;
 	}
 	/**

@@ -36,7 +36,7 @@ method for model build functional flows that prints all the parsed
 expressions and intermediate expression in the system console, and b)
 a. `.getExecutionGraphDot()` that returns a String holding the execution
 graph in *.dot* format for visualization with external tools, such
-as (GraphViz](https://dreampuf.github.io/GraphvizOnline).
+as [GraphViz](https://dreampuf.github.io/GraphvizOnline).
 
 A second error-checking procedure consists of checking 
 for model operations that do not

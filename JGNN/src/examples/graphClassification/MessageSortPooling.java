@@ -19,7 +19,7 @@ import mklab.JGNN.nn.optimizers.BatchOptimizer;
  * @author github.com/gavalian
  * @author Emmanouil Krasanakis
  */
-public class SortPooling {
+public class MessageSortPooling {
     
     public static void main(String[] args){
         long reduced = 5;  // input graphs need to have at least that many nodes, lower values decrease accuracy
@@ -29,22 +29,37 @@ public class SortPooling {
                 .var("A")  
                 .config("features", 1)
                 .config("classes", 2)
-                .config("reduced", reduced)
+                //.config("reduced", reduced)
                 .config("hidden", hidden)
+                .config("2hidden", 2*hidden)
                 .config("reg", 0.005)
-                .layer("h{l+1}=relu(A@(h{l}@matrix(features, hidden, reg))+vector(hidden))") 
-                .layer("h{l+1}=relu(A@(h{l}@matrix(hidden, hidden, reg))+vector(hidden))") 
-                .concat(2) // concatenates the outputs of the last 2 layers
-                .config("hiddenReduced", hidden*2*reduced)  // 2* due to concatenation
+                .operation("edgeSrc = from(A)")
+				.operation("edgeDst = to(A)")
+				.layer("h{l+1}=relu(h{l}@matrix(features, hidden, reg)+vector(hidden))")
+				.layer("h{l+1}=h{l}@matrix(hidden, hidden, reg)+vector(hidden)")
+				
+				// message passing layer (make it as complex as needed)
+				.operation("message{l}=h{l}[edgeSrc] | h{l}[edgeDst]")
+				.operation("transformed{l}=relu(message{l}@matrix(2hidden, hidden, reg)+vector(hidden))")
+				.operation("received{l}=reduce(transformed{l}, A)")
+				.operation("i{l}=relu((received{l} | h{l})@matrix(2hidden, hidden, reg)+vector(hidden))")
+				.layer("h{l+1}=relu(i{l}@matrix(hidden, hidden, reg)+vector(hidden))")
+				
+				// this would be the sort pooling
+                /*.config("hiddenReduced", hidden*reduced)  // reduced * (previous layer's output size)
                 .operation("z{l}=sort(h{l}, reduced)")  // currently, the parser fails to understand full expressions within next step's gather, so we need to create this intermediate variable
                 .layer("h{l+1}=reshape(h{l}[z{l}], 1, hiddenReduced)") //
                 .layer("h{l+1}=h{l}@matrix(hiddenReduced, classes)")
+                .layer("h{l+1}=softmax(h{l}, row)")*/
+				
+				// the following two layers implement the sum pooling
+                .layer("h{l+1}=sum(h{l}@matrix(hidden, classes)+vector(classes), row)")
                 .layer("h{l+1}=softmax(h{l}, row)")
-                //.layer("h{l+1}=softmax(sum(h{l}@matrix(hiddenReduced, classes), row))")//this is mean pooling to replace the above sort pooling
-                .out("h{l}");       
+				
+                .out("h{l}");
         
-        TrajectoryData dtrain = new TrajectoryData(8000);
-        TrajectoryData dtest = new TrajectoryData(2000);
+        TrajectoryData dtrain = new TrajectoryData(800);
+        TrajectoryData dtest = new TrajectoryData(200);
         
         Model model = builder.getModel().init(new XavierNormal());
         BatchOptimizer optimizer = new BatchOptimizer(new Adam(0.01));

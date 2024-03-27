@@ -8,7 +8,7 @@ import java.util.Stack;
 import java.util.WeakHashMap;
 
 /**
- * A memory management systems for thread-safe allocation and release of arrays of doubles.
+ * A memory management system for thread-safe allocation and release of arrays of doubles.
  * Soft references to allocated arrays kept so that released ones can be reused by future
  * allocation calls without explicitly initializing memory.
  * 

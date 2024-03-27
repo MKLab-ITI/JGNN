@@ -80,7 +80,7 @@ is presented later in in the [debugging](Debugging.md) tutorial.
 ## Training
 To train the model, we set up 50-25-25 training-validation-test data slices.
 These basically handle shuffled sample identifiers. You can use integers instead of
-doubles in the `range` method to reference a fixed fixed instead of fractional slice sizes.
+doubles in the `range` method to reference a fixed number of samples instead of fractional slice sizes.
 
 ```java
 Slice samples = dataset.samples().getSlice().shuffle();  // or samples = new Slice(0, labels.getRows()).shuffle();

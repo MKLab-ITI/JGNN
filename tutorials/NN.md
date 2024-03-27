@@ -32,13 +32,15 @@ ModelBuilder modelBuilder = new LayeredBuilder("h0")
 ## Deep architectures
 Now that we have explained how simple layers work, let's look at two more advanced
 `LayeredBuilder` methods pivotal to many deep neural networks.
-The first is `.layerRepeat(String, int)`), which just repeats
+The first is `.layerRepeat(String, int)`, which just repeats
 the layer expression a set number of times without breaking the
-functional model definition pipeline. The second is `.concat(int)`. Concatenation
-is also possible with normal parsing with the `|` operation, but this performs it over any
-number of layers.
+functional model definition pipeline. The second is `.concat(int)`, 
+which concatenates horizontally concatenates a number of top layers. Concatenation
+is also possible in symbolic parsing through the `|` operation, 
+but calling the method easily scales it over a large number of layers 
+(e.g., across several graph convolutional layers).
 
-We now make a more advanved model:
+We now make a more advanved model using these methods:
 
 ```java
 ModelBuilder modelBuilder = new LayeredBuilder()
@@ -54,7 +56,7 @@ ModelBuilder modelBuilder = new LayeredBuilder()
 ```
 
 ## Writing operations
-This is a good point to we present symbols you can use to define operation expressions.
+This is a good point to present symbols you can use within expressions.
 Unless otherwise specified, you can replace x and y with any expression. Sometimes,
 y needs to be a constant defined either by presenting a number, calling 
 `ModelBuilder.config(y, double)`, or calling `ModelBuilder.constant(y, double)` to
@@ -75,7 +77,7 @@ set the numbers as hyperparameters.
 | tanh(x) | Function | Apply a tanh activation on each tensor element. |
 | sigmoid(x) | Function | Apply a sigmoid activation on each tensor element. |
 | dropout(x, y) | Function | Apply training dropout on tensor x with constant dropout rate y. |
-| lrely(x, y)   | Function | Leaky relu on tensor x with constant negative slope y. |
+| lrelu(x, y)   | Function | Leaky relu on tensor x with constant negative slope y. |
 | prelu(x)      | Function | Leaky relu on tensor x with learnanble negative slope. |
 | softmax(x, y) | Function | Apply y-wide  softmax on x, where y is either row or col.|
 | sum(x, y) | Function | Apply y-wide sum reduction on x, where y is either row or col.|
@@ -83,7 +85,7 @@ set the numbers as hyperparameters.
 | matrix(x, y)  | Function | Generate a matrix parameter with respective hyperparameter dimensions. |
 | vector(x)     | Function | Generate a vector with respective hyperparameter size.|
 
-Prefer using hyperparameters for matrix and vector creation, as these transfer their names to respective
+Prefer using hyperparameters (set via `.config`) for matrix and vector creation, as these transfer their names to respective
 dimensions for error checking. For `dropout,matrix,vector` you can also use the short names `drop,mat,vec`.
 
 ## Save and load architectures

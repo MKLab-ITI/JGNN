@@ -79,7 +79,7 @@ on the adjacency matrix values on each layer per:
 .layer("h{l+1}=dropout(A,0.5) @ h{l}")
 ```
 
-Recent areas of heterogenous graph research also explicitly use the graph laplacian,
+Recent areas of heterogenous graph research also explicitly use the graph Laplacian,
 which you can insert into the architecture as a normal constant per `.constant("L", adjacency.negative().cast(Matrix.class).setMainDiagonal(1))`. Even more complex concepts 
 can be modelled with edge attention that gathers and
 perform the dot product of edge nodes to provide new edge weights, exponentiating

@@ -30,7 +30,7 @@ public class APPNP {
 		long numClasses = dataset.labels().getCols();
 		ModelBuilder modelBuilder = new FastBuilder(dataset.graph(), dataset.features())
 				.config("reg", 0.005)
-				.config("hidden", 64)
+				.config("hidden", 8)
 				.config("classes", numClasses)
 				.layer("h{l+1}=relu(h{l}@matrix(features, hidden, reg)+vector(hidden))")
 				.layer("h{l+1}=h{l}@matrix(hidden, classes)+vector(classes)")

@@ -23,7 +23,7 @@ import mklab.JGNN.nn.optimizers.Adam;
 public class MessagePassing {
 	public static void main(String[] args) throws Exception {
 		Dataset dataset = new Cora();
-		dataset.graph().setMainDiagonal(1).setToSymmetricNormalization();
+		dataset.graph().setToSymmetricNormalization();
 		
 		long numClasses = dataset.labels().getCols();
 		ModelBuilder modelBuilder = new FastBuilder(dataset.graph(), dataset.features())
@@ -33,8 +33,8 @@ public class MessagePassing {
 				.config("2hidden", (numClasses+2)*2)
 				.operation("u = from(A)")
 				.operation("v = to(A)")
-				.layer("h{l+1}=relu(h{l}@matrix(features, hidden)+vector(hidden))")
-				.layer("h{l+1}=h{l}@matrix(hidden, hidden)+vector(hidden)")
+				.layer("h{l+1}=relu(h{l}@matrix(features, hidden, reg)+vector(hidden))")
+				.layer("h{l+1}=h{l}@matrix(hidden, hidden, reg)+vector(hidden)")
 				.operation("m{l}_1=h{l}[u] | h{l}[v]")
 				.operation("m{l}_2=relu(m{l}_1@matrix(2hidden, hidden, reg)+vector(hidden))")
 				.operation("m{l}_3=m{l}_2@matrix(hidden, hidden, reg)+vector(hidden)")
@@ -53,7 +53,7 @@ public class MessagePassing {
 		ModelTraining trainer = new ModelTraining()
 				.setOptimizer(new Adam(0.01))
 				.setEpochs(300)
-				.setPatience(100)
+				.setPatience(10)
 				.setVerbose(true)
 				.setLoss(new CategoricalCrossEntropy())
 				.setValidationLoss(new CategoricalCrossEntropy());

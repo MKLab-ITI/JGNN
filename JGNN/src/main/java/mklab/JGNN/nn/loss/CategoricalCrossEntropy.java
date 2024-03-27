@@ -1,5 +1,6 @@
 package mklab.JGNN.nn.loss;
 
+import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.nn.Loss;
 
@@ -10,6 +11,7 @@ import mklab.JGNN.nn.Loss;
  */
 public class CategoricalCrossEntropy extends Loss {
 	private double epsilon;
+	private boolean meanReduction;
 
 	/**
 	 * Initializes categorical cross entropy with 1.E-12 epsilon value.
@@ -28,13 +30,30 @@ public class CategoricalCrossEntropy extends Loss {
 		this.epsilon = epsilon;
 	}
 	
+	/**
+	 * Sets the reduction mechanism of categorical cross entropy.
+	 * This can be either a sum or a mean across the categorical cross entropy of all data samples.
+	 * @param meanReduction true to perform mean reduction, false (default) for sum reduction.
+	 * @return <code>this</code> CategoricalCrossEntropy object.
+	 */
+	public CategoricalCrossEntropy setMeanReduction(boolean meanReduction) {
+		this.meanReduction = meanReduction;
+		return this;
+	}
+	
 	@Override
 	public double evaluate(Tensor output, Tensor desired) {
-		return -output.add(epsilon).selfLog().selfMultiply(desired).sum();// / output.cast(Matrix.class).getRows();
+		double ret = -output.add(epsilon).selfLog().selfMultiply(desired).sum();
+		if(meanReduction)
+			ret /= output.cast(Matrix.class).getRows();
+		return ret;
 	}
 	
 	@Override
 	public Tensor derivative(Tensor output, Tensor desired) {
-		return desired.multiply(output.add(epsilon).selfInverse()).negative();//.selfMultiply(-1. / output.cast(Matrix.class).getRows());
+		Tensor ret = desired.multiply(output.add(epsilon).selfInverse()).negative();
+		if(meanReduction)
+			ret.selfMultiply(1. / output.cast(Matrix.class).getRows());
+		return ret;
 	}
 }

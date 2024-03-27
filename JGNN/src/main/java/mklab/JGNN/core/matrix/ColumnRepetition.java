@@ -25,7 +25,7 @@ public class ColumnRepetition extends Matrix {
 		}
 		@Override
 		public boolean hasNext() {
-			return current<getCols()-1 || iterator.hasNext();
+			return current<getRows()-1 || iterator.hasNext();
 		}
 		@Override
 		public Long next() {
@@ -34,7 +34,7 @@ public class ColumnRepetition extends Matrix {
 				iterator = column.iterator();
 			}
 			long pos = iterator.next();
-			return pos+current*getRows();
+			return pos*getRows()+current;
 		}
 		@Override
 		public Iterator<Long> iterator() {
