@@ -283,8 +283,10 @@ public class ModelBuilder {
 	protected void assertExists(String name) {
 		if(configurations.containsKey(name))
 			throw new IllegalArgumentException("Component name "+name+" is a configuration but expressions can only parse components");
-		if(!components.containsKey(name))
+		if(!components.containsKey(name)) {
+			this.print();
 			throw new IllegalArgumentException("Component name "+name+" not declared");
+		}
 	}
 	
 	/**
@@ -477,7 +479,7 @@ public class ModelBuilder {
 	}
 	
 	private static List<String> extractTokens(String input) {
-        String tokenRegex = "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"+"|\\b\\w+\\b|\\(|\\)|\\=|\\+|\\;|\\-|\\.|\\*|\\@|\\/|\\[|\\]|\\,|\\?|\\||\\{|\\}";
+        String tokenRegex = "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"+"|\\b\\w+\\b|\\(|\\)|\\=|\\+|\\;|\\!|\\:|\\#|\\-|\\.|\\*|\\@|\\/|\\[|\\]|\\,|\\?|\\||\\{|\\}";
         Pattern tokenPattern = Pattern.compile(tokenRegex);
         Matcher tokenMatcher = tokenPattern.matcher(input);
         List<String> tokens = new ArrayList<>();
@@ -523,7 +525,6 @@ public class ModelBuilder {
 					operation(line);
 			return this;
 		}
-		
 		desc = desc.trim();
 		desc = desc.replace("=", " = ");
 		desc = desc.replace("@", " @ ");
@@ -605,7 +606,7 @@ public class ModelBuilder {
 			if(level!=0)
 				throw new RuntimeException("Imbalanced parenthesis in operation: "+desc);
 			desc = newDesc;
-			String[] operators = {" + ", " * ", " @ ", " | "};
+			String[] operators = {" + ", " * ", " @ ", " | ", "-", "/"};
 			madeChanges = false;
 			for(String operator : operators) {
 				if(madeChanges)
@@ -889,18 +890,43 @@ public class ModelBuilder {
 		}
 		else if(functions.containsKey(splt[2])) {
 			String[] args = functionSignatures.get(splt[2]).split("\\,");
-			if(args.length!=splt.length-3)
-				throw new RuntimeException("Function "+splt[2]+" requires "+args.length+" arguments");
+			//if(args.length!=splt.length-3)
+			//	throw new RuntimeException("Function "+splt[2]+" requires at most "+args.length+" arguments");
 			int functionRepetition = functionUsages.get(splt[2]);
 			functionUsages.put(splt[2], functionRepetition+1);
+			HashMap<String, Double> configStack = this.configurations;
+			this.configurations = new HashMap<String, Double>(this.configurations);
 			HashMap<String, String> customNames = new HashMap<String, String>();
 			for(int i=0;i<args.length;i++)
-				customNames.put(args[i], splt[i+3]);
+				if(i<splt.length-3)
+					customNames.put(args[i].trim(), splt[i+3]);
+				else {
+					String config = args[i].substring(0, args[i].indexOf(":")).trim();
+					String value = args[i].substring(args[i].indexOf(":")+1).trim();
+					if(value.equals("extern")) {
+						if(!this.configurations.containsKey(config))
+							throw new RuntimeException("Required external config: "+config);
+					}
+					else if(!this.configurations.containsKey(config))
+						this.config(config, parseConfigValue(value));
+				}
+			for(int i=args.length;i<splt.length-3;i++) {
+				String config = splt[i+3].substring(0, splt[i+3].indexOf(":")).trim();
+				String value = splt[i+3].substring(splt[i+3].indexOf(":")+1).trim();
+				if(value.equals("extern")) {
+					if(!this.configurations.containsKey(config))
+						throw new RuntimeException("Required external config: "+config);
+				}
+				else
+					this.config(config, parseConfigValue(value));
+			}
+			
 			List<String> tokens = extractTokens(functions.get(splt[2]));
 			HashSet<String> keywords = new HashSet<String>();
 			keywords.addAll(functions.keySet());
 			keywords.addAll(Arrays.asList(".", "+", "-", "*", "/", "@", ",", "(", ")", ";", "=",
-					"max", "min", "vector", "matrix", "vec", "mat", "[", "]", "{", "}", "|",
+					"max", "min", "vector", "matrix", "vec", "mat", "[", "]", "{", "}", "|", "#", "!", ":", 
+					"extern",
 					"from", "to", "reduce", "transpose", "attention", "att", "dropout", "drop", 
 					"repeat", "exp", "nexp", "L1", "sigmoid", "transpose", "monitor", 
 					"log", "tanh", "prelu", "lrelu", "relu", "reshape", "mean", "col", "row"));
@@ -909,17 +935,24 @@ public class ModelBuilder {
 			customNames.put("return", splt[0]+" = ");
 			String newExpr = "";
 			routing = prevRouting; // remove the function call from the routing
+			boolean prevHash = false;
 			for(String token : tokens) {
-				if(!keywords.contains(token) && !isNumeric(token)) 
-					token = customNames.getOrDefault(token, splt[2]+functionRepetition+"_"+token);
-				newExpr += token;
+				if(!keywords.contains(token) && !isNumeric(token) && !prevHash) 
+					token = customNames.getOrDefault(token, "_"+splt[2]+functionRepetition+"_"+token);
+				prevHash = token.equals("#");
+				if(!prevHash)
+					newExpr += token;
 			}
-			System.out.println(newExpr);
+			//System.out.println(newExpr);
 			this.operation(newExpr);
+			this.configurations = configStack;
 			return this;
 		}
 		else
 			throw new RuntimeException("Invalid operation: "+desc);
+		
+		if(arg0.contains(":"))
+			return this;
 
 		if(arg0!=null) {
 			assertExists(arg0);

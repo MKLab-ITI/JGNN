@@ -1,9 +1,9 @@
-fn gcnlayer(A, h, hidden=64, reg=0.005) 
+fn gcnlayer(A, h, hidden: 64, reg: 0.005) {
 	return relu(A@h@matrix(?, hidden, reg) + vector(hidden));
+}
 
-
-fn gcn(A, h) 
-	h = gcnlayer(A, h);
-	h = gcnlayer(A, h, hidden=classes);
-	return h;
-
+fn gcn(A, h0, classes: extern) {
+	h1 = gcnlayer(A, h0);
+	h2 = gcnlayer(A, h1, hidden: classes);
+	return h2;
+}

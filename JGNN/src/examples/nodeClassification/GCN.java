@@ -1,9 +1,13 @@
 package nodeClassification;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import mklab.JGNN.adhoc.Dataset;
 import mklab.JGNN.adhoc.ModelBuilder;
 import mklab.JGNN.adhoc.datasets.Cora;
 import mklab.JGNN.adhoc.parsers.FastBuilder;
+import mklab.JGNN.adhoc.parsers.TextBuilder;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.nn.Model;
 import mklab.JGNN.nn.ModelTraining;
@@ -26,7 +30,7 @@ public class GCN {
 		dataset.graph().setMainDiagonal(1).setToSymmetricNormalization();
 
 		long numClasses = dataset.labels().getCols();
-		ModelBuilder modelBuilder = new FastBuilder(dataset.graph(), dataset.features())
+		/*ModelBuilder modelBuilder = new FastBuilder(dataset.graph(), dataset.features())
 				.config("reg", 0.005)
 				.config("classes", numClasses)
 				.config("hidden", numClasses)
@@ -34,6 +38,17 @@ public class GCN {
 				.layer("h{l+1}=relu(gcnlayer(A, h{l}))")
 				.layer("h{l+1}=gcnlayer(A, h{l})")
 				.classify()
+				.autosize(new EmptyTensor(dataset.samples().getSlice().size()));
+		*/
+		ModelBuilder modelBuilder = new TextBuilder()
+				.parse(String.join("\n", Files.readAllLines(Paths.get("../architectures.nn"))))
+				.constant("A", dataset.graph())
+				.constant("h0", dataset.features())
+				.var("nodes")
+				.config("classes", numClasses)
+				.config("hidden", numClasses)
+				.operation("h=gcn(A,h0); out=softmax(h[nodes], row)")
+				.out("out")
 				.autosize(new EmptyTensor(dataset.samples().getSlice().size()));
 		
 		ModelTraining trainer = new ModelTraining()
