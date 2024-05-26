@@ -109,6 +109,10 @@ public class FastBuilder extends ModelBuilder {
 			layer(expression);
 		return this;
 	}
+	public FastBuilder function(String name, String value) {
+		super.function(name, value);
+		return this;
+	}
 	public FastBuilder config(String name, double value) {
 		super.config(name, value);
 		return this;

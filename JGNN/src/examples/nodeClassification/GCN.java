@@ -30,9 +30,9 @@ public class GCN {
 				.config("reg", 0.005)
 				.config("classes", numClasses)
 				.config("hidden", numClasses)
-				.operation("fn dense(A, h){dense=dropout(A, 0.5)@(h{l}@matrix(?, hidden, reg))+vector(?)}")
-				.layer("h{l+1}=relu(dense(A, ))")
-				.layer("h{l+1}=dropout(A, 0.5)@(h{l}@matrix(?, classes, reg))+vector(?)")
+				.function("gcnlayer", "(A,h){z=dropout(A, 0.5)@(h@matrix(?, hidden, reg))+vector(?);return z}")
+				.layer("h{l+1}=relu(gcnlayer(A, h{l}))")
+				.layer("h{l+1}=gcnlayer(A, h{l})")
 				.classify()
 				.autosize(new EmptyTensor(dataset.samples().getSlice().size()));
 		

@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.Tensor;
@@ -38,6 +40,7 @@ import mklab.JGNN.nn.operations.Concat;
 import mklab.JGNN.nn.operations.Dropout;
 import mklab.JGNN.nn.operations.From;
 import mklab.JGNN.nn.operations.Gather;
+import mklab.JGNN.nn.operations.Identity;
 import mklab.JGNN.nn.operations.Log;
 import mklab.JGNN.nn.operations.MatMul;
 import mklab.JGNN.nn.operations.Multiply;
@@ -70,6 +73,9 @@ public class ModelBuilder {
 	private Model model = null;
 	private HashMap<String, NNOperation> components = new HashMap<String, NNOperation>();
 	private HashMap<String, Double> configurations = new HashMap<String, Double>();
+	private HashMap<String, String> functions = new HashMap<String, String>();
+	private HashMap<String, String> functionSignatures = new HashMap<String, String>();
+	private HashMap<String, Integer> functionUsages = new HashMap<String, Integer>();
 	private int tmpVariableIdentifier = 0;
 	public ModelBuilder() {
 		this(new Model());
@@ -458,6 +464,39 @@ public class ModelBuilder {
 		return this;
 	}
 	
+	public ModelBuilder function(String name, String value) {
+		value = value.trim();
+		if(value.indexOf(")")==-1)
+			throw new RuntimeException("Function signature should be enclosed in parentheses.");
+		if(value.indexOf("{")==-1)
+			throw new RuntimeException("Function body should start with brackets.");
+		functions.put(name, value.substring(value.indexOf("{")+1, value.length()-1));
+		functionSignatures.put(name, value.substring(1, value.indexOf(")")));
+		functionUsages.put(name, 0);
+		return this;
+	}
+	
+	private static List<String> extractTokens(String input) {
+        String tokenRegex = "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"+"|\\b\\w+\\b|\\(|\\)|\\=|\\+|\\;|\\-|\\.|\\*|\\@|\\/|\\[|\\]|\\,|\\?|\\||\\{|\\}";
+        Pattern tokenPattern = Pattern.compile(tokenRegex);
+        Matcher tokenMatcher = tokenPattern.matcher(input);
+        List<String> tokens = new ArrayList<>();
+        while (tokenMatcher.find()) {
+            String token = tokenMatcher.group();
+            tokens.add(token);
+        }
+        return tokens;
+    }
+	
+
+    private static boolean isNumeric(String str) {
+        if (str == null || str.isEmpty()) {
+            return false;
+        }
+        String regex = "[+-]?\\d*(\\.\\d+)?";
+        return str.matches(regex);
+    }
+	
 	/**
 	 * Parses one or more operations split by new line characters or ; 
 	 * to add to the execution graph. All operations should assign a
@@ -634,11 +673,13 @@ public class ModelBuilder {
 			try {
 				double val = Double.parseDouble(splt[2]);
 				constant(name, Tensor.fromDouble(val));
+				return this;
 			}
 			catch(NumberFormatException e) {
-				throw new RuntimeException("Symbol "+splt[2]+" not defined.");
+				component = new Identity();
+				arg0 = splt[2];
+				//throw new RuntimeException("Symbol "+splt[2]+" not defined.");
 			}
-			return this;
 		}
 		else if(splt[3].equals("+")) {
 			component = new Add();
@@ -845,6 +886,37 @@ public class ModelBuilder {
 			component = new Repeat();
 			arg0 = splt[2];
 			arg1 = splt[4];
+		}
+		else if(functions.containsKey(splt[2])) {
+			String[] args = functionSignatures.get(splt[2]).split("\\,");
+			if(args.length!=splt.length-3)
+				throw new RuntimeException("Function "+splt[2]+" requires "+args.length+" arguments");
+			int functionRepetition = functionUsages.get(splt[2]);
+			functionUsages.put(splt[2], functionRepetition+1);
+			HashMap<String, String> customNames = new HashMap<String, String>();
+			for(int i=0;i<args.length;i++)
+				customNames.put(args[i], splt[i+3]);
+			List<String> tokens = extractTokens(functions.get(splt[2]));
+			HashSet<String> keywords = new HashSet<String>();
+			keywords.addAll(functions.keySet());
+			keywords.addAll(Arrays.asList(".", "+", "-", "*", "/", "@", ",", "(", ")", ";", "=",
+					"max", "min", "vector", "matrix", "vec", "mat", "[", "]", "{", "}", "|",
+					"from", "to", "reduce", "transpose", "attention", "att", "dropout", "drop", 
+					"repeat", "exp", "nexp", "L1", "sigmoid", "transpose", "monitor", 
+					"log", "tanh", "prelu", "lrelu", "relu", "reshape", "mean", "col", "row"));
+			keywords.addAll(this.components.keySet());
+			keywords.addAll(this.configurations.keySet());
+			customNames.put("return", splt[0]+" = ");
+			String newExpr = "";
+			routing = prevRouting; // remove the function call from the routing
+			for(String token : tokens) {
+				if(!keywords.contains(token) && !isNumeric(token)) 
+					token = customNames.getOrDefault(token, splt[2]+functionRepetition+"_"+token);
+				newExpr += token;
+			}
+			System.out.println(newExpr);
+			this.operation(newExpr);
+			return this;
 		}
 		else
 			throw new RuntimeException("Invalid operation: "+desc);
