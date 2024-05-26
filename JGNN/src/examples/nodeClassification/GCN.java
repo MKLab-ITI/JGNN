@@ -9,6 +9,8 @@ import mklab.JGNN.nn.Model;
 import mklab.JGNN.nn.ModelTraining;
 import mklab.JGNN.core.Slice;
 import mklab.JGNN.core.Tensor;
+import mklab.JGNN.core.empy.EmptyMatrix;
+import mklab.JGNN.core.empy.EmptyTensor;
 import mklab.JGNN.nn.initializers.XavierNormal;
 import mklab.JGNN.nn.loss.CategoricalCrossEntropy;
 import mklab.JGNN.nn.optimizers.Adam;
@@ -28,10 +30,11 @@ public class GCN {
 				.config("reg", 0.005)
 				.config("classes", numClasses)
 				.config("hidden", numClasses)
-				.layer("h{l+1}=relu(dropout(A, 0.5)@(h{l}@matrix(features, hidden, reg))+vector(hidden))")
-				.layer("h{l+1}=dropout(A, 0.5)@(h{l}@matrix(hidden, classes, reg))+vector(classes)")
+				.operation("fn dense(A, h){dense=dropout(A, 0.5)@(h{l}@matrix(?, hidden, reg))+vector(?)}")
+				.layer("h{l+1}=relu(dense(A, ))")
+				.layer("h{l+1}=dropout(A, 0.5)@(h{l}@matrix(?, classes, reg))+vector(?)")
 				.classify()
-				.assertBackwardValidity();
+				.autosize(new EmptyTensor(dataset.samples().getSlice().size()));
 		
 		ModelTraining trainer = new ModelTraining()
 				.setOptimizer(new Adam(0.01))

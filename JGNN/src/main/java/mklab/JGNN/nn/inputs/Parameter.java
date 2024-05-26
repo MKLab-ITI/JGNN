@@ -31,6 +31,7 @@ public class Parameter extends NNOperation {
 	 */
 	public Parameter set(Tensor tensor) {
 		this.tensor = tensor;
+		this.clearPrediction();
 		return this;
 	}
 	/**

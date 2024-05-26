@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -72,6 +73,7 @@ public class ModelBuilder {
 	private int tmpVariableIdentifier = 0;
 	public ModelBuilder() {
 		this(new Model());
+		configurations.put("?", 0.0);
 	}
 	public ModelBuilder(Model model) {
 		this.model = model;
@@ -861,14 +863,38 @@ public class ModelBuilder {
 		
 		return this;
 	}
-
-	public ModelBuilder assertForwardValidity(List<Integer> inputSizes) {
-		ArrayList<Tensor> inputs = new ArrayList<Tensor>();
-		for(int size : inputSizes)
-			inputs.add(new DenseTensor(size));
-		model.predict(inputs);
+	
+	public ModelBuilder autosize(Tensor... inputs) {
+		createForwardValidity(Arrays.asList(inputs));
+		assertBackwardValidity();
 		return this;
 	}
+
+	public ModelBuilder autosize(List<Tensor> inputs) {
+		createForwardValidity(inputs);
+		assertBackwardValidity();
+		return this;
+	}
+
+	/**
+	 * Asserts that all components parsed into a call graph with
+	 * {@link #operation(String)} are eventually used by at least one {@link #out(String)}
+	 * component.
+	 * @return The builder's instance.
+	 * @throws RuntimeException if not all execution graph branches lead to declared outputs.
+	 */
+	public ModelBuilder createForwardValidity(List<Tensor> inputs) {
+		if(inputs.size() != model.getInputs().size())
+			throw new IllegalArgumentException("Incompatible input size: expected"+model.getInputs().size()+" inputs instead of "+inputs.size());
+		for(NNOperation output : model.getOutputs())
+			output.clearPrediction();
+		for(int i=0;i<inputs.size();i++)
+			model.getInputs().get(i).setTo(inputs.get(i));
+		for(int i=0;i<model.getOutputs().size();i++)
+			model.getOutputs().get(i).runPredictionAndAutosize();
+		return this;
+	}
+	
 	
 	/**
 	 * Asserts that all components parsed into a call graph with
@@ -904,7 +930,6 @@ public class ModelBuilder {
 				//for(NNOperation other : actualComponents)
 				//	other.getOutputs().remove(component);
 			}
-		
 		return this;
 	}
 	/**

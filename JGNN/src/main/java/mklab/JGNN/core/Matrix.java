@@ -133,6 +133,17 @@ public abstract class Matrix extends Tensor {
 		return zeroCopy(rows, cols);
 	}
 	/**
+	 * Creates a tensor of the same class and all elements set to zero,
+	 * but size and dimension names are obtained from a prototype tensor.
+	 */
+	public Tensor zeroCopy(Tensor prototype) {
+		Matrix prototypeMatrix = prototype.cast(Matrix.class);
+		return zeroCopy(prototypeMatrix.getRows(), prototypeMatrix.getCols())
+				.setRowName(prototypeMatrix.getRowName())
+				.setColName(prototypeMatrix.getColName())
+				.setDimensionName(prototype.getDimensionName());
+	}
+	/**
 	 * Creates a matrix of the same class and all element set to zero, but with
 	 * a given number of rows and columns.
 	 * @param rows The number of rows of the matrix.
@@ -254,7 +265,7 @@ public abstract class Matrix extends Tensor {
 	 * @see #matmul(Matrix, boolean, boolean)
 	 */
 	public final Matrix matmul(Matrix with) {
-		if(cols!=with.getRows())
+		if(cols!=with.getRows()) 
 			throw new IllegalArgumentException("Mismatched matrix sizes between "+describe()+" and "+with.describe());
 		if(colName!=null && with.getRowName()!=null && !colName.equals(with.getRowName()))
 			throw new IllegalArgumentException("Mismatched matrix dimension names between "+describe()+" and "+with.describe());

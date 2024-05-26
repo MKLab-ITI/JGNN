@@ -180,6 +180,15 @@ public abstract class Tensor implements Iterable<Long> {
 	public Tensor zeroCopy() {
 		return zeroCopy(size()).setDimensionName(this);
 	}
+	
+	/**
+	 * Creates a tensor of the same class and all elements set to zero,
+	 * but size and dimension names are obtained from a prototype tensor.
+	 */
+	public Tensor zeroCopy(Tensor prototype) {
+		return zeroCopy(prototype.size()).setDimensionName(prototype.getDimensionName());
+	}
+	
 	/**
 	 * Fills in dimension names per an example {@link isMatching} tensor. This appropriately fills in dimension
 	 * names of inherited classes too, such as matrices. Effectively, this method automatically infers

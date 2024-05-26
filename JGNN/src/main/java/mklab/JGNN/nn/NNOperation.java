@@ -202,7 +202,7 @@ public abstract class NNOperation {
 			if(data.lastOutput!=null)
 				return data.lastOutput;
 			ArrayList<Tensor> lastInputs = new ArrayList<Tensor>(inputs.size());
-			for(NNOperation input : inputs)
+			for(NNOperation input : inputs) 
 				lastInputs.add(input.runPrediction());
 			/*for(int inputId=0;inputId<inputs.size();inputId++)
 				if(!isInputNeededForDerivative(inputId) 
@@ -337,5 +337,54 @@ public abstract class NNOperation {
 	 */
 	public String getSimpleDescription() {
 		return getClass().getSimpleName();
+	}
+
+	public Tensor runPredictionAndAutosize() {
+		try {
+			ThreadData data = data();
+			if(data.lastOutput!=null)
+				return data.lastOutput;
+			ArrayList<Tensor> lastInputs = new ArrayList<Tensor>(inputs.size());
+			for(NNOperation input : inputs) 
+				lastInputs.add(input.runPredictionAndAutosize());
+			autosize(lastInputs);
+			lastInputs.clear();
+			for(NNOperation input : inputs) 
+				lastInputs.add(input.runPrediction());
+			
+			if(debugging) {
+				System.out.println("Predicting "+describe()+" for inputs:");
+				for(Tensor input : lastInputs)
+					System.out.println("\t"+input.describe());
+			}
+			if(data()!=data)
+				throw new RuntimeException("Thread data object should not change within the same thread");
+			if(constantCache!=null) {
+				data.lastOutput = constantCache;
+				if(debugging)
+					System.out.println("\tUsing cached value for "+describe());
+			}
+			else 
+				data.lastOutput = forward(lastInputs);
+			data.tapeError = null;
+			data.countTapeSources = 0;
+			if(isConstant() && isCachable())
+				constantCache = data.lastOutput;
+			if(debugging) 
+				System.out.println("\t=> "+describe());
+			return data.lastOutput;
+		}
+		catch(Exception e) {
+			System.err.println(e.toString());
+			System.err.println("During the forward pass of "+describe()+" with the following inputs:");
+			for(NNOperation input : inputs)
+				System.err.println("\t"+input.describe());
+			e.printStackTrace();
+			System.exit(1);
+			return null;
+		}
+	}
+
+	protected void autosize(ArrayList<Tensor> lastInputs) {
 	}
 }
