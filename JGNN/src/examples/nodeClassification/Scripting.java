@@ -6,44 +6,44 @@ import java.nio.file.Paths;
 import mklab.JGNN.adhoc.Dataset;
 import mklab.JGNN.adhoc.ModelBuilder;
 import mklab.JGNN.adhoc.datasets.Cora;
-import mklab.JGNN.adhoc.parsers.FastBuilder;
 import mklab.JGNN.adhoc.parsers.TextBuilder;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.nn.Model;
 import mklab.JGNN.nn.ModelTraining;
 import mklab.JGNN.core.Slice;
 import mklab.JGNN.core.Tensor;
-import mklab.JGNN.core.empy.EmptyMatrix;
 import mklab.JGNN.core.empy.EmptyTensor;
 import mklab.JGNN.nn.initializers.XavierNormal;
 import mklab.JGNN.nn.loss.CategoricalCrossEntropy;
 import mklab.JGNN.nn.optimizers.Adam;
 
 /**
- * Demonstrates classification with the GCN architecture.
+ * Demonstrates classification with an architecture defined through the scripting engine.
  * 
  * @author Emmanouil Krasanakis
  */
-public class GCN {
+public class Scripting {
 	public static void main(String[] args) throws Exception {
 		Dataset dataset = new Cora();
 		dataset.graph().setMainDiagonal(1).setToSymmetricNormalization();
-
 		long numClasses = dataset.labels().getCols();
-		ModelBuilder modelBuilder = new FastBuilder(dataset.graph(), dataset.features())
-				.config("reg", 0.005)
+		
+		ModelBuilder modelBuilder = new TextBuilder()
+				.parse(String.join("\n", Files.readAllLines(Paths.get("../architectures.nn"))))
+				.constant("A", dataset.graph())
+				.constant("h", dataset.features())
+				.var("nodes")
 				.config("classes", numClasses)
 				.config("hidden", numClasses)
-				.function("gcnlayer", "(A,h){z=dropout(A, 0.5)@(h@matrix(?, hidden, reg))+vector(?);return z}")
-				.layer("h{l+1}=relu(gcnlayer(A, h{l}))")
-				.layer("h{l+1}=gcnlayer(A, h{l})")
-				.classify()
+				.out("classify(nodes, gcn(A,h))");
+		System.out.println(modelBuilder.getExecutionGraphDot());
+		modelBuilder
 				.autosize(new EmptyTensor(dataset.samples().getSlice().size()));
 		
 		ModelTraining trainer = new ModelTraining()
-				.setOptimizer(new Adam(0.01))
-				.setEpochs(300)
-				.setPatience(300)
+				.setOptimizer(new Adam(modelBuilder.getConfigOrDefault("lr", 0.01)))
+				.setEpochs(modelBuilder.getConfigOrDefault("epochs", 1000))
+				.setPatience(modelBuilder.getConfigOrDefault("patience", 100))
 				.setVerbose(true)
 				.setLoss(new CategoricalCrossEntropy())
 				.setValidationLoss(new CategoricalCrossEntropy());

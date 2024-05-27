@@ -15,8 +15,8 @@ A native Java library for Graph Neural Networks.
 
 Graph Neural Networks (GNNs) are getting more and more popular;
 they can reason from relational information and perform inference from small datasets.
-JGNN provides GNNs to native Java applications and supports cross-platform machine
-learning, such as on Android, without specific hardware or firmware.
+JGNN implements GNNs for native Java applications to supports cross-platform machine
+learning, such as on Android, without dedicated hardware or firmware.
 
 * [Tutorials](tutorials/README.md)
 * [Javadoc](https://mklab-iti.github.io/JGNN/)
@@ -25,13 +25,14 @@ learning, such as on Android, without specific hardware or firmware.
 
 * Cross-platform (written in native java)
 * Lightweight
-* Minimal memory footprints
-* Symbolic model definition
+* Minimal memory footprint
+* A scripting language for model definition
 * Parallelized batching
 
 # :zap: Quickstart
 
-To install the latest working version, you can include it as Maven or Gradle dependency by following the instructions of its JitPack distribution:
+To install the latest working version, you can include it as a Maven or Gradle dependency 
+by following the instructions of its JitPack distribution:
 [![](https://jitpack.io/v/MKLab-ITI/JGNN.svg)](https://jitpack.io/#MKLab-ITI/JGNN)
 
 As a good out-of-the-box graph neural network for node classification, you can try the 

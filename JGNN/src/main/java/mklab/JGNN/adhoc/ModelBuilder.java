@@ -283,10 +283,8 @@ public class ModelBuilder {
 	protected void assertExists(String name) {
 		if(configurations.containsKey(name))
 			throw new IllegalArgumentException("Component name "+name+" is a configuration but expressions can only parse components");
-		if(!components.containsKey(name)) {
-			this.print();
+		if(!components.containsKey(name)) 
 			throw new IllegalArgumentException("Component name "+name+" not declared");
-		}
 	}
 	
 	/**
@@ -313,6 +311,10 @@ public class ModelBuilder {
 	 * @return The builder's instance.
 	 */
 	public ModelBuilder out(String name) {
+		if(name.contains("(") || name.contains("[")) {
+			operation("_return = "+name);
+			name = "_return";
+		}
 		assertExists(name);
 		model.addOutput(components.get(name));
 		return this;
@@ -355,6 +357,14 @@ public class ModelBuilder {
 	public ModelBuilder config(String name, double value) {
 		configurations.put(name, value);
 		return this;
+	}
+	
+	public int getConfigOrDefault(String name, int defaultValue) {
+		return (int)(double)configurations.getOrDefault(name, (double) defaultValue);
+	}
+	
+	public double getConfigOrDefault(String name, double defaultValue) {
+		return configurations.getOrDefault(name, defaultValue);
 	}
 	
 	protected double parseConfigValue(String text) {
@@ -926,7 +936,7 @@ public class ModelBuilder {
 			keywords.addAll(functions.keySet());
 			keywords.addAll(Arrays.asList(".", "+", "-", "*", "/", "@", ",", "(", ")", ";", "=",
 					"max", "min", "vector", "matrix", "vec", "mat", "[", "]", "{", "}", "|", "#", "!", ":", 
-					"extern",
+					"extern", "softmax",
 					"from", "to", "reduce", "transpose", "attention", "att", "dropout", "drop", 
 					"repeat", "exp", "nexp", "L1", "sigmoid", "transpose", "monitor", 
 					"log", "tanh", "prelu", "lrelu", "relu", "reshape", "mean", "col", "row"));
@@ -936,14 +946,31 @@ public class ModelBuilder {
 			String newExpr = "";
 			routing = prevRouting; // remove the function call from the routing
 			boolean prevHash = false;
-			for(String token : tokens) {
-				if(!keywords.contains(token) && !isNumeric(token) && !prevHash) 
-					token = customNames.getOrDefault(token, "_"+splt[2]+functionRepetition+"_"+token);
+			boolean prevTemp = false;
+			HashMap<String, Integer> temp = new HashMap<String, Integer>();
+			HashMap<String, String> renameLater = new HashMap<String, String>();
+			for(int i=0;i<tokens.size();i++) {
+				String token = tokens.get(i);
+				if(i<tokens.size()-1 && tokens.get(i+1).equals("=")) {
+					int id = temp.getOrDefault(token, 0);
+					temp.put(token, id+1);
+					renameLater.put(token, "_"+splt[2]+functionRepetition+"_stack"+id+"_"+token);
+					token = "_"+splt[2]+functionRepetition+"_stack"+id+"_"+token;
+				}
+				else if(customNames.containsKey(token))
+					token = customNames.get(token);
+				else if(!keywords.contains(token) && !isNumeric(token) && !prevHash) 
+					token = "_"+splt[2]+functionRepetition+"_"+token;
 				prevHash = token.equals("#");
-				if(!prevHash)
+				prevTemp = token.equals("!");
+				if(token.equals(";") || token.equals("}")) {
+					customNames.putAll(renameLater);
+					renameLater.clear();
+				}
+				if(!prevHash && !prevTemp)
 					newExpr += token;
 			}
-			//System.out.println(newExpr);
+			customNames.putAll(renameLater);
 			this.operation(newExpr);
 			this.configurations = configStack;
 			return this;
@@ -968,7 +995,6 @@ public class ModelBuilder {
 		
 		return this;
 	}
-	
 	public ModelBuilder autosize(Tensor... inputs) {
 		createForwardValidity(Arrays.asList(inputs));
 		assertBackwardValidity();
