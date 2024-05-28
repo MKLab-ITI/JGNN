@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import mklab.JGNN.adhoc.ModelBuilder;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.Memory;
 import mklab.JGNN.core.Slice;
@@ -11,6 +12,7 @@ import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.ThreadPool;
 import mklab.JGNN.core.matrix.WrapRows;
 import mklab.JGNN.nn.inputs.Parameter;
+import mklab.JGNN.nn.optimizers.Adam;
 import mklab.JGNN.nn.optimizers.BatchOptimizer;
 
 /**
@@ -151,5 +153,12 @@ public class ModelTraining {
 		for(Parameter parameter : model.getParameters()) 
 			parameter.set(minLossParameters.get(parameter));
 		return model;
+	}
+	public ModelTraining configFrom(ModelBuilder modelBuilder) {
+		setOptimizer(new Adam(modelBuilder.getConfigOrDefault("lr", 0.01)));
+		setEpochs(modelBuilder.getConfigOrDefault("epochs", epochs));
+		numBatches = modelBuilder.getConfigOrDefault("batches", numBatches);
+		setPatience(modelBuilder.getConfigOrDefault("patience", patience));
+		return this;
 	}
 }

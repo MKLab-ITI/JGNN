@@ -2,7 +2,7 @@ fn classify(nodes, h, epochs: 3000, patience: 100, lr: 0.01) {
 	return softmax(h[nodes], row);
 }
 
-fn gcnlayer(A, h, hidden: 64, reg: 0.005) {
+fn gcnlayer(A, h, hidden: 16, reg: 0.005) {
 	return relu(A@h@matrix(?, hidden, reg) + vector(hidden));
 }
 
@@ -11,4 +11,3 @@ fn gcn(A, h, classes: extern) {
 	h = gcnlayer(A, h, hidden: classes);
 	return h;
 }
-

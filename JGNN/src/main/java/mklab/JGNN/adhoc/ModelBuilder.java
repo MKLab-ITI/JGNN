@@ -355,7 +355,7 @@ public class ModelBuilder {
 	 * @see #param(String, double, Tensor)
 	 */
 	public ModelBuilder config(String name, double value) {
-		configurations.put(name, value);
+		this.configurations.put(name, value);
 		return this;
 	}
 	
@@ -908,7 +908,7 @@ public class ModelBuilder {
 			this.configurations = new HashMap<String, Double>(this.configurations);
 			HashMap<String, String> customNames = new HashMap<String, String>();
 			for(int i=0;i<args.length;i++)
-				if(i<splt.length-3)
+				if(!args[i].contains(":"))
 					customNames.put(args[i].trim(), splt[i+3]);
 				else {
 					String config = args[i].substring(0, args[i].indexOf(":")).trim();
@@ -917,20 +917,20 @@ public class ModelBuilder {
 						if(!this.configurations.containsKey(config))
 							throw new RuntimeException("Required external config: "+config);
 					}
-					else if(!this.configurations.containsKey(config))
-						this.config(config, parseConfigValue(value));
-				}
-			for(int i=args.length;i<splt.length-3;i++) {
-				String config = splt[i+3].substring(0, splt[i+3].indexOf(":")).trim();
-				String value = splt[i+3].substring(splt[i+3].indexOf(":")+1).trim();
-				if(value.equals("extern")) {
 					if(!this.configurations.containsKey(config))
-						throw new RuntimeException("Required external config: "+config);
+						this.config(config, parseConfigValue(value));
+					/*// these are parsed in the attempt to create an intermediate variable for the argument
+					  if(i<splt.length-3) {
+						String config = splt[i+3].substring(0, splt[i+3].indexOf(":")).trim();
+						String value = splt[i+3].substring(splt[i+3].indexOf(":")+1).trim();
+						if(value.equals("extern")) {
+							if(!this.configurations.containsKey(config))
+								throw new RuntimeException("Required external config: "+config);
+						}
+						else
+							this.config(config, parseConfigValue(value));
+					}*/
 				}
-				else
-					this.config(config, parseConfigValue(value));
-			}
-			
 			List<String> tokens = extractTokens(functions.get(splt[2]));
 			HashSet<String> keywords = new HashSet<String>();
 			keywords.addAll(functions.keySet());
@@ -970,7 +970,6 @@ public class ModelBuilder {
 				if(!prevHash && !prevTemp)
 					newExpr += token;
 			}
-			customNames.putAll(renameLater);
 			this.operation(newExpr);
 			this.configurations = configStack;
 			return this;
@@ -978,8 +977,16 @@ public class ModelBuilder {
 		else
 			throw new RuntimeException("Invalid operation: "+desc);
 		
-		if(arg0.contains(":"))
+		if(arg0.contains(":")) {
+			String config = arg0.substring(0, arg0.indexOf(":")).trim();
+			String value = arg0.substring(arg0.indexOf(":")+1).trim();
+			if(value.equals("extern")) {
+				if(!this.configurations.containsKey(config))
+					throw new RuntimeException("Required external config: "+config);
+			}
+			this.config(config, parseConfigValue(value));
 			return this;
+		}
 
 		if(arg0!=null) {
 			assertExists(arg0);
