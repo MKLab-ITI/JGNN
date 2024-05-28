@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.Tensor;
+import mklab.JGNN.core.util.FastEntry;
 
 /**
  * Defines a matrix whose columns are all a copy of a {@link Tensor}.
@@ -45,6 +46,7 @@ public class ColumnRepetition extends Matrix {
 	protected class Repeat2DIterator implements Iterator<Entry<Long, Long>>, Iterable<Entry<Long, Long>> {
 		private Iterator<Long> iterator;
 		private long current;
+		private final FastEntry<Long,Long> ret = new FastEntry<Long, Long>();
 		public Repeat2DIterator() {
 			this.iterator = column.iterator();
 			current = 0;
@@ -60,7 +62,11 @@ public class ColumnRepetition extends Matrix {
 				iterator = column.iterator();
 			}
 			long pos = iterator.next();
-			return new AbstractMap.SimpleEntry<Long,Long>(Long.valueOf(pos), Long.valueOf(current));
+
+			ret.setKey(pos);
+			ret.setValue(current);
+			return ret;
+			//return new AbstractMap.SimpleEntry<Long,Long>(Long.valueOf(pos), Long.valueOf(current));
 		}
 		@Override
 		public Iterator<Entry<Long, Long>> iterator() {

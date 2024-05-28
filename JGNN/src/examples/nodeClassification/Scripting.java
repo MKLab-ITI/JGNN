@@ -14,6 +14,7 @@ import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.empy.EmptyTensor;
 import mklab.JGNN.nn.initializers.XavierNormal;
 import mklab.JGNN.nn.loss.CategoricalCrossEntropy;
+import mklab.JGNN.nn.optimizers.Adam;
 
 /**
  * Demonstrates classification with an architecture defined through the scripting engine.
@@ -36,7 +37,9 @@ public class Scripting {
 				.autosize(new EmptyTensor(dataset.samples().getSlice().size()));
 		
 		ModelTraining trainer = new ModelTraining()
-				.configFrom(modelBuilder)
+				.setEpochs(300)
+				.setPatience(100)
+				.setOptimizer(new Adam(0.01))
 				.setVerbose(true)
 				.setLoss(new CategoricalCrossEntropy())
 				.setValidationLoss(new CategoricalCrossEntropy());

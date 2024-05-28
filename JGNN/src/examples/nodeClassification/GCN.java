@@ -12,7 +12,6 @@ import mklab.JGNN.nn.Model;
 import mklab.JGNN.nn.ModelTraining;
 import mklab.JGNN.core.Slice;
 import mklab.JGNN.core.Tensor;
-import mklab.JGNN.core.empy.EmptyMatrix;
 import mklab.JGNN.core.empy.EmptyTensor;
 import mklab.JGNN.nn.initializers.XavierNormal;
 import mklab.JGNN.nn.loss.CategoricalCrossEntropy;
@@ -35,14 +34,15 @@ public class GCN {
 				.config("hidden", numClasses)
 				.function("gcnlayer", "(A,h){z=dropout(A, 0.5)@(h@matrix(?, hidden, reg))+vector(?);return z}")
 				.layer("h{l+1}=relu(gcnlayer(A, h{l}))")
+				.config("hidden", "classes")
 				.layer("h{l+1}=gcnlayer(A, h{l})")
 				.classify()
 				.autosize(new EmptyTensor(dataset.samples().getSlice().size()));
 		
 		ModelTraining trainer = new ModelTraining()
 				.setOptimizer(new Adam(0.01))
-				.setEpochs(300)
-				.setPatience(300)
+				.setEpochs(10)
+				.setPatience(100)
 				.setVerbose(true)
 				.setLoss(new CategoricalCrossEntropy())
 				.setValidationLoss(new CategoricalCrossEntropy());

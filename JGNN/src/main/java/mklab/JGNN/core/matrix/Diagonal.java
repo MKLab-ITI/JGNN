@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.Tensor;
+import mklab.JGNN.core.util.FastEntry;
 
 /**
  * Implements a square matrix whose diagonal elements are determined by the correspond values of
@@ -37,6 +38,7 @@ public class Diagonal extends Matrix {
 
 	protected class Diagonal2DIterator implements Iterator<Entry<Long, Long>>, Iterable<Entry<Long, Long>> {
 		private Iterator<Long> iterator;
+		private final FastEntry<Long,Long> ret = new FastEntry<Long, Long>();
 		public Diagonal2DIterator(Iterator<Long> iterator) {
 			this.iterator = iterator;
 		}
@@ -47,7 +49,10 @@ public class Diagonal extends Matrix {
 		@Override
 		public Entry<Long, Long> next() {
 			long pos = iterator.next();
-			return new AbstractMap.SimpleEntry<Long,Long>(Long.valueOf(pos), Long.valueOf(pos));
+			ret.setKey(pos);
+			ret.setValue(pos);
+			return ret;
+			//return new AbstractMap.SimpleEntry<Long,Long>(Long.valueOf(pos), Long.valueOf(pos));
 		}
 		@Override
 		public Iterator<Entry<Long, Long>> iterator() {

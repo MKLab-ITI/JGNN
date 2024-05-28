@@ -359,6 +359,15 @@ public class ModelBuilder {
 		return this;
 	}
 	
+
+	public ModelBuilder config(String name, String value) {
+		Double val = configurations.get(value);
+		if(val==null)
+			throw new RuntimeException("No configuration "+value+" found");
+		this.configurations.put(name, val);
+		return this;
+	}
+	
 	public int getConfigOrDefault(String name, int defaultValue) {
 		return (int)(double)configurations.getOrDefault(name, (double) defaultValue);
 	}
@@ -489,7 +498,7 @@ public class ModelBuilder {
 	}
 	
 	private static List<String> extractTokens(String input) {
-        String tokenRegex = "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"+"|\\b\\w+\\b|\\(|\\)|\\=|\\+|\\;|\\!|\\:|\\#|\\-|\\.|\\*|\\@|\\/|\\[|\\]|\\,|\\?|\\||\\{|\\}";
+        String tokenRegex = "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"+"|(\\\".*\\\")"+"|\\b\\w+\\b|\\(|\\)|\\=|\\+|\\;|\\!|\\:|\\#|\\-|\\.|\\*|\\@|\\/|\\[|\\]|\\,|\\?|\\||\\{|\\}";
         Pattern tokenPattern = Pattern.compile(tokenRegex);
         Matcher tokenMatcher = tokenPattern.matcher(input);
         List<String> tokens = new ArrayList<>();
@@ -499,7 +508,9 @@ public class ModelBuilder {
         }
         return tokens;
     }
-	
+    private static boolean isString(String str) {
+    	return str.startsWith("\"") && str.endsWith("\"");
+    }
 
     private static boolean isNumeric(String str) {
         if (str == null || str.isEmpty()) {
@@ -586,7 +597,7 @@ public class ModelBuilder {
 									|| (newDesc.endsWith(" vector ") && isDouble(arg)) 
 									|| (newDesc.endsWith(" sort ") && isDouble(arg)) 
 									|| (newDesc.endsWith(" reshape ") && isDouble(arg))
-									|| arg.equals("col") || arg.equals("row")) 
+									|| arg.equals("col") || arg.equals("row") || arg.contains(":")) 
 								args += arg;
 							else {
 								String tmpName = "_tmp"+tmpVariableIdentifier;
@@ -701,12 +712,19 @@ public class ModelBuilder {
 			boolean mode = false;
 			if(splt.length>4) {
 				String modeText = splt[4].trim();
-				if(modeText.equals("col"))
+				if(splt.length>5)
+					modeText = splt[4]+splt[5];
+				if(modeText.endsWith(";"))
+					modeText = modeText.substring(0, modeText.length()-1);
+				if(!modeText.split("\\:")[0].trim().equals("dim"))
+					throw new RuntimeException("Second argument "+modeText+" to softmax should be a dim config (dim: \"row\" or dim: \"col\")");
+				modeText = modeText.substring(modeText.indexOf(":")+1).trim();
+				if(modeText.equals("\"col\""))
 					mode = false;
-				else if(modeText.equals("row"))
+				else if(modeText.equals("\"row\""))
 					mode = true;
 				else
-					throw new RuntimeException("Invalid argument "+modeText+" to softmax");
+					throw new RuntimeException("Invalid dim argument "+modeText+" to softmax");
 			}
 			component = new SoftMax(mode);
 			arg0 = splt[3];
@@ -715,12 +733,15 @@ public class ModelBuilder {
 			boolean mode = false;
 			if(splt.length>4) {
 				String modeText = splt[4].trim();
-				if(modeText.equals("col"))
+				if(!modeText.split("\\:")[0].trim().equals("dim"))
+					throw new RuntimeException("Second argument "+modeText+" to sum should be a dim config (dim: \"row\" or dim: \"col\")");
+				modeText = modeText.substring(modeText.indexOf(":")+1).trim();
+				if(modeText.equals("\"col\""))
 					mode = false;
-				else if(modeText.equals("row"))
+				else if(modeText.equals("\"row\""))
 					mode = true;
 				else
-					throw new RuntimeException("Invalid argument "+modeText+" to softmax");
+					throw new RuntimeException("Invalid dim argument "+modeText+" to sum");
 			}
 			component = new Sum(mode);
 			arg0 = splt[3];
@@ -729,12 +750,15 @@ public class ModelBuilder {
 			boolean mode = false;
 			if(splt.length>4) {
 				String modeText = splt[4].trim();
-				if(modeText.equals("col"))
+				if(!modeText.split("\\:")[0].trim().equals("dim"))
+					throw new RuntimeException("Second argument "+modeText+" to mean should be a dim config (dim: \"row\" or dim: \"col\")");
+				modeText = modeText.substring(modeText.indexOf(":")+1).trim();
+				if(modeText.equals("\"col\""))
 					mode = false;
-				else if(modeText.equals("row"))
+				else if(modeText.equals("\"row\""))
 					mode = true;
 				else
-					throw new RuntimeException("Invalid argument "+modeText+" to softmax");
+					throw new RuntimeException("Invalid dim argument "+modeText+" to mean");
 			}
 			component = new Mean(mode);
 			arg0 = splt[3];
@@ -743,12 +767,15 @@ public class ModelBuilder {
 			boolean mode = false;
 			if(splt.length>4) {
 				String modeText = splt[4].trim();
-				if(modeText.equals("col"))
+				if(!modeText.split("\\:")[0].trim().equals("dim"))
+					throw new RuntimeException("Second argument "+modeText+" to max should be a dim config (dim: \"row\" or dim: \"col\")");
+				modeText = modeText.substring(modeText.indexOf(":")+1).trim();
+				if(modeText.equals("\"col\""))
 					mode = false;
-				else if(modeText.equals("row"))
+				else if(modeText.equals("\"row\""))
 					mode = true;
 				else
-					throw new RuntimeException("Invalid argument "+modeText+" to softmax");
+					throw new RuntimeException("Invalid dim argument "+modeText+" to max");
 			}
 			component = new Max(mode);
 			arg0 = splt[3];
@@ -907,20 +934,22 @@ public class ModelBuilder {
 			HashMap<String, Double> configStack = this.configurations;
 			this.configurations = new HashMap<String, Double>(this.configurations);
 			HashMap<String, String> customNames = new HashMap<String, String>();
-			for(int i=0;i<args.length;i++)
-				if(!args[i].contains(":"))
+			for(int i=0;i<Math.max(args.length, splt.length-3);i++)
+				if(!args[i].contains(":") && !splt[i+3].contains(":"))
 					customNames.put(args[i].trim(), splt[i+3]);
 				else {
-					String config = args[i].substring(0, args[i].indexOf(":")).trim();
-					String value = args[i].substring(args[i].indexOf(":")+1).trim();
-					if(value.equals("extern")) {
+					if(i<args.length) {
+						String config = args[i].substring(0, args[i].indexOf(":")).trim();
+						String value = args[i].substring(args[i].indexOf(":")+1).trim();
+						if(value.equals("extern")) {
+							if(!this.configurations.containsKey(config))
+								throw new RuntimeException("Required external config: "+config);
+						}
 						if(!this.configurations.containsKey(config))
-							throw new RuntimeException("Required external config: "+config);
+							this.config(config, parseConfigValue(value));
 					}
-					if(!this.configurations.containsKey(config))
-						this.config(config, parseConfigValue(value));
-					/*// these are parsed in the attempt to create an intermediate variable for the argument
-					  if(i<splt.length-3) {
+					// these are parsed in the attempt to create an intermediate variable for the argument
+					if(i<splt.length-3) {
 						String config = splt[i+3].substring(0, splt[i+3].indexOf(":")).trim();
 						String value = splt[i+3].substring(splt[i+3].indexOf(":")+1).trim();
 						if(value.equals("extern")) {
@@ -929,17 +958,17 @@ public class ModelBuilder {
 						}
 						else
 							this.config(config, parseConfigValue(value));
-					}*/
+					}
 				}
 			List<String> tokens = extractTokens(functions.get(splt[2]));
 			HashSet<String> keywords = new HashSet<String>();
 			keywords.addAll(functions.keySet());
-			keywords.addAll(Arrays.asList(".", "+", "-", "*", "/", "@", ",", "(", ")", ";", "=",
+			keywords.addAll(Arrays.asList(".", "+", "-", "*", "/", "@", ",", "(", ")", ";", "=", "\"",
 					"max", "min", "vector", "matrix", "vec", "mat", "[", "]", "{", "}", "|", "#", "!", ":", 
 					"extern", "softmax",
 					"from", "to", "reduce", "transpose", "attention", "att", "dropout", "drop", 
 					"repeat", "exp", "nexp", "L1", "sigmoid", "transpose", "monitor", 
-					"log", "tanh", "prelu", "lrelu", "relu", "reshape", "mean", "col", "row"));
+					"log", "tanh", "prelu", "lrelu", "relu", "reshape", "mean"));
 			keywords.addAll(this.components.keySet());
 			keywords.addAll(this.configurations.keySet());
 			customNames.put("return", splt[0]+" = ");
@@ -957,9 +986,15 @@ public class ModelBuilder {
 					renameLater.put(token, "_"+splt[2]+functionRepetition+"_stack"+id+"_"+token);
 					token = "_"+splt[2]+functionRepetition+"_stack"+id+"_"+token;
 				}
+				else if(i<tokens.size()-1 && tokens.get(i+1).equals(":")) {
+					//  token = token; // this is the case where we have configuration arguments
+				}
+				else if(i>0 && tokens.get(i-1).equals(":")) {
+					//  token = token; // this is the case where we have configuration values
+				}
 				else if(customNames.containsKey(token))
 					token = customNames.get(token);
-				else if(!keywords.contains(token) && !isNumeric(token) && !prevHash) 
+				else if(!keywords.contains(token) && !isNumeric(token) && !isString(token) && !prevHash) 
 					token = "_"+splt[2]+functionRepetition+"_"+token;
 				prevHash = token.equals("#");
 				prevTemp = token.equals("!");

@@ -17,6 +17,8 @@ public class Range2D implements Iterator<Entry<Long,Long>>, Iterable<Entry<Long,
 	  private final long min;
 	  private final long max;
 	  private final long max2;
+	  private final FastEntry<Long,Long> ret = new FastEntry<Long, Long>();
+	  
 	  public Range2D(long min, long max, long min2, long max2) {
 	    this.nextValue = min;
 	    this.nextValue2 = min2;
@@ -32,7 +34,9 @@ public class Range2D implements Iterator<Entry<Long,Long>>, Iterable<Entry<Long,
 	  public Entry<Long,Long> next() {
 	    if (!hasNext()) 
 	      throw new NoSuchElementException();
-	    Entry<Long,Long> ret = new AbstractMap.SimpleEntry<Long,Long>(Long.valueOf(nextValue), Long.valueOf(nextValue2));
+	    //Entry<Long,Long> ret = new AbstractMap.SimpleEntry<Long,Long>(Long.valueOf(nextValue), Long.valueOf(nextValue2));
+	    ret.setKey(nextValue);
+	    ret.setValue(nextValue2);
 	    nextValue++;
 	    if(nextValue==max) {
 	    	nextValue = min;

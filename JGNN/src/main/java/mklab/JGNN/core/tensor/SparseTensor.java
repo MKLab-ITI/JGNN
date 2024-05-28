@@ -1,11 +1,9 @@
 package mklab.JGNN.core.tensor;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 
 import mklab.JGNN.core.Tensor;
+import it.unimi.dsi.fastutil.longs.Long2DoubleOpenHashMap;
 
 /**
  * This class provides a sparse {@link Tensor} with many zero elements.
@@ -19,8 +17,7 @@ import mklab.JGNN.core.Tensor;
  * @author Emmanouil Krasanakis
  */
 public class SparseTensor extends Tensor {
-	private HashMap<Long, Double> values;
-	private List<Long> keySet;
+	private Long2DoubleOpenHashMap values;
 	
 	public SparseTensor(long length) {
 		super(length);
@@ -28,6 +25,7 @@ public class SparseTensor extends Tensor {
 	public SparseTensor() {
 		this(0);
 	}
+	@Override
 	public final synchronized Tensor put(long pos, double value) {
 		if(!Double.isFinite(value))
 			throw new IllegalArgumentException("Cannot accept non-finite (NaN or Infinity) tensor values");
@@ -38,18 +36,18 @@ public class SparseTensor extends Tensor {
 				values.remove(pos);
 			else
 				values.put(pos, value);
-			keySet = null;
 		}
 		return this;
 	}
+	@Override
 	public final synchronized double get(long pos) {
 		if(pos<0 || pos>=size())
 			throw new IllegalArgumentException("Tensor position "+pos+" out of range [0, "+size()+")");
-		return values.getOrDefault(pos, 0.);
+		return values.get(pos);
 	}
 	@Override
 	protected void allocate(long size) {
-		values = new HashMap<Long, Double>();
+		values = new Long2DoubleOpenHashMap((int)Math.min(Math.sqrt(size), Integer.MAX_VALUE), 0.75f);
 	}
 	@Override
 	public Tensor zeroCopy(long size) {
@@ -57,9 +55,7 @@ public class SparseTensor extends Tensor {
 	}
 	@Override
 	public synchronized Iterator<Long> traverseNonZeroElements() {
-		if(keySet==null)
-			keySet = new ArrayList<Long>(values.keySet());
-		return keySet.iterator();
+		return values.keySet().iterator();
 	}
 	@Override
 	public long estimateNumNonZeroElements() {
@@ -68,7 +64,6 @@ public class SparseTensor extends Tensor {
 	@Override
 	public void release() {
 		values = null;
-		keySet = null;
 	}
 	@Override
 	public void persist() {

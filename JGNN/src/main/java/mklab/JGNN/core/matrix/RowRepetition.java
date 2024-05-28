@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.Tensor;
+import mklab.JGNN.core.util.FastEntry;
 import mklab.JGNN.core.util.Range2D;
 
 /**
@@ -47,6 +48,7 @@ public class RowRepetition extends Matrix {
 	protected class Repeat2DIterator implements Iterator<Entry<Long, Long>>, Iterable<Entry<Long, Long>> {
 		private Iterator<Long> iterator;
 		private long current;
+		private final FastEntry<Long,Long> ret = new FastEntry<Long, Long>();
 		public Repeat2DIterator() {
 			this.iterator = row.iterator();
 			current = 0;
@@ -62,7 +64,10 @@ public class RowRepetition extends Matrix {
 				iterator = row.iterator();
 			}
 			long pos = iterator.next();
-			return new AbstractMap.SimpleEntry<Long,Long>(Long.valueOf(current), Long.valueOf(pos));
+			ret.setKey(current);
+			ret.setValue(pos);
+			return ret;
+			//return new AbstractMap.SimpleEntry<Long,Long>(Long.valueOf(current), Long.valueOf(pos));
 		}
 		@Override
 		public Iterator<Entry<Long, Long>> iterator() {

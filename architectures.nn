@@ -1,5 +1,5 @@
 fn classify(nodes, h, epochs: 3000, patience: 100, lr: 0.01) {
-	return softmax(h[nodes], row);
+	return softmax(h[nodes], dim: "row");
 }
 
 fn gcnlayer(A, h, hidden: 16, reg: 0.005) {
@@ -7,7 +7,7 @@ fn gcnlayer(A, h, hidden: 16, reg: 0.005) {
 }
 
 fn gcn(A, h, classes: extern) {
-	h = gcnlayer(A, h);
+	h = dropout(gcnlayer(A, h), 0.5);
 	h = gcnlayer(A, h, hidden: classes);
 	return h;
 }

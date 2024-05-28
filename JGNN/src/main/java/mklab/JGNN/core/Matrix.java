@@ -304,18 +304,20 @@ public abstract class Matrix extends Tensor {
 		}
 		else {
 			if(estimateNumNonZeroElements()/getRows()<with.estimateNumNonZeroElements()/with.getCols()) {
+				final long withCols = with.getCols();
 				for(Entry<Long, Long> element : getNonZeroEntries()) {
 					long row = element.getKey();
 					long col = element.getValue();
-					for(long col2=0;col2<with.getCols();col2++) 
+					for(long col2=0;col2<withCols;++col2) 
 						ret.put(row, col2, ret.get(row, col2) + get(row, col)*with.get(col, col2));
 				}
 			}
 			else {
+				final long rows = getRows();
 				for(Entry<Long, Long> element : with.getNonZeroEntries()) {
 					long row = element.getKey();
 					long col = element.getValue();
-					for(long row1=0;row1<getRows();row1++) 
+					for(long row1=0;row1<rows;++row1) 
 						ret.put(row1, col, ret.get(row1, col) + get(row1, row)*with.get(row, col));
 				}
 			}

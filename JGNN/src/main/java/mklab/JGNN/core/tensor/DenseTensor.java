@@ -62,17 +62,17 @@ public class DenseTensor extends Tensor {
 		this(0);
 	}
 	public final synchronized Tensor put(long pos, double value) {
-		if(!Double.isFinite(value))
+		/*if(!Double.isFinite(value))
 			throw new IllegalArgumentException("Cannot accept non-finite (NaN or Infinity) tensor values");
 		else if(pos<0 || pos>=size())
 			throw new IllegalArgumentException("Tensor position "+pos+" out of range [0, "+size()+")");
-		else
+		else*/
 			values[(int)pos] = value;
 		return this;
 	}
 	public final synchronized double get(long pos) {
-		if(pos<0 || pos>=size())
-			throw new IllegalArgumentException("Tensor position "+pos+" out of range [0, "+size()+")");
+		//if(pos<0 || pos>=size())
+		//	throw new IllegalArgumentException("Tensor position "+pos+" out of range [0, "+size()+")");
 		return values[(int)pos];
 	}
 	@Override

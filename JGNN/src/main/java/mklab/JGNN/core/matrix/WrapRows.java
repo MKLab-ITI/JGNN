@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.Tensor;
+import mklab.JGNN.core.util.FastEntry;
 
 /**
  * Wraps a list of tensors into a matrix with the tensors as rows.
@@ -48,6 +49,7 @@ public class WrapRows extends Matrix {
 	protected class Wrap2DIterator implements Iterator<Entry<Long, Long>>, Iterable<Entry<Long, Long>> {
 		private Iterator<Long> iterator;
 		private long current;
+		private final FastEntry<Long,Long> ret = new FastEntry<Long, Long>();
 		public Wrap2DIterator() {
 			this.iterator = rows.get(0).iterator();
 			current = 0;
@@ -63,7 +65,10 @@ public class WrapRows extends Matrix {
 		@Override
 		public Entry<Long, Long> next() {
 			long pos = iterator.next();
-			return new AbstractMap.SimpleEntry<Long,Long>(Long.valueOf(current), Long.valueOf(pos));
+			ret.setKey(current);
+			ret.setValue(pos);
+			return ret;
+			//return new AbstractMap.SimpleEntry<Long,Long>(Long.valueOf(current), Long.valueOf(pos));
 		}
 		@Override
 		public Iterator<Entry<Long, Long>> iterator() {

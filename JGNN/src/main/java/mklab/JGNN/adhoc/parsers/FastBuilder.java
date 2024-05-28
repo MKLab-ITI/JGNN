@@ -90,7 +90,7 @@ public class FastBuilder extends ModelBuilder {
 	public FastBuilder classify() {
 		var("nodes");
 		layer("h{l+1}=h{l}[nodes]");
-		layer("h{l+1}=softmax(h{l}, row)");
+		layer("h{l+1}=softmax(h{l}, dim: \"row\")");
 		out("h"+layer);
 		return this;
 	}
@@ -111,6 +111,10 @@ public class FastBuilder extends ModelBuilder {
 	}
 	public FastBuilder function(String name, String value) {
 		super.function(name, value);
+		return this;
+	}
+	public FastBuilder config(String name, String value) {
+		super.config(name, value);
 		return this;
 	}
 	public FastBuilder config(String name, double value) {

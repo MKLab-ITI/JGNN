@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.tensor.SparseTensor;
+import mklab.JGNN.core.util.FastEntry;
 
 /**
  * A sparse {@link Matrix} that allocates memory only for non-zero elements. Operations
@@ -73,6 +74,7 @@ public class SparseMatrix extends Matrix {
 	protected class Sparse2DIterator implements Iterator<Entry<Long, Long>>, Iterable<Entry<Long, Long>> {
 		private Iterator<Long> iterator;
 		private long rows;
+		private final FastEntry<Long,Long> ret = new FastEntry<Long, Long>();
 		public Sparse2DIterator(Iterator<Long> iterator) {
 			this.iterator = iterator;
 			rows = getRows();
@@ -84,7 +86,10 @@ public class SparseMatrix extends Matrix {
 		@Override
 		public Entry<Long, Long> next() {
 			long pos = iterator.next();
-			return new AbstractMap.SimpleEntry<Long,Long>(pos % rows, pos/rows);
+			ret.setKey(pos % rows);
+			ret.setValue(pos/rows);
+			return ret;
+			//return new AbstractMap.SimpleEntry<Long,Long>(pos % rows, pos/rows);
 		}
 		@Override
 		public Iterator<Entry<Long, Long>> iterator() {
