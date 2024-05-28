@@ -37,9 +37,7 @@ public class Scripting {
 				.autosize(new EmptyTensor(dataset.samples().getSlice().size()));
 		
 		ModelTraining trainer = new ModelTraining()
-				.setEpochs(300)
-				.setPatience(100)
-				.setOptimizer(new Adam(0.01))
+				.configFrom(modelBuilder)
 				.setVerbose(true)
 				.setLoss(new CategoricalCrossEntropy())
 				.setValidationLoss(new CategoricalCrossEntropy());

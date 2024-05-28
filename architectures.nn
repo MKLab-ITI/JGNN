@@ -1,4 +1,4 @@
-fn classify(nodes, h, epochs: 3000, patience: 100, lr: 0.01) {
+fn classify(nodes, h, epochs: !3000, patience: !100, lr: !0.01) {
 	return softmax(h[nodes], dim: "row");
 }
 

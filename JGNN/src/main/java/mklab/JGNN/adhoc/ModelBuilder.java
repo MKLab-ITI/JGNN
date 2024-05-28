@@ -941,23 +941,33 @@ public class ModelBuilder {
 					if(i<args.length) {
 						String config = args[i].substring(0, args[i].indexOf(":")).trim();
 						String value = args[i].substring(args[i].indexOf(":")+1).trim();
+						boolean isFinal = value.startsWith("!");
+						if(isFinal)
+							value = value.substring(1);
 						if(value.equals("extern")) {
 							if(!this.configurations.containsKey(config))
 								throw new RuntimeException("Required external config: "+config);
 						}
-						if(!this.configurations.containsKey(config))
+						if(!this.configurations.containsKey(config)) {
+							if(isFinal)
+								configStack.put(config, parseConfigValue(value));
 							this.config(config, parseConfigValue(value));
+						}
 					}
 					// these are parsed in the attempt to create an intermediate variable for the argument
 					if(i<splt.length-3) {
 						String config = splt[i+3].substring(0, splt[i+3].indexOf(":")).trim();
 						String value = splt[i+3].substring(splt[i+3].indexOf(":")+1).trim();
+						boolean isFinal = value.startsWith("!");
+						if(isFinal)
+							value = value.substring(1);
 						if(value.equals("extern")) {
 							if(!this.configurations.containsKey(config))
 								throw new RuntimeException("Required external config: "+config);
 						}
-						else
-							this.config(config, parseConfigValue(value));
+						if(isFinal)
+							configStack.put(config, parseConfigValue(value));
+						this.config(config, parseConfigValue(value));
 					}
 				}
 			List<String> tokens = extractTokens(functions.get(splt[2]));
