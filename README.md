@@ -4,7 +4,7 @@ A native Java library for Graph Neural Networks.
 
 # :cyclone: Changes from 1.0.0
 
-* [Neuralang](Neuralang.md): a scripting language for neural network declaration
+* [Neuralang](tutorials/Neuralang.md): a scripting language for neural network declaration
 * Autosized parameteters
 * Up to 30% less memory and running time
 * Renamed `GCNBuilder` to `FastBuilder`
