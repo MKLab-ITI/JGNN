@@ -23,7 +23,7 @@ jobs:
         java-version: '17'
 
     - name: Build with Maven
-      run: mvn clean package
+      run: mvn clean package -f /JGNN/pom.xml
 
     - name: Archive JAR
       uses: actions/upload-artifact@v2
