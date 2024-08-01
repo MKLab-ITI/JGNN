@@ -2,7 +2,6 @@ package nodeClassification;
 
 import mklab.JGNN.adhoc.Dataset;
 import mklab.JGNN.adhoc.ModelBuilder;
-import mklab.JGNN.adhoc.datasets.Citeseer;
 import mklab.JGNN.adhoc.datasets.Cora;
 import mklab.JGNN.adhoc.parsers.FastBuilder;
 import mklab.JGNN.core.Matrix;
@@ -11,7 +10,6 @@ import mklab.JGNN.nn.ModelTraining;
 import mklab.JGNN.core.Slice;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.nn.initializers.XavierNormal;
-import mklab.JGNN.nn.loss.Accuracy;
 import mklab.JGNN.nn.loss.CategoricalCrossEntropy;
 import mklab.JGNN.nn.optimizers.Adam;
 
@@ -51,9 +49,9 @@ public class MessagePassing {
 		System.out.println(modelBuilder.getExecutionGraphDot());
 		
 		ModelTraining trainer = new ModelTraining()
-				.setOptimizer(new Adam(0.01))
+				.setOptimizer(new Adam(0.001))
 				.setEpochs(300)
-				.setPatience(10)
+				.setPatience(100)
 				.setVerbose(true)
 				.setLoss(new CategoricalCrossEntropy())
 				.setValidationLoss(new CategoricalCrossEntropy());
