@@ -28,7 +28,7 @@ jobs:
     - name: Archive JAR
       uses: actions/upload-artifact@v2
       with:
-        name: java-app
+        name: JGNN-nightly
         path: target/*.jar
 
     - name: Create GitHub Release

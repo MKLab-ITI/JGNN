@@ -3,7 +3,7 @@
 
 	<groupId>mklab</groupId>
 	<artifactId>JGNN</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>nightly</version>
 	<packaging>jar</packaging>
 
 	<name>JGNN</name>
