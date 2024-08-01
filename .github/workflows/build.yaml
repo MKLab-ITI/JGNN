@@ -1,4 +1,4 @@
-name: Create nightly release
+name: Build JAR with Maven
 
 on:
   push:
@@ -36,16 +36,17 @@ jobs:
         draft: false
         prerelease: true
       continue-on-error: false
-      run: |
-        echo "upload_url=${{ steps.create_release.outputs.upload_url }}" >> $GITHUB_ENV
+
+    - name: Set upload_url environment variable
+      run: echo "upload_url=${{ steps.create_release.outputs.upload_url }}" >> $GITHUB_ENV
 
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
-      continue-on-error: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ env.upload_url }}
-        asset_path: ./JGNN/target/JGNN-nightly.jar
-        asset_name: JGNN v1.3.${{ github.run_number }}-nightly.jar
+        asset_path: JGNN/target/*.jar
+        asset_name: JGNN-nightly.jar
         asset_content_type: application/java-archive
+      continue-on-error: false
