@@ -31,7 +31,7 @@ public class GCN {
 		ModelBuilder modelBuilder = new FastBuilder(dataset.graph(), dataset.features())
 				.config("reg", 0.005)
 				.config("classes", numClasses)
-				.config("hidden", numClasses)
+				.config("hidden", 64)
 				.function("gcnlayer", "(A,h){z=dropout(A, 0.5)@(h@matrix(?, hidden, reg))+vector(?);return z}")
 				.layer("h{l+1}=relu(gcnlayer(A, h{l}))")
 				.config("hidden", "classes")
@@ -41,7 +41,7 @@ public class GCN {
 		
 		ModelTraining trainer = new ModelTraining()
 				.setOptimizer(new Adam(0.01))
-				.setEpochs(10)
+				.setEpochs(20)
 				.setPatience(100)
 				.setVerbose(true)
 				.setLoss(new CategoricalCrossEntropy())

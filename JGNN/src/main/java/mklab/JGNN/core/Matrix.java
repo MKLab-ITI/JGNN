@@ -9,6 +9,7 @@ import mklab.JGNN.core.matrix.AccessCol;
 import mklab.JGNN.core.matrix.DenseMatrix;
 import mklab.JGNN.core.matrix.SparseMatrix;
 import mklab.JGNN.core.matrix.TransposedMatrix;
+import mklab.JGNN.core.matrix.VectorizedMatrix;
 import mklab.JGNN.core.matrix.WrapCols;
 import mklab.JGNN.core.matrix.WrapRows;
 import mklab.JGNN.core.tensor.DenseTensor;
@@ -37,11 +38,11 @@ public abstract class Matrix extends Tensor {
 		this.cols = cols;
 	}
 	
-	public final String getRowName() {
+	public String getRowName() {
 		return rowName;
 	}
 	
-	public final String getColName() {
+	public String getColName() {
 		return colName;
 	}
 	
@@ -58,7 +59,7 @@ public abstract class Matrix extends Tensor {
 	 * @see #setDimensionName(String)
 	 * @see #setDimensionName(Tensor)
 	 */
-	public final Matrix setDimensionName(String rowName, String colName) {
+	public Matrix setDimensionName(String rowName, String colName) {
 		setRowName(rowName);
 		setColName(colName);
 		return this;
@@ -73,7 +74,7 @@ public abstract class Matrix extends Tensor {
 	 * @see #setDimensionName(String, String)
 	 * @see #setColName(String)
 	 */
-	public final Matrix setRowName(String rowName) {
+	public Matrix setRowName(String rowName) {
 		this.rowName = rowName;
 		return this;
 	}
@@ -87,7 +88,7 @@ public abstract class Matrix extends Tensor {
 	 * @see #setDimensionName(String, String)
 	 * @see #setRowName(String)
 	 */
-	public final Matrix setColName(String colName) {
+	public Matrix setColName(String colName) {
 		this.colName = colName;
 		return this;
 	}
@@ -100,7 +101,7 @@ public abstract class Matrix extends Tensor {
 	 */
 	public abstract Iterable<Entry<Long, Long>> getNonZeroEntries();
 	
-	public final Matrix setDimensionName(Tensor other) {
+	public Matrix setDimensionName(Tensor other) {
 		super.setDimensionName(other);
 		if(rowName==null)
 			rowName = other.cast(Matrix.class).getRowName();
@@ -115,7 +116,7 @@ public abstract class Matrix extends Tensor {
 	 * @see #zeroCopy(long, long)
 	 */
 	@Override
-	public final Matrix zeroCopy() {
+	public Matrix zeroCopy() {
 		return zeroCopy(rows, cols).setDimensionName(this).cast(Matrix.class);
 	}
 	/**
@@ -127,7 +128,7 @@ public abstract class Matrix extends Tensor {
 	 * @see #zeroCopy(long, long)
 	 */
 	@Override
-	public final Tensor zeroCopy(long size) {
+	public Tensor zeroCopy(long size) {
 		if(size!=size())
 			throw new RuntimeException("To avoid ambiguity, desired matrix zeroCopy size "+size+" can only be equal to rows "+rows+" * "+cols);
 		return zeroCopy(rows, cols);
@@ -158,7 +159,7 @@ public abstract class Matrix extends Tensor {
 	 * @see #getCols()
 	 * @see #getDimensionSize(String)
 	 */
-	public final long getRows() {
+	public long getRows() {
 		return rows;
 	}
 	/**
@@ -167,7 +168,7 @@ public abstract class Matrix extends Tensor {
 	 * @see #getRows()
 	 * @see #getDimensionSize(String)
 	 */
-	public final long getCols() {
+	public long getCols() {
 		return cols;
 	}
 	/**
@@ -183,7 +184,7 @@ public abstract class Matrix extends Tensor {
 	 *@see #setColName(String)
 	 *@see #setRowName(String)
 	 */
-	public final long getDimensionSize(String name) {
+	public long getDimensionSize(String name) {
 		if(rowName!=null && colName!=null && rowName.equals(colName))
 			throw new RuntimeException("Cannot call getDimension for the same row and col "
 					+ "dimention names in "+describe());
@@ -199,7 +200,7 @@ public abstract class Matrix extends Tensor {
 	 * @param col The element's column.
 	 * @return The value corresponding to the element (row, col).
 	 */
-	public final double get(long row, long col) {
+	public double get(long row, long col) {
 		if(row<0 || col<0 || row>=rows || col>=cols)
 			throw new IllegalArgumentException("Element ("+row+","+col+") out of range for "+describe());
 		return get(row+col*rows);
@@ -212,7 +213,7 @@ public abstract class Matrix extends Tensor {
 	 * @param value The value to store.
 	 * @return <code>this</code> Matrix instance.
 	 */
-	public final Matrix put(long row, long col, double value) {
+	public Matrix put(long row, long col, double value) {
 		if(row<0 || col<0 || row>=rows || col>=cols)
 			throw new IllegalArgumentException("Element ("+row+","+col+") out of range for "+describe());
 		put(row+col*rows, value);
@@ -227,7 +228,7 @@ public abstract class Matrix extends Tensor {
 	 * @see #matmul(Matrix, boolean, boolean)
 	 * @see #asTransposed()
 	 */
-	public final Matrix transposed() {
+	public Matrix transposed() {
 		Matrix ret = zeroCopy(getCols(), getRows());
 		for(Entry<Long, Long> element : getNonZeroEntries())
 			ret.put(element.getValue(), element.getKey(), get(element.getKey(), element.getValue()));
@@ -246,13 +247,13 @@ public abstract class Matrix extends Tensor {
 	 * @param x The one-dimensional tensor which is the vector being transformed.
 	 * @return The one-dimensional outcome of the transformation.
 	 */
-	public final Tensor transform(Tensor x) {
+	public Tensor transform(Tensor x) {
 		x.assertSize(cols);
-		Tensor ret = new DenseTensor(rows);
+		DenseTensor ret = new DenseTensor(rows);
 		for(Entry<Long, Long> element : getNonZeroEntries()) {
 			long row = element.getKey();
 			long col = element.getValue();
-			ret.put(row, ret.get(row) + get(row, col)*x.get(col));
+			ret.putAdd(row, get(row, col)*x.get(col));
 		}
 		return ret;
 	}
@@ -264,7 +265,7 @@ public abstract class Matrix extends Tensor {
 	 * @return A matrix that stores the outcome of the multiplication.
 	 * @see #matmul(Matrix, boolean, boolean)
 	 */
-	public final Matrix matmul(Matrix with) {
+	public Matrix matmul(Matrix with) {
 		if(cols!=with.getRows()) 
 			throw new IllegalArgumentException("Mismatched matrix sizes between "+describe()+" and "+with.describe());
 		if(colName!=null && with.getRowName()!=null && !colName.equals(with.getRowName()))
@@ -304,7 +305,7 @@ public abstract class Matrix extends Tensor {
 		}
 		else {
 			if(estimateNumNonZeroElements()/getRows()<with.estimateNumNonZeroElements()/with.getCols()) {
-				final long withCols = with.getCols();
+				long withCols = with.getCols();
 				for(Entry<Long, Long> element : getNonZeroEntries()) {
 					long row = element.getKey();
 					long col = element.getValue();
@@ -313,7 +314,7 @@ public abstract class Matrix extends Tensor {
 				}
 			}
 			else {
-				final long rows = getRows();
+				long rows = getRows();
 				for(Entry<Long, Long> element : with.getNonZeroEntries()) {
 					long row = element.getKey();
 					long col = element.getValue();
@@ -342,7 +343,7 @@ public abstract class Matrix extends Tensor {
 	 * @see #matmul(Matrix)
 	 * @see #transposed()
 	 */
-	public final Matrix matmul(Matrix with, boolean transposeSelf, boolean transposeWith) {
+	public Matrix matmul(Matrix with, boolean transposeSelf, boolean transposeWith) {
 		if((transposeSelf?rows:cols)!=(transposeWith?with.getCols():with.getRows()))
 			throw new IllegalArgumentException("Mismatched matrix sizes");
 		if((transposeSelf?rowName:colName)!=null &&
@@ -658,7 +659,7 @@ public abstract class Matrix extends Tensor {
 		return ret;
 	}
 	
-	/*public final static Matrix fromColumns(List<Tensor> tensors) {
+	/*public static Matrix fromColumns(List<Tensor> tensors) {
 		Matrix ret = new SparseMatrix(tensors.get(0).size(), tensors.size());
 		for(int col=0;col<tensors.size();col++) 
 			for(long row : tensors.get(col).getNonZeroElements())
@@ -676,7 +677,7 @@ public abstract class Matrix extends Tensor {
 	 * @see #accessRows(Iterable)
 	 * @see #accessColumns()
 	 */
-	public final List<Tensor> accessRows() {
+	public List<Tensor> accessRows() {
 		List<Tensor> ret = new ArrayList<Tensor>();
 		for(long row=0;row<getRows();row++)
 			ret.add(accessRow(row));
@@ -693,7 +694,7 @@ public abstract class Matrix extends Tensor {
 	 * @see #accessColumns(Iterable)
 	 * @see #accessRows()
 	 */
-	public final List<Tensor> accessColumns() {
+	public List<Tensor> accessColumns() {
 		List<Tensor> ret = new ArrayList<Tensor>();
 		for(long col=0;col<getCols();col++)
 			ret.add(accessCol(col));
@@ -712,7 +713,7 @@ public abstract class Matrix extends Tensor {
 	 * @see #accessRows(Iterable)
 	 * @see #accessColumns(long...)
 	 */
-	public final Matrix accessRows(long ... rows) {
+	public Matrix accessRows(long ... rows) {
 		List<Tensor> ret = new ArrayList<Tensor>();
 		for(long row : rows)
 			ret.add(accessRow(row));
@@ -730,7 +731,7 @@ public abstract class Matrix extends Tensor {
 	 * @see #accessColumns(Iterable)
 	 * @see #accessRows(long...)
 	 */
-	public final Matrix accessColumns(long ... cols) {
+	public Matrix accessColumns(long ... cols) {
 		List<Tensor> ret = new ArrayList<Tensor>();
 		for(long col=0;col<getCols();col++)
 			ret.add(accessCol(col));
@@ -749,7 +750,7 @@ public abstract class Matrix extends Tensor {
 	 * @see #accessRows(Iterable)
 	 * @see #accessColumns(Tensor)
 	 */
-	public final Matrix accessRows(Tensor rows) {
+	public Matrix accessRows(Tensor rows) {
 		List<Tensor> ret = new ArrayList<Tensor>();
 		for(long row=0;row<rows.size();row++)
 			ret.add(accessRow((long)rows.get(row)));
@@ -767,7 +768,7 @@ public abstract class Matrix extends Tensor {
 	 * @see #accessColumns(Iterable)
 	 * @see #accessRows(Tensor)
 	 */
-	public final Matrix accessColumns(Tensor cols) {
+	public Matrix accessColumns(Tensor cols) {
 		ArrayList<Tensor> ret = new ArrayList<Tensor>();
 		for(long col=0;col<cols.size();col++)
 			ret.add(accessCol((long)cols.get(col)));
@@ -786,7 +787,7 @@ public abstract class Matrix extends Tensor {
 	 * @see #accessRows()
 	 * @see #accessColumns(Iterable)
 	 */
-	public final List<Tensor> accessRows(Iterable<Long> rowIds) {
+	public List<Tensor> accessRows(Iterable<Long> rowIds) {
 		List<Tensor> ret = new ArrayList<Tensor>();
 		for(long row : rowIds)
 			ret.add(accessRow(row));
@@ -805,13 +806,13 @@ public abstract class Matrix extends Tensor {
 	 * @see #accessColumns()
 	 * @see #accessRows(Iterable)
 	 */
-	public final List<Tensor> accessColumns(Iterable<Long> colIds) {
+	public List<Tensor> accessColumns(Iterable<Long> colIds) {
 		List<Tensor> ret = new ArrayList<Tensor>();
 		for(long col : colIds)
 			ret.add(accessCol(col));
 		return ret;
 	}
-	/*public final List<Tensor> toSparseColumns() {
+	/*public List<Tensor> toSparseColumns() {
 		List<Tensor> ret = new ArrayList<Tensor>();
 		for(long col=0;col<getCols();col++)
 			ret.add(new SparseTensor(getRows()));
@@ -851,6 +852,8 @@ public abstract class Matrix extends Tensor {
 		}
 		catch(UnsupportedOperationException e) {
 		}*/
+		if(rows>100000/cols && Tensor.vectorization)
+			return new VectorizedMatrix(rows, cols);  // TODO: run benchmarks on several machines for this limit
 		return new DenseMatrix(rows, cols);
 		//throw new UnsupportedOperationException("Neither "+describe()+" nor "+with.describe()+" support zeroCopy("+rows+", "+cols+")");
 	}
@@ -858,14 +861,16 @@ public abstract class Matrix extends Tensor {
 	 * Creates a copy of the matrix organized as a dense matrix.
 	 * @return A {@link DenseMatrix} instance.
 	 */
-	public DenseMatrix toDense() {
+	public Matrix toDense() {
+		if(getRows()>100000/getCols() && vectorization)
+			return (VectorizedMatrix)new VectorizedMatrix(getRows(), getCols()).selfAdd(this).setDimensionName(this);
 		return (DenseMatrix)new DenseMatrix(getRows(), getCols()).selfAdd(this).setDimensionName(this);
 	}
 	/**
 	 * Creates a copy of the matrix organized as a sparse matrix.
 	 * @return A {@link SparseMatrix} instance.
 	 */
-	public SparseMatrix toSparse() {
+	public Matrix toSparse() {
 		return (SparseMatrix)new SparseMatrix(getRows(), getCols()).selfAdd(this).setDimensionName(this);
 	}
 	/**

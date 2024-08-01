@@ -1,6 +1,5 @@
 package mklab.JGNN.core.matrix;
 
-import java.util.AbstractMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
@@ -16,7 +15,7 @@ import mklab.JGNN.core.util.FastEntry;
  * @author Emmanouil Krasanakis
  */
 public class SparseMatrix extends Matrix {
-	private Tensor tensor;
+	private SparseTensor tensor;
 	/**
 	 * Generates a sparse matrix with the designated number of rows and columns.
 	 * @param rows The number of rows.

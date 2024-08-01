@@ -23,19 +23,19 @@ public class TrajectoryData {
     public List<Tensor> labels = new ArrayList<>();
     
     private Random r = new Random();
-    protected double[] createTrajectory(){
+    protected double[] createTrajectory(int size){
         double v = 40.0;
         double angle = r.nextDouble()*40+15;
         double g = 9.8;
         double vx = v*Math.cos(Math.toRadians(angle));
         double vy = v*Math.sin(Math.toRadians(angle));
-        double[] f = new double[10];
-        int counter=0;
-        for(double x = 4; x < 44; x += 4){
+        double[] f = new double[size];
+        double x = 4;
+        for(int counter=0; counter<size; counter++){
+        	x+= 4;
             double t = x/vx;
             double y = vy*t - g*t*t;
             f[counter] = y/28.0;
-            counter++;
         }
         return f;
     }
@@ -53,10 +53,11 @@ public class TrajectoryData {
     
     protected void createGraphs(int numGraphs){
         for(int i = 0; i < numGraphs; i++){
-            Matrix mt = createTimeAdjacency(10);
-            Matrix mf = createTimeAdjacency(10);
+        	int size = 10+(int)(2*Math.random());
+            Matrix mt = createTimeAdjacency(size);
+            Matrix mf = createTimeAdjacency(size);
             
-            double[] trajectory = createTrajectory();
+            double[] trajectory = createTrajectory(size);
             
             Matrix ff = new DenseTensor(trajectory).asColumn().toDense();
             Matrix ft = new DenseTensor(trajectory).asColumn().toDense();

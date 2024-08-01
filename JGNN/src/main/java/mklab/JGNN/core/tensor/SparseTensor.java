@@ -26,12 +26,12 @@ public class SparseTensor extends Tensor {
 		this(0);
 	}
 	@Override
-	public final synchronized Tensor put(long pos, double value) {
-		if(!Double.isFinite(value))
+	public final Tensor put(long pos, double value) {
+		/*if(!Double.isFinite(value))
 			throw new IllegalArgumentException("Cannot accept non-finite (NaN or Infinity) tensor values");
 		else if(pos<0 || pos>=size())
 			throw new IllegalArgumentException("Tensor position "+pos+" out of range [0, "+size()+")");
-		else {
+		else*/ {
 			if(value==0)
 				values.remove(pos);
 			else
@@ -40,9 +40,9 @@ public class SparseTensor extends Tensor {
 		return this;
 	}
 	@Override
-	public final synchronized double get(long pos) {
-		if(pos<0 || pos>=size())
-			throw new IllegalArgumentException("Tensor position "+pos+" out of range [0, "+size()+")");
+	public final double get(long pos) {
+		//if(pos<0 || pos>=size())
+		//	throw new IllegalArgumentException("Tensor position "+pos+" out of range [0, "+size()+")");
 		return values.get(pos);
 	}
 	@Override

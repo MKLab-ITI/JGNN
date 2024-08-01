@@ -14,6 +14,7 @@ import mklab.JGNN.core.util.Range;
  * @author Emmanouil Krasanakis
  */
 public abstract class Tensor implements Iterable<Long> {
+	public static boolean vectorization = ModuleLayer.boot().findModule("jdk.incubator.vector").isPresent();
 	private long size;
 	private String dimensionName;
 	
@@ -34,18 +35,18 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @return <code>this</code> Tensor instance.
 	 * @see #getDimensionName()
 	 */
-	public final Tensor setDimensionName(String dimensionName) {
+	public Tensor setDimensionName(String dimensionName) {
 		this.dimensionName = dimensionName;
 		return this;
 	}
-	public final String getDimensionName() {
+	public String getDimensionName() {
 		return dimensionName;
 	}
 	/**
 	 * Set tensor elements to random values from the uniform range [0,1]
 	 * @return <code>this</code> Tensor instance.
 	 */
-	public final Tensor setToRandom() {
+	public Tensor setToRandom() {
 		for(long i=0;i<size();i++)
 			put(i, Math.random());
 		return this;
@@ -56,7 +57,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @param distribution The distribution instance to sample from.
 	 * @return <code>this</code> Tensor instance.
 	 */
-	public final Tensor setToRandom(Distribution distribution) {
+	public Tensor setToRandom(Distribution distribution) {
 		for(long i=0;i<size();i++)
 			put(i, distribution.sample());
 		return this;
@@ -67,7 +68,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * and calls the {@link #allocate(long)} method.
 	 * @param size The size of the tensor.
 	 */
-	protected final void init(long size) {
+	protected void init(long size) {
 		this.size = size;
 		allocate(size);
 	}
@@ -127,14 +128,14 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @return <code>this</code> Tensor instance.
 	 * @see #put(long, double)
 	 */
-	public final Tensor putAdd(long pos, double value) {
+	public Tensor putAdd(long pos, double value) {
 		put(pos, get(pos)+value);
 		return this;
 	}
 	/**
 	 * @return The number of tensor elements
 	 */
-	public final long size() {
+	public long size() {
 		return size;
 	}
 	/**
@@ -142,7 +143,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @param size The size the tensor should match
 	 * @throws RuntimeException if the tensor does not match the given size
 	 */
-	public final void assertSize(long size) {
+	public void assertSize(long size) {
 		if(size()!=size)
 			throw new RuntimeException("Different sizes: given "+size+" vs "+size());
 	}
@@ -154,7 +155,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @param other The other tensor to compare with.
 	 * @return <code>this</code> Tensor instance.
 	 */
-	public final Tensor assertMatching(Tensor other) {
+	public Tensor assertMatching(Tensor other) {
 		if(!isMatching(other)) 
 			throw new RuntimeException("Non-compliant: "+describe()+" vs "+other.describe());
 		return this;
@@ -221,7 +222,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * a new object in case many tensors are used.
 	 * @return An iterable of tensor positions.
 	 */
-	public final Iterable<Long> getNonZeroElements() {
+	public Iterable<Long> getNonZeroElements() {
 		return this;
 	}
 	/**
@@ -247,7 +248,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * and lower values sparser data.
 	 * @return A double in the range [0,1].
 	 */
-	public final double density() {
+	public double density() {
 		return estimateNumNonZeroElements() / (double)size;
 	}
 	
@@ -268,7 +269,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @see #zeroCopy()
 	 * @see #getNonZeroElements()
 	 */
-	public final Tensor copy() {
+	public Tensor copy() {
 		Tensor res = zeroCopy();
 		for(long i : getNonZeroElements())
 			res.put(i, get(i));
@@ -280,7 +281,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @return <code>this</code> Tensor instance.
 	 * @see #assign(Tensor)
 	 */
-	public final Tensor assign(Tensor tensor) {
+	public Tensor assign(Tensor tensor) {
 		assertMatching(tensor);
 		for(long i : tensor.getNonZeroElements())
 			put(i, tensor.get(i));
@@ -290,7 +291,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @param tensor The tensor to add with
 	 * @return a new Tensor that stores the outcome of addition
 	 */
-	public final Tensor add(Tensor tensor) {
+	public Tensor add(Tensor tensor) {
 		assertMatching(tensor);
 		if(density()<tensor.density()) 
 			return tensor.add(this);
@@ -304,7 +305,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @param value The value to add to each element
 	 * @return a new Tensor that stores the outcome of addition
 	 */
-	public final Tensor add(double value) {
+	public Tensor add(double value) {
 		Tensor res = zeroCopy();
 		for(long i=0;i<size();i++)
 			res.put(i, get(i)+value);
@@ -315,7 +316,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @param tensor The tensor to add (it's not affected).
 	 * @return <code>this</code> Tensor instance.
 	 */
-	public final Tensor selfAdd(Tensor tensor) {
+	public Tensor selfAdd(Tensor tensor) {
 		assertMatching(tensor);
 		Tensor res = this;
 		for(long i : tensor.getNonZeroElements())
@@ -328,7 +329,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @param weight The weight to multiply the added tensor's elements with during addition.
 	 * @return <code>this</code> Tensor instance.
 	 */
-	public final Tensor selfAdd(Tensor tensor, double weight) {
+	public Tensor selfAdd(Tensor tensor, double weight) {
 		assertMatching(tensor);
 		Tensor res = this;
 		for(long i : tensor.getNonZeroElements())
@@ -340,7 +341,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @param value The value to add to each tensor element.
 	 * @return <code>this</code> Tensor instance.
 	 */
-	public final Tensor selfAdd(double value) {
+	public Tensor selfAdd(double value) {
 		Tensor res = this;
 		for(long i=0;i<size();i++)
 			res.put(i, get(i)+value);
@@ -350,7 +351,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @param tensor The tensor to subtract
 	 * @return a new Tensor that stores the outcome of subtraction
 	 */
-	public final Tensor subtract(Tensor tensor) {
+	public Tensor subtract(Tensor tensor) {
 		assertMatching(tensor);
 		Tensor res = copy();
 		for(long i : tensor.getNonZeroElements())
@@ -362,7 +363,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @param tensor The tensor to subtract (it's not affected).
 	 * @return <code>this</code> Tensor instance.
 	 */
-	public final Tensor selfSubtract(Tensor tensor) {
+	public Tensor selfSubtract(Tensor tensor) {
 		assertMatching(tensor);
 		Tensor res = this;
 		for(long i : tensor.getNonZeroElements()) 
@@ -373,7 +374,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @param tensor The tensor to perform element-wise multiplication with.
 	 * @return A new Tensor that stores the outcome of the multiplication.
 	 */
-	public final Tensor multiply(Tensor tensor) {
+	public Tensor multiply(Tensor tensor) {
 		assertMatching(tensor);
 		Tensor res = determineZeroCopy(tensor);
 		for(long i : getNonZeroElements())
@@ -400,7 +401,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @param value A number to multiply all tensor elements with.
 	 * @return A new Tensor that stores the outcome of the multiplication.
 	 */
-	public final Tensor multiply(double value) {
+	public Tensor multiply(double value) {
 		Tensor res = zeroCopy();
 		for(long i : getNonZeroElements())
 			res.put(i, get(i)*value);
@@ -411,7 +412,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @param value A number to multiply all tensor elements with.
 	 * @return <code>this</code> Tensor instance.
 	 */
-	public final Tensor selfMultiply(double value) {
+	public Tensor selfMultiply(double value) {
 		Tensor res = this;
 		for(long i : getNonZeroElements())
 			res.put(i, get(i)*value);
@@ -421,7 +422,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * Computes the square root of tensor elements.
 	 * @return A new Tensor that stores the outcome of finding the absolute square root of each element.
 	 */
-	public final Tensor sqrt() {
+	public Tensor sqrt() {
 		Tensor res = zeroCopy();
 		for(long i : getNonZeroElements())
 			res.put(i, Math.sqrt(Math.abs(get(i))));
@@ -431,7 +432,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * Performs in-memory set of each element to the square root of its absolute value.
 	 * @return <code>this</code> Tensor instance.
 	 */
-	public final Tensor selfSqrt() {
+	public Tensor selfSqrt() {
 		Tensor res = this;
 		for(long i : getNonZeroElements())
 			res.put(i, Math.sqrt(Math.abs(get(i))));
@@ -441,7 +442,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * Computes the exponential minus 1 of tensor elements.
 	 * @return A new Tensor that stores the outcome of finding the operation on each element.
 	 */
-	public final Tensor expMinusOne() {
+	public Tensor expMinusOne() {
 		Tensor res = zeroCopy();
 		for(long i : getNonZeroElements())
 			res.put(i, Math.exp(get(i)));
@@ -451,7 +452,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * Sets the exponential minus 1 of tensor elements.
 	 * @return  <code>this</code> Tensor instance.
 	 */
-	public final Tensor selfExpMinusOne() {
+	public Tensor selfExpMinusOne() {
 		Tensor res = this;
 		for(long i : getNonZeroElements())
 			res.put(i, Math.exp(get(i)));
@@ -461,7 +462,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * Computes the logarithm of tensor elements.
 	 * @return A new Tensor that stores the outcome of finding the logarithm of the absolute of each element.
 	 */
-	public final Tensor log() {
+	public Tensor log() {
 		Tensor res = zeroCopy();
 		for(long i : getNonZeroElements())
 			res.put(i, Math.log(Math.abs(get(i))));
@@ -471,7 +472,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * Performs in-memory set of each element to the logarithm of its absolute value.
 	 * @return <code>this</code> Tensor instance.
 	 */
-	public final Tensor selfLog() {
+	public Tensor selfLog() {
 		Tensor res = this;
 		for(long i : getNonZeroElements())
 			res.put(i, Math.log(Math.abs(get(i))));
@@ -482,7 +483,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * Computes the negative of tensor elements.
 	 * @return A new Tensor that stores the outcome of finding the negative of each element.
 	 */
-	public final Tensor negative() {
+	public Tensor negative() {
 		Tensor res = zeroCopy();
 		for(long i : getNonZeroElements())
 			res.put(i, -get(i));
@@ -492,7 +493,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * Performs in-memory set of each element to the negative of itself.
 	 * @return <code>this</code> Tensor instance.
 	 */
-	public final Tensor selfNegative() {
+	public Tensor selfNegative() {
 		Tensor res = this;
 		for(long i : getNonZeroElements())
 			res.put(i, -get(i));
@@ -502,7 +503,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * Computes the absolute value of tensor elements.
 	 * @return A new Tensor that stores the outcome of finding the absolute value of each element.
 	 */
-	public final Tensor abs() {
+	public Tensor abs() {
 		Tensor res = zeroCopy();
 		for(long i : getNonZeroElements())
 			res.put(i, Math.abs(get(i)));
@@ -512,7 +513,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * Performs in-memory set of each element to its absolute value.
 	 * @return <code>this</code> Tensor instance.
 	 */
-	public final Tensor selfAbs() {
+	public Tensor selfAbs() {
 		Tensor res = this;
 		for(long i : getNonZeroElements())
 			res.put(i, Math.abs(get(i)));
@@ -521,7 +522,7 @@ public abstract class Tensor implements Iterable<Long> {
 	/**
 	 * @return A new Tensor with inversed each non-zero element.
 	 */
-	public final Tensor inverse() {
+	public Tensor inverse() {
 		Tensor res = zeroCopy();
 		for(long i : getNonZeroElements())
 			if(get(i)!=0)
@@ -532,7 +533,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * Performs in-memory the inverse of each non-zero element.
 	 * @return <code>this</code> Tensor instance.
 	 */
-	public final Tensor selfInverse() {
+	public Tensor selfInverse() {
 		Tensor res = this;
 		for(long i : getNonZeroElements())
 			if(get(i)!=0)
@@ -544,7 +545,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @param tensor The tensor with which to find the product.
 	 * @return The dot product between the tensors.
 	 */
-	public final double dot(Tensor tensor) {
+	public double dot(Tensor tensor) {
 		assertMatching(tensor);
 		double res = 0;
 		if(density() < tensor.density())
@@ -561,7 +562,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @param tensor2 The second other tensor with which to find the product.
 	 * @return The triple dot product between the tensors.
 	 */
-	public final double dot(Tensor tensor1, Tensor tensor2) {
+	public double dot(Tensor tensor1, Tensor tensor2) {
 		assertMatching(tensor1);
 		assertMatching(tensor2);
 		double res = 0;
@@ -572,7 +573,7 @@ public abstract class Tensor implements Iterable<Long> {
 	/**
 	 * @return The L2 norm of the tensor
 	 */
-	public final double norm() {
+	public double norm() {
 		double res = 0;
 		for(long i : getNonZeroElements())
 			res += get(i)*get(i);
@@ -581,7 +582,7 @@ public abstract class Tensor implements Iterable<Long> {
 	/**
 	 * @return The sum of tensor elements
 	 */
-	public final double sum() {
+	public double sum() {
 		double res = 0;
 		for(long i : getNonZeroElements())
 			res += get(i);
@@ -624,7 +625,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @see #argmax()
 	 * @see #min()
 	 */
-	public final double max() {
+	public double max() {
 		double res = Double.NEGATIVE_INFINITY;
 		for(long i=0;i<size;i++) {
 			double value = get(i);
@@ -640,7 +641,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @see #max()
 	 * @see #argmin()
 	 */
-	public final long argmax() {
+	public long argmax() {
 		double res = Double.NEGATIVE_INFINITY;
 		long pos = -1;
 		for(long i=0;i<size;i++) {
@@ -659,7 +660,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @see #argmin()
 	 * @see #max()
 	 */
-	public final double min() {
+	public double min() {
 		double res = Double.POSITIVE_INFINITY;
 		for(long i=0;i<size;i++) {
 			double value = get(i);
@@ -675,7 +676,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @see #min()
 	 * @see #argmax()
 	 */
-	public final long argmin() {
+	public long argmin() {
 		double res = Double.POSITIVE_INFINITY;
 		long pos = -1;
 		for(long i=0;i<size;i++) {
@@ -704,7 +705,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @return A copy of the tensor on which L2 normalization has been performed.
 	 * @see #setToNormalized()
 	 */
-	public final Tensor normalized() {
+	public Tensor normalized() {
 		double norm = norm();
 		Tensor res = zeroCopy();
 		if(norm!=0)
@@ -717,7 +718,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * (if the tensor contains no negative elements, this is equivalent to L1 normalization)
 	 * @see #setToProbability()
 	 */
-	public final Tensor toProbability() {
+	public Tensor toProbability() {
 		double norm = sum();
 		Tensor res = zeroCopy();
 		if(norm!=0)
@@ -730,7 +731,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @return <code>this</code> Tensor instance.
 	 * @see #normalized()
 	 */
-	public final Tensor setToNormalized() {
+	public Tensor setToNormalized() {
 		double norm = norm();
 		if(norm!=0)
 			for(long i : getNonZeroElements())
@@ -742,7 +743,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @return <code>this</code> Tensor instance.
 	 * @see #toProbability()
 	 */
-	public final Tensor setToProbability() {
+	public Tensor setToProbability() {
 		double norm = sum();
 		if(norm!=0)
 			for(long i : getNonZeroElements())
@@ -753,7 +754,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * Set all tensor element values to 1/{@link #size()}
 	 * @return <code>this</code> Tensor instance.
 	 */
-	public final Tensor setToUniform() {
+	public Tensor setToUniform() {
 		for(long i=0;i<size();i++)
 			put(i, 1./size());
 		return this;
@@ -762,7 +763,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * Set all tensor element values to 1.
 	 * @return <code>this</code> Tensor instance.
 	 */
-	public final Tensor setToOnes() {
+	public Tensor setToOnes() {
 		for(long i=0;i<size();i++)
 			put(i, 1.);
 		return this;
@@ -771,7 +772,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * Set all tensor element values to 0.
 	 * @return <code>this</code> Tensor instance.
 	 */
-	public final Tensor setToZero() {
+	public Tensor setToZero() {
 		for(long i=0;i<size();i++)
 			put(i, 0.);
 		return this;
@@ -780,7 +781,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * Retrieves a representation of the Tensor as an array of doubles.
 	 * @return An array of doubles
 	 */
-	public final double[] toArray() {
+	public double[] toArray() {
 		double[] values = new double[(int)size()];
 		for(long i=0;i<size();i++)
 			values[(int)i] = get(i);

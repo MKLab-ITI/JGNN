@@ -1,11 +1,12 @@
 package mklab.JGNN.core.matrix;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.Tensor;
-import mklab.JGNN.core.tensor.DenseTensor;
+import mklab.JGNN.core.tensor.VectorizedTensor;
 import mklab.JGNN.core.util.Range2D;
 
 /**
@@ -15,25 +16,25 @@ import mklab.JGNN.core.util.Range2D;
  * 
  * @author Emmanouil Krasanakis
  */
-public class DenseMatrix extends Matrix {
-	DenseTensor tensor;
+public class VectorizedMatrix extends Matrix {
+	public VectorizedTensor tensor;
 	/**
 	 * Generates a dense matrix with the designated number of rows and columns.
 	 * @param rows The number of rows.
 	 * @param cols The number of columns.
 	 */
-	public DenseMatrix(long rows, long cols) {
+	public VectorizedMatrix(long rows, long cols) {
 		super(rows, cols);
 	}
 	@Override
 	public Matrix zeroCopy(long rows, long cols) {
-		if(rows>100000/cols && vectorization)
-			return new VectorizedMatrix(rows, cols).setDimensionName(getRowName(), getColName());
-		return new DenseMatrix(rows, cols).setDimensionName(getRowName(), getColName());
+		if(rows<=100000/cols)
+			return new DenseMatrix(rows, cols).setDimensionName(getRowName(), getColName());
+		return new VectorizedMatrix(rows, cols).setDimensionName(getRowName(), getColName());
 	}
 	@Override
 	protected void allocate(long size) {
-		tensor = new DenseTensor(size);
+		tensor = new VectorizedTensor(size);
 	}
 	@Override
 	public Tensor put(long pos, double value) {
@@ -64,14 +65,14 @@ public class DenseMatrix extends Matrix {
 
 	@Override
 	public Matrix matmul(Matrix with) {
-		if(with instanceof SparseMatrix)
-			return super.matmul(with);
+	    if (with instanceof SparseMatrix)
+	        return super.matmul(with);
 		if(getCols()!=with.getRows()) 
 			throw new IllegalArgumentException("Mismatched matrix sizes between "+describe()+" and "+with.describe());
 		if(getColName()!=null && with.getRowName()!=null && !getColName().equals(with.getRowName()))
 			throw new IllegalArgumentException("Mismatched matrix dimension names between "+describe()+" and "+with.describe());
-		DenseMatrix ret = new DenseMatrix(getRows(), with.getCols());
-		double[] with_tensor_values = (with instanceof VectorizedMatrix)
+		VectorizedMatrix ret = new VectorizedMatrix(getRows(), with.getCols());
+	    double[] with_tensor_values = (with instanceof VectorizedMatrix)
 				?((VectorizedMatrix) with).tensor.values
 				:((DenseMatrix) with).tensor.values;
 	
@@ -93,6 +94,7 @@ public class DenseMatrix extends Matrix {
 		return ret.setRowName(getRowName()).setColName(with.getColName());
 	}
 	
+
 	@Override
 	public Matrix matmul(Matrix with, boolean transposeThis, boolean transposeWith) {
 	    if (with instanceof SparseMatrix)
@@ -103,7 +105,6 @@ public class DenseMatrix extends Matrix {
 	    int colsThis = (int) (transposeThis ? getRows() : getCols());
 	    int rowsWith = (int) (transposeWith ? with.getCols() : with.getRows());
 	    int colsWith = (int) (transposeWith ? with.getRows() : with.getCols());
-	    
 
 	    if(colsThis!=rowsWith)
 			throw new IllegalArgumentException("Mismatched matrix sizes");
@@ -112,11 +113,12 @@ public class DenseMatrix extends Matrix {
 				!(transposeThis?getRowName():getColName()).equals(transposeWith?with.getColName():with.getRowName()))
 			throw new IllegalArgumentException("Mismatched matrix dimension names");
 		
+	 
 	    // Create the resulting matrix
-	    DenseMatrix ret = new DenseMatrix(rowsThis, colsWith);
+	    VectorizedMatrix ret = new VectorizedMatrix(rowsThis, colsWith);
 	    double[] with_tensor_values = (with instanceof VectorizedMatrix)
-				?((VectorizedMatrix) with).tensor.values
-				:((DenseMatrix) with).tensor.values;
+	    											?((VectorizedMatrix) with).tensor.values
+	    											:((DenseMatrix) with).tensor.values;
 	    
 	    for (int col2 = 0; col2 < colsWith; ++col2) {
 	        for (int row = 0; row < rowsThis; ++row) {

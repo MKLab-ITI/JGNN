@@ -32,12 +32,13 @@ public class GAT {
 				.layer("h{l+1}=(L1(nexp(att(A, h{l})))@h{l} | h{l})@matrix(2hidden, hidden, reg)+vector(hidden)")
 				.layer("h{l+1}=(L1(nexp(att(A, h{l})))@h{l} | h{l})@matrix(2hidden, classes, reg)+vector(classes)")
 				.classify()
-				.assertBackwardValidity();				;
+				.assertBackwardValidity();
 		
 		ModelTraining trainer = new ModelTraining()
 				.setOptimizer(new Adam(0.01))
 				.setEpochs(300)
 				.setPatience(100)
+				.setVerbose(true)
 				.setLoss(new CategoricalCrossEntropy())
 				.setValidationLoss(new Accuracy());
 		

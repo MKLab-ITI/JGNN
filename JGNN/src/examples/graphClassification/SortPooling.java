@@ -39,10 +39,9 @@ public class SortPooling {
                 .operation("z{l}=sort(h{l}, reduced)")  // currently, the parser fails to understand full expressions within next step's gather, so we need to create this intermediate variable
                 .layer("h{l+1}=reshape(h{l}[z{l}], 1, hiddenReduced)") //
                 .layer("h{l+1}=h{l}@matrix(hiddenReduced, classes)")
-                .layer("h{l+1}=softmax(h{l}, row)")
+                .layer("h{l+1}=softmax(h{l}, dim: \"row\")")
                 //.layer("h{l+1}=softmax(sum(h{l}@matrix(hiddenReduced, classes), row))")//this is mean pooling to replace the above sort pooling
                 .out("h{l}");       
-        
         TrajectoryData dtrain = new TrajectoryData(8000);
         TrajectoryData dtest = new TrajectoryData(2000);
         
@@ -61,13 +60,14 @@ public class SortPooling {
 		                Matrix adjacency = dtrain.graphs.get(graphIdentifier);
 		                Matrix features= dtrain.features.get(graphIdentifier);
 		                Tensor graphLabel = dtrain.labels.get(graphIdentifier).asRow();
+		                
 		                model.train(loss, optimizer, 
 		                        Arrays.asList(features, adjacency), 
 		                        Arrays.asList(graphLabel));
             		}
             	});
+            	ThreadPool.getInstance().waitForConclusion();  // wait for all gradients to compute
             }
-            ThreadPool.getInstance().waitForConclusion();  // wait for all gradients to compute
             optimizer.updateAll();  // apply gradients on model parameters
             
             double acc = 0.0;

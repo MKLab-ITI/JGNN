@@ -77,6 +77,8 @@ public class ModelBuilder {
 	private HashMap<String, String> functionSignatures = new HashMap<String, String>();
 	private HashMap<String, Integer> functionUsages = new HashMap<String, Integer>();
 	private int tmpVariableIdentifier = 0;
+	private static transient DenseTensor denseTensorConstructor = new DenseTensor(1);
+	private static transient DenseMatrix denseMatrixConstructor = new DenseMatrix(1, 1);
 	public ModelBuilder() {
 		this(new Model());
 		configurations.put("?", 0.0);
@@ -182,7 +184,7 @@ public class ModelBuilder {
 					if(type.contains("Tensor ")) {
 						String[] dimParts = type.substring(type.indexOf('(')+1, type.lastIndexOf(')')).split("\\s", 2);
 						int dim = Integer.parseInt(dimParts[dimParts.length-1]);
-						tensor = isDense?new DenseTensor(dim):new SparseTensor(dim);
+						tensor = isDense?denseTensorConstructor.zeroCopy(dim):new SparseTensor(dim);
 						if(dimParts.length>1)
 							tensor.setDimensionName(dimParts[0]);
 					}
@@ -192,7 +194,7 @@ public class ModelBuilder {
 						int dimRow = Integer.parseInt(dimRowParts[dimRowParts.length-1]);
 						String[] dimColParts = dims[1].trim().split("\\s", 2);
 						int dimCol = Integer.parseInt(dimColParts[dimColParts.length-1]);
-						tensor = isDense?new DenseMatrix(dimRow, dimCol):new SparseMatrix(dimRow, dimCol);
+						tensor = isDense?denseMatrixConstructor.zeroCopy(dimRow, dimCol):new SparseMatrix(dimRow, dimCol);
 						if(dimRowParts.length>1)
 							tensor.cast(Matrix.class).setRowName(dimRowParts[0]);
 						if(dimColParts.length>1)
@@ -782,7 +784,7 @@ public class ModelBuilder {
 		}
 		else if(splt[2].equals("matrix") || splt[2].equals("mat")) {
 			param(name, splt.length>5?parseConfigValue(splt[5]):0.,
-					new DenseMatrix((long)parseConfigValue(splt[3]), (long)parseConfigValue(splt[4]))
+					denseMatrixConstructor.zeroCopy((long)parseConfigValue(splt[3]), (long)parseConfigValue(splt[4]))
 					.setDimensionName(isDouble(splt[3])?null:splt[3], isDouble(splt[4])?null:splt[4]));
 			routing = prevRouting;
 			return this;
@@ -790,7 +792,7 @@ public class ModelBuilder {
 		else if(splt[2].equals("vector") || splt[2].equals("vec")) {
 			param(name, 
 					splt.length>4?parseConfigValue(splt[4]):0.,
-					new DenseTensor((long)parseConfigValue(splt[3]))
+					denseTensorConstructor.zeroCopy((long)parseConfigValue(splt[3]))
 					.setDimensionName(isDouble(splt[3])?null:splt[3]));
 			routing = prevRouting;
 			return this;
