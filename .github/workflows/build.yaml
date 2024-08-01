@@ -29,7 +29,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: JGNN-nightly
-        path: target/*.jar
+        path: JGNN/target/*.jar
 
     - name: Create GitHub Release
       id: create_release
