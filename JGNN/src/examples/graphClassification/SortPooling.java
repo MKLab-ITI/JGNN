@@ -39,7 +39,7 @@ public class SortPooling {
                 .operation("z{l}=sort(h{l}, reduced)")  // currently, the parser fails to understand full expressions within next step's gather, so we need to create this intermediate variable
                 .layer("h{l+1}=reshape(h{l}[z{l}], 1, hiddenReduced)") //
                 .layer("h{l+1}=h{l}@matrix(hiddenReduced, classes)")
-                .layer("h{l+1}=softmax(h{l}, dim: \"row\")")
+                .layer("h{l+1}=softmax(h{l}, dim: 'row')")
                 //.layer("h{l+1}=softmax(sum(h{l}@matrix(hiddenReduced, classes), row))")//this is mean pooling to replace the above sort pooling
                 .out("h{l}");       
         TrajectoryData dtrain = new TrajectoryData(8000);

@@ -285,8 +285,11 @@ public class ModelBuilder {
 	protected void assertExists(String name) {
 		if(configurations.containsKey(name))
 			throw new IllegalArgumentException("Component name "+name+" is a configuration but expressions can only parse components");
-		if(!components.containsKey(name)) 
+		if(!components.containsKey(name)) {
+			if(name.equals("row") || name.equals("col"))
+				throw new IllegalArgumentException("Component name "+name+" not declared.\n     It seems like you are trying to use a model declaration for an earlier version of JGNN.\n     Newer versions should parse expressions that are compatible\n     with Neuralang syntax.\nFIX: Consider replacing the `"+name+"` argument with `dim:\""+name+"\"`");
 			throw new IllegalArgumentException("Component name "+name+" not declared");
+		}
 	}
 	
 	/**
@@ -538,7 +541,7 @@ public class ModelBuilder {
 	 * @see #out(String)
 	 */
 	public ModelBuilder operation(String desc) {
-		
+		desc = desc.replace("'", "\"");
 		//System.out.println(desc);
 		
 		String[] lines = desc.split("\\;|\\\n");
@@ -599,7 +602,7 @@ public class ModelBuilder {
 									|| (newDesc.endsWith(" vector ") && isDouble(arg)) 
 									|| (newDesc.endsWith(" sort ") && isDouble(arg)) 
 									|| (newDesc.endsWith(" reshape ") && isDouble(arg))
-									|| arg.equals("col") || arg.equals("row") || arg.contains(":")) 
+									|| ((arg.equals("\"col\"") || arg.equals("\"row\"") || arg.contains(":")) && !arg.contains(","))) 
 								args += arg;
 							else {
 								String tmpName = "_tmp"+tmpVariableIdentifier;
@@ -735,15 +738,19 @@ public class ModelBuilder {
 			boolean mode = false;
 			if(splt.length>4) {
 				String modeText = splt[4].trim();
+				if(splt.length>5)
+					modeText = splt[4]+splt[5];
+				if(modeText.endsWith(";"))
+					modeText = modeText.substring(0, modeText.length()-1);
 				if(!modeText.split("\\:")[0].trim().equals("dim"))
-					throw new RuntimeException("Second argument "+modeText+" to sum should be a dim config (dim: \"row\" or dim: \"col\")");
+					throw new RuntimeException("Second argument "+modeText+" to softmax should be a dim config (dim: \"row\" or dim: \"col\")");
 				modeText = modeText.substring(modeText.indexOf(":")+1).trim();
 				if(modeText.equals("\"col\""))
 					mode = false;
 				else if(modeText.equals("\"row\""))
 					mode = true;
 				else
-					throw new RuntimeException("Invalid dim argument "+modeText+" to sum");
+					throw new RuntimeException("Invalid dim argument "+modeText+" to softmax");
 			}
 			component = new Sum(mode);
 			arg0 = splt[3];
@@ -752,15 +759,19 @@ public class ModelBuilder {
 			boolean mode = false;
 			if(splt.length>4) {
 				String modeText = splt[4].trim();
+				if(splt.length>5)
+					modeText = splt[4]+splt[5];
+				if(modeText.endsWith(";"))
+					modeText = modeText.substring(0, modeText.length()-1);
 				if(!modeText.split("\\:")[0].trim().equals("dim"))
-					throw new RuntimeException("Second argument "+modeText+" to mean should be a dim config (dim: \"row\" or dim: \"col\")");
+					throw new RuntimeException("Second argument "+modeText+" to softmax should be a dim config (dim: \"row\" or dim: \"col\")");
 				modeText = modeText.substring(modeText.indexOf(":")+1).trim();
 				if(modeText.equals("\"col\""))
 					mode = false;
 				else if(modeText.equals("\"row\""))
 					mode = true;
 				else
-					throw new RuntimeException("Invalid dim argument "+modeText+" to mean");
+					throw new RuntimeException("Invalid dim argument "+modeText+" to softmax");
 			}
 			component = new Mean(mode);
 			arg0 = splt[3];
@@ -769,15 +780,19 @@ public class ModelBuilder {
 			boolean mode = false;
 			if(splt.length>4) {
 				String modeText = splt[4].trim();
+				if(splt.length>5)
+					modeText = splt[4]+splt[5];
+				if(modeText.endsWith(";"))
+					modeText = modeText.substring(0, modeText.length()-1);
 				if(!modeText.split("\\:")[0].trim().equals("dim"))
-					throw new RuntimeException("Second argument "+modeText+" to max should be a dim config (dim: \"row\" or dim: \"col\")");
+					throw new RuntimeException("Second argument "+modeText+" to softmax should be a dim config (dim: \"row\" or dim: \"col\")");
 				modeText = modeText.substring(modeText.indexOf(":")+1).trim();
 				if(modeText.equals("\"col\""))
 					mode = false;
 				else if(modeText.equals("\"row\""))
 					mode = true;
 				else
-					throw new RuntimeException("Invalid dim argument "+modeText+" to max");
+					throw new RuntimeException("Invalid dim argument "+modeText+" to softmax");
 			}
 			component = new Max(mode);
 			arg0 = splt[3];
@@ -848,12 +863,19 @@ public class ModelBuilder {
 			boolean mode = false;
 			if(splt.length>4) {
 				String modeText = splt[4].trim();
-				if(modeText.equals("col"))
+				if(splt.length>5)
+					modeText = splt[4]+splt[5];
+				if(modeText.endsWith(";"))
+					modeText = modeText.substring(0, modeText.length()-1);
+				if(!modeText.split("\\:")[0].trim().equals("dim"))
+					throw new RuntimeException("Second argument "+modeText+" to softmax should be a dim config (dim: \"row\" or dim: \"col\")");
+				modeText = modeText.substring(modeText.indexOf(":")+1).trim();
+				if(modeText.equals("\"col\""))
 					mode = false;
-				else if(modeText.equals("row"))
+				else if(modeText.equals("\"row\""))
 					mode = true;
 				else
-					throw new RuntimeException("Invalid argument "+modeText+" to L1");
+					throw new RuntimeException("Invalid dim argument "+modeText+" to softmax");
 			}
 			component = new L1(mode);
 			arg0 = splt[3];

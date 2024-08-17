@@ -53,8 +53,8 @@ public class MessageSortPooling {
                 .layer("h{l+1}=softmax(h{l}, row)")*/
 				
 				// the following two layers implement the sum pooling
-                .layer("h{l+1}=sum(h{l}@matrix(hidden, classes)+vector(classes), row)")
-                .layer("h{l+1}=softmax(h{l}, row)")
+                .layer("h{l+1}=sum(h{l}@matrix(hidden, classes)+vector(classes), dim:\"row\")")
+                .layer("h{l+1}=softmax(h{l}, dim:\"row\")")
 				
                 .out("h{l}");
         

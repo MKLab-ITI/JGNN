@@ -1,23 +1,25 @@
 # JGNN 
 
-A native Java library for graph neural networks. 
+A native Java library for graph neural networks.
+
+**Current requirements: Java 17**
 
 ## :dart: About
 
-Graph Neural Networks (GNN) are getting more and more popular;
-they can reason from relational information and perform inference from small datasets.
-JGNN provides implementations that do not require dedicated hardware or firmware.
+Graph Neural Networks (GNNs) are getting more and more popular, for example to
+make predictions based on relational information, and to perform inference
+on small datasets. JGNN provides cross-platform implementations of this machine
+learning paradigm that do not require dedicated hardware or firmware.
 
-* Cross-platform (written in native java)
+* Cross-platform
 * Lightweight
-* Minimal memory footprint
-* Parallelized batching
+* Optimized: data views, automatic datatypes, SIMD, parallelized batching
 * [Neuralang](tutorials/Neuralang.md) scripting language for model definition
 
 ## :rocket: Setup and links
 
-Get the JAR file for a specific version from the project's releases
-[releases](https://github.com/MKLab-ITI/JGNN/releases). Add this to your dependencies.
+Add to your dependencies the JAR file of a specific version. Download this
+from the project's [releases](https://github.com/MKLab-ITI/JGNN/releases). .
 Alternatively, include the latest nightly version as a Maven or Gradle dependency 
 by following the instructions of the JitPack distribution:
 
@@ -27,11 +29,6 @@ by following the instructions of the JitPack distribution:
 :cyclone: [Tutorials](tutorials/README.md)<br>
 :cyclone: [Javadoc](https://mklab-iti.github.io/JGNN/)
 
-
-## :thumbsup: Contributing
-
-Feel free to contribute in any way, for example through the [issue tracker](https://github.com/MKLab-ITI/JGNN/issues). In addition to bug reports, requests for features and clarifications are welcome.
- 
 
 ## :notebook: Citation
 
@@ -61,3 +58,12 @@ Feel free to contribute in any way, for example through the [issue tracker](http
 * Sort pooling and graph classification
 
 </details>
+
+
+## :thumbsup: Contributing
+
+Feel free to contribute in any way, for example through the [issue tracker](https://github.com/MKLab-ITI/JGNN/issues). In addition to bug reports, 
+requests for features and clarifications are welcome.
+
+**Copyright Emmanouil Krasanakis (maniospas@hotmail.com), Apache license 2.0** 
+ 

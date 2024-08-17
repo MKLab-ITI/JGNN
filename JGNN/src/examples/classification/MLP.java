@@ -35,7 +35,7 @@ public class MLP {
 				.config("regularization", 0.005)
 				.var("x")
 				.operation("h = relu(x@matrix(features, classes, regularization)+vector(classes))")
-				.operation("yhat = softmax(h@matrix(classes, classes)+vector(classes), row)")
+				.operation("yhat = softmax(h@matrix(classes, classes)+vector(classes), dim: 'row')")
 				.out("yhat")
 				.print();
 		System.out.println(modelBuilder.getExecutionGraphDot());

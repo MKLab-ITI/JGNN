@@ -93,7 +93,7 @@ public class MeanPooling {
 			    .layer("h{l+1}=relu(A@(h{l}@matrix(hidden, hidden)))")
 			    .operation("s{l}=sort(h{l}, reduced)")
 			    //.layer("h{l+1}=reshape(h{l}[s{l}],1,reducedFeatures)@matrix(reducedFeatures, classes)")
-			    .layer("h{l+1}=softmax(sum(h{l}[s{l}]@matrix(hidden, classes), row))")
+			    .layer("h{l+1}=softmax(sum(h{l}[s{l}]@matrix(hidden, classes), dim: 'row'))")
 			    .out("h{l}");
 		System.out.println(builder.getExecutionGraphDot());
 		
