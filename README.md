@@ -2,7 +2,7 @@
 
 A native Java library for graph neural networks.
 
-**Current requirements: Java 17 or later**
+**Current requirements: Java 17+**
 
 ## :dart: About
 
@@ -19,7 +19,7 @@ learning paradigm that do not require dedicated hardware or firmware.
 ## :rocket: Setup and links
 
 Add to your dependencies the JAR file of a specific version. Download this
-from the project's [releases](https://github.com/MKLab-ITI/JGNN/releases). .
+from the project's [releases](https://github.com/MKLab-ITI/JGNN/releases).
 Alternatively, include the latest nightly version as a Maven or Gradle dependency 
 by following the instructions of the JitPack distribution:
 
