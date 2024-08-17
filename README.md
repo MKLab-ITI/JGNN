@@ -2,7 +2,7 @@
 
 A native Java library for graph neural networks.
 
-**Current requirements: Java 17**
+**Current requirements: Java 17 or later**
 
 ## :dart: About
 
