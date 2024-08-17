@@ -7,7 +7,7 @@ A native Java library for graph neural networks.
 ## :dart: About
 
 Graph Neural Networks (GNNs) are getting more and more popular, for example to
-make predictions based on relational information, and to perform inference
+make predictions based on relational information, or to perform inference
 on small datasets. JGNN provides cross-platform implementations of this machine
 learning paradigm that do not require dedicated hardware or firmware.
 

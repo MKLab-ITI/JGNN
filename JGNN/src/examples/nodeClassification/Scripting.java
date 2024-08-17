@@ -26,15 +26,37 @@ public class Scripting {
 		Dataset dataset = new Cora();
 		dataset.graph().setMainDiagonal(1).setToSymmetricNormalization();
 		
+		String architectures = """
+			fn classify(nodes, h, epochs: !3000, patience: !100, lr: !0.01) {
+				return softmax(h[nodes], dim: "row");
+			}
+			fn gcnlayer(A, h, hidden: 16, reg: 0.005) {
+				h = A@h@matrix(?, hidden, reg) + vector(hidden);
+				return h;
+			}
+			fn gcn(A, h, classes: extern) {
+				h = gcnlayer(A, h);
+				h = dropout(relu(h), 0.5);
+				h = gcnlayer(A, h, hidden: classes);
+				return h;
+			}
+			fn ngcn(A, h, nodes) {
+				h = classify(nodes, gcn(A,h));
+				return h;
+			}
+		""";
+		
+		long numSamples = dataset.samples().getSlice().size();
+		long numClasses = dataset.labels().getCols();
 		ModelBuilder modelBuilder = new Neuralang()
-				.parse(Paths.get("../architectures.nn"))
+				.parse(architectures)
 				.constant("A", dataset.graph())
 				.constant("h", dataset.features())
 				.var("nodes")
-				.config("classes", dataset.labels().getCols())
-				.config("hidden", 16)
-				.out("classify(nodes, gcn(A,h))")
-				.autosize(new EmptyTensor(dataset.samples().getSlice().size()));
+				.config("classes", numClasses)
+				.config("hidden", numClasses+2)
+				.out("ngcn(A,h, nodes)")
+				.autosize(new EmptyTensor(numSamples));
 		
 		ModelTraining trainer = new ModelTraining()
 				.configFrom(modelBuilder)
