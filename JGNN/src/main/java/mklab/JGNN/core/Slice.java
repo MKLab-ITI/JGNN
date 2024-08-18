@@ -72,8 +72,8 @@ public class Slice implements Iterable<Long> {
 		return Tensor.fromRange(0, size()).asColumn();
 	}
 	/**
-	 * Performs the {@link #range(double, double)} operation
-	 * but replaces values of <code>from</code> and <code>end</code>
+	 * Performs the {@link #range(int, int)} operation
+	 * while replacing values of <code>from</code> and <code>end</code>
 	 * with <code>(int)(from*size())</code> and <code>(int)(end*size())</code>
 	 * so that fractional ranges can be obtained. For example, 
 	 * you can call <code>slice.shuffle().range(0.5, 1)</code> to obtain a 

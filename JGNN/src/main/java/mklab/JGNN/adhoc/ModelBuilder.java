@@ -360,6 +360,8 @@ public class ModelBuilder {
 	 * @see #param(String, double, Tensor)
 	 */
 	public ModelBuilder config(String name, double value) {
+		if(name.equals("?"))
+			throw new RuntimeException("The \"?\" config name is not allowed.");
 		this.configurations.put(name, value);
 		return this;
 	}
@@ -568,6 +570,8 @@ public class ModelBuilder {
 		}
 		desc = desc.replaceAll("\\s\\=\\s+\\+\\s+MINUS\\_ONE", " = MINUS_ONE");
 		desc = desc.replaceAll("\\s+", " ");
+		if(desc.endsWith(";")) // hack to parse return correctly
+			desc = desc.substring(0, desc.length()-1);
 		
 		boolean madeChanges = true;
 		while(madeChanges) {

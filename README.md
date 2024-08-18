@@ -26,8 +26,7 @@ by following the instructions of the JitPack distribution:
 [![](https://jitpack.io/v/MKLab-ITI/JGNN.svg)](https://jitpack.io/#MKLab-ITI/JGNN)
 
 
-:cyclone: [Tutorials](tutorials/README.md)<br>
-:cyclone: [Javadoc](https://mklab-iti.github.io/JGNN/)
+:cyclone: [Guidebook](https://mklab-iti.github.io/JGNN/)
 
 
 ## :notebook: Citation

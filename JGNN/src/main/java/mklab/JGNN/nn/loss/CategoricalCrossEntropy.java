@@ -6,7 +6,7 @@ import mklab.JGNN.nn.Loss;
 
 /**
  * Implements a categorical cross-entropy {@link Loss}.<br>
- * For binary classification of one output use {@link BinaryCrossEntropy}
+ * For binary classification of one output use {@link BinaryCrossEntropy}.
  * @author Emmanouil Krasanakis
  */
 public class CategoricalCrossEntropy extends Loss {
@@ -15,7 +15,8 @@ public class CategoricalCrossEntropy extends Loss {
 
 	/**
 	 * Initializes categorical cross entropy with 1.E-12 epsilon value.
-	 * @see #BinaryCrossEntropy(double)
+	 * For binary classification of one output use {@link BinaryCrossEntropy#BinaryCrossEntropy()}.
+	 * @see #CategoricalCrossEntropy(double)
 	 */
 	public CategoricalCrossEntropy() {
 		this(1.E-12);
@@ -24,7 +25,9 @@ public class CategoricalCrossEntropy extends Loss {
 	/**
 	 * Initializes categorical cross entropy with and epsilon value 
 	 * to bound its outputs in the range [log(epsilon), -log(epsilon)] instead of (-inf, inf).
+	 * For binary classification of one output use {@link BinaryCrossEntropy#BinaryCrossEntropy(double)}.
 	 * @param epsilon A very small positive <code>double</code>.
+	 * @see #CategoricalCrossEntropy()
 	 */
 	public CategoricalCrossEntropy(double epsilon) {
 		this.epsilon = epsilon;

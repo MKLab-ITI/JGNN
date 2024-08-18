@@ -34,10 +34,28 @@ public class ModelTraining {
 	
 	public ModelTraining() {
 	}
+	
+	/**
+	 * @param verbose Whether an error message will be printed.
+	 * @deprecated This method was available in earlier JGNN versions but will be gradually phased out.
+	 * Instead, wrap the validation loss within {@link mklab.JGNN.nn.loss.report.VerboseLoss} to replicate
+	 * the same behavior.
+	 */
 	public ModelTraining setVerbose(boolean verbose) {
+		System.err.println("WARNING: The setVerbose method was available in earlier JGNN versions"
+				+ "\n    but will be gradually phased out. Instead, wrap the validation"
+				+ "\n    loss within a VerboseLoss instance to replicate the same"
+				+ "\n    behavior. Look for more losses of the mklab.JGNN.nn.loss.report"
+				+ "\n    package for more types of training feedback.");
 		this.verbose = verbose;
 		return this;
 	}
+	
+	/**
+	 * Set 
+	 * @param loss
+	 * @return
+	 */
 	public ModelTraining setLoss(Loss loss) {
 		this.loss = loss;
 		return this;
@@ -46,23 +64,73 @@ public class ModelTraining {
 		this.validationLoss = loss;
 		return this;
 	}
+	
+	/**
+	 * Sets an {@link Optimizer} instance to controls parameter updates during training.
+	 * If the provided optimizer is not an instance of {@link BatchOptimizer},
+	 * it is forcefully wrapped by the latter. Training calls the batch optimizer's
+	 * update method after every batch.
+	 * @param optimizer The desired optimizer.
+	 * @return <code>this</code> model training instance.
+	 * @see #train(Model, Matrix, Matrix, Slice, Slice)
+	 */
 	public ModelTraining setOptimizer(Optimizer optimizer) {
-		this.optimizer = new BatchOptimizer(optimizer);
+		if(optimizer instanceof BatchOptimizer)
+			this.optimizer = (BatchOptimizer) optimizer;
+		else
+			this.optimizer = new BatchOptimizer(optimizer);
 		return this;
 	}
+	
+	/**
+	 * Sets the number of batches training data slices should be split into.
+	 * @param numBatches The desired number of batches. Default is 1.
+	 * @return <code>this</code> model training instance.
+	 * @see #setParallelizedStochasticGradientDescent(boolean)
+	 */
 	public ModelTraining setNumBatches(int numBatches) {
 		this.numBatches = numBatches;
 		return this;
 	}
+	
+	/**
+	 * Sets whether the training strategy should reflect stochastic
+	 * gradient descent by randomly sampling from the training dataset to obtain data samples.
+	 * If <code>true</code>, both this feature and acceptable thread-based paralellization
+	 * is enabled. Parallelization makes use of JGNN's {@link ThreadPool}.
+	 * @param paralellization A boolean value indicating whether this feature is enabled.
+	 * @return <code>this</code> model training instance.
+	 * @see #setNumBatches(int)
+	 * @see #train(Model, Matrix, Matrix, Slice, Slice)
+	 */
 	public ModelTraining setParallelizedStochasticGradientDescent(boolean paralellization) {
 		this.paralellization = paralellization;
 		this.stochasticGradientDescent = paralellization;
 		return this;
 	}
+	
+	/**
+	 * Sets the maximum number of epochs for which training runs. 
+	 * If no patience has been set, training runs for exactly this
+	 * number of epochs.
+	 * @param epochs The maximum number of epochs.
+	 * @return <code>this</code> model training instance.
+	 * @see #setPatience(int)
+	 */
 	public ModelTraining setEpochs(int epochs) {
 		this.epochs = epochs;
 		return this;
 	}
+	
+	/**
+	 * Sets the patience of the training strategy that performs early stopping.
+	 * If training does not encounter a smaller validation loss for this number of 
+	 * epochs, it stops. 
+	 * @param patience The number of patience epochs. Default is Integer.MAX_VALUE to effectively disable this
+	 * 	feature and let training always reach the maximum number of set epochs.
+	 * @return <code>this</code> model training instance.
+	 * @see #setEpochs(int)
+	 */
 	public ModelTraining setPatience(int patience) {
 		this.patience = patience;
 		return this;

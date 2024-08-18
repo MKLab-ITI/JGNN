@@ -15,10 +15,12 @@ public abstract class Loss {
 	 * lower values correspond to better predictions.
 	 * @param output A model's estimation of true outputs.
 	 * @param desired The expected outputs.
-	 * @return A <code>double</code> value (could be negative too).
+	 * @return A <code>double</code> value (is negative if smaller 
+	 * values are better).
 	 * @see #derivative(Tensor, Tensor)
 	 */
 	public abstract double evaluate(Tensor output, Tensor desired);
+	
 	/**
 	 * Provides the derivative of a loss function at its evaluation point. 
 	 * @param output A model's estimation of true outputs.

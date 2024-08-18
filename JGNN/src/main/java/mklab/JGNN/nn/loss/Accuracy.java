@@ -4,12 +4,19 @@ import mklab.JGNN.core.Tensor;
 import mklab.JGNN.nn.Loss;
 
 /**
- * Implements an accuracy {@link Loss} of row-by-row comparison.
+ * Implements an accuracy {@link Loss} of row-by-row comparisons.
+ * Each row of the output should have the same {@link Tensor#argmax()}
+ * value as the corresponding row of desired values.
+ * This comparison has no derivative.
+ * 
  * @author Emmanouil Krasanakis
  */
 public class Accuracy extends Loss {
 	/**
-	 * Instantiates a row-by-row accuracy loss.
+	 * Instantiates a row-by-row {@link Accuracy} loss.
+	 * For this loss, each row of the output should have the same {@linke Tensor#argmax()}
+	 * value as the corresponding row of desired values.
+	 * This comparison has no derivative.
 	 */
 	public Accuracy() {
 	}

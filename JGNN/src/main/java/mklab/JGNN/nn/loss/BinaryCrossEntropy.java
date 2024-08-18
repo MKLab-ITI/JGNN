@@ -14,6 +14,7 @@ public class BinaryCrossEntropy extends Loss {
 	
 	/**
 	 * Initializes binary cross entropy with 1.E-12 epsilon value.
+	 * For more than one output dimensions use {@link CategoricalCrossEntropy#CategoricalCrossEntropy()}
 	 * @see #BinaryCrossEntropy(double)
 	 */
 	public BinaryCrossEntropy() {
@@ -22,7 +23,9 @@ public class BinaryCrossEntropy extends Loss {
 	/**
 	 * Initializes binary cross entropy with and epsilon value 
 	 * to bound its outputs in the range [log(epsilon), -log(epsilon)] instead of (-inf, inf).
+	 * For more than one output dimensions use {@link CategoricalCrossEntropy#CategoricalCrossEntropy(double)}
 	 * @param epsilon A very small positive <code>double</code>.
+	 * @see #BinaryCrossEntropy()
 	 */
 	public BinaryCrossEntropy(double epsilon) {
 		this.epsilon = epsilon;

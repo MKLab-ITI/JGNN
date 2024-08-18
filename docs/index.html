@@ -12,135 +12,177 @@
     <style>
         body {
             display: flex;
+            overflow-x: hidden; /* Prevent horizontal scrolling */
         }
+		
+		.table td, .table th {
+		  min-width: 100px; /* Adjust the value as needed */
+		}
 
         #sidebar {
             position: fixed;
             top: 0;
             left: 0;
             height: 100%;
-            width: 250px;
+            width: 190px;
             background-color: #f8f9fa;
             padding-top: 20px;
+            padding-left: 5px;
             border-right: 1px solid #ddd;
         }
 
+        .sidebar-title {
+            text-align: center;
+        }
+
         #content {
-            margin-left: 260px;
+            margin-left: 200px;
             padding: 20px;
             flex-grow: 1;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
+            width: 100%; /* Ensures content takes full width */
         }
-		
-		section {
-			margin-top: 90px;
-		}
+
+        section {
+            margin-top: 90px;
+        }
 
         .sidebar-link {
-            padding: 10px 20px;
-            display: block;
-            color: #333;
+            color: #000;
             text-decoration: none;
+            padding: 10px;
+            display: block;
         }
 
-        .sidebar-link:hover {
-            background-color: #ddd;
+        .sidebar-link.active {
+            color: #fff;
+            background-color: #007bff;
+            border-radius: 4px;
         }
 
-        .sidebar-title {
-            padding: 10px 20px;
-            font-weight: bold;
-            font-size: 1.25rem;
-            color: #333;
-        }
-		
-		.sidebar-link {
-			color: #000;
-			text-decoration: none;
-			padding: 10px;
-			display: block;
-		}
+        @media (max-width: 767.98px) {
+            #sidebar {
+                display: none;
+            }
 
-		/* Highlighted (active) item */
-		.sidebar-link.active {
-			color: #fff;
-			background-color: #007bff;
-			border-radius: 4px;
-		}
+            .navbar {
+                position: fixed;
+                display: block;
+                color: #fff;
+                background-color: #007bff;
+                border-radius: 4px;
+            }
+
+            #content {
+                margin-left: 0;
+                padding: 20px;
+                flex-grow: 1;
+                overflow-wrap: break-word;
+                word-wrap: break-word;
+                word-break: break-word;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .navbar {
+                display: none;
+            }
+        }
     </style>
-	<script>
-		document.addEventListener("DOMContentLoaded", function () {
-			const sidebarLinks = document.querySelectorAll('.sidebar-link');
-			
-			// Function to remove 'active' class from all sidebar links
-			function removeActiveClasses() {
-				sidebarLinks.forEach(link => link.classList.remove('active'));
-			}
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
 
-			// Function to add 'active' class to the current section link
-			function addActiveClass(link) {
-				removeActiveClasses();
-				link.classList.add('active');
-			}
+            function removeActiveClasses() {
+                sidebarLinks.forEach(link => link.classList.remove('active'));
+            }
 
-			// Intersection Observer options
-			const options = {
-				root: null,
-				rootMargin: '0px',
-				threshold: 0.2 // Adjust this value to your liking
-			};
+            function addActiveClass(link) {
+                removeActiveClasses();
+                link.classList.add('active');
+            }
 
-			// Intersection Observer callback
-			const observerCallback = (entries, observer) => {
-				entries.forEach(entry => {
-					const id = entry.target.getAttribute('id');
-					const link = document.querySelector(`.sidebar-link[href="#${id}"]`);
-					
-					if (entry.isIntersecting) {
-						addActiveClass(link);
-					}
-				});
-			};
+            const options = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.2
+            };
 
-			// Create an Intersection Observer instance
-			const observer = new IntersectionObserver(observerCallback, options);
+            const observerCallback = (entries, observer) => {
+                entries.forEach(entry => {
+                    const id = entry.target.getAttribute('id');
+                    const link = document.querySelector(`.sidebar-link[href="#${id}"]`);
 
-			// Observe each section
-			document.querySelectorAll('section').forEach(section => {
-				observer.observe(section);
-			});
-		});
-	</script>
+                    if (entry.isIntersecting) {
+                        addActiveClass(link);
+                    }
+                });
+            };
+
+            const observer = new IntersectionObserver(observerCallback, options);
+
+            document.querySelectorAll('section').forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
 </head>
 
 <body>
     <nav id="sidebar">
         <ul class="nav flex-column">
-            <li class="nav-item sidebar-title">JGNN</li>
+            <li class="nav-item sidebar-title"><h5>JGNN</h5></li>
             <li class="nav-item"> <a class="sidebar-link" href="#setup">1. Setup</a></li>
             <li class="nav-item"> <a class="sidebar-link" href="#quickstart">2. Quickstart</a></li>
-            <li class="nav-item"> <a class="sidebar-link" href="#gnn-builders">3. GNN Builders</a>
-			<li class="nav-item ps-md-3 text-secondary"><a class="sidebar-link small p-1" href="#modelbuilder" style="color: #777777;">3.1. ModelBuilder</a></li>
-			<li class="nav-item ps-md-3 text-secondary"><a class="sidebar-link small p-1" href="#fastbuilder" style="color: #777777;">3.2. FastBuilder</a></li>
-			<li class="nav-item ps-md-3 text-secondary"><a class="sidebar-link small p-1" href="#neuralang" style="color: #777777;">3.3. Neuralang</a></li>
-			<li class="nav-item ps-md-3 text-secondary"><a class="sidebar-link small p-1" href="#debugging" style="color: #777777;">3.4. Debugging</a></li>
-            <li class="nav-item"> <a class="sidebar-link" href="#create-data">4. Create data</a></li>
-			<li class="nav-item ps-md-3 text-secondary"><a class="sidebar-link small p-1" href="#fill-in-data" style="color: #777777;">4.1. Fill in data</a></li>
-			<li class="nav-item ps-md-3 text-secondary"><a class="sidebar-link small p-1" href="#identifiers" style="color: #777777;">4.2. Identifiers</a></li>
-			<li class="nav-item ps-md-3 text-secondary"><a class="sidebar-link small p-1" href="#tensor-operations" style="color: #777777;">4.3. Tensor operations</a></li>
-			<li class="nav-item ps-md-3 text-secondary"><a class="sidebar-link small p-1" href="#named-dimensions" style="color: #777777;">4.4. Named dimensions</a></li>
-            <li class="nav-item"> <a class="sidebar-link" href="#training">5. Training</a>
+            <li class="nav-item"> <a class="sidebar-link" href="#gnn-builders">3. GNN Builders</a></li>
+            <li class="nav-item ps-md-3 text-secondary"><a class="sidebar-link small p-1 subsection" href="#modelbuilder"
+                    style="color: #777777;">3.1. ModelBuilder</a></li>
+            <li class="nav-item ps-md-3 text-secondary"><a class="sidebar-link small p-1 subsection" href="#fastbuilder"
+                    style="color: #777777;">3.2. FastBuilder</a></li>
+            <li class="nav-item ps-md-3 text-secondary"><a class="sidebar-link small p-1 subsection" href="#debugging"
+                    style="color: #777777;">3.4. Debugging</a></li>
+            <li class="nav-item"> <a class="sidebar-link" href="#neuralang">4. Neuralang</a></li>
+            <li class="nav-item"> <a class="sidebar-link" href="#create-data">5. Create data</a></li>
+            <li class="nav-item ps-md-3 text-secondary"><a class="sidebar-link small p-1 subsection" href="#fill-in-data"
+                    style="color: #777777;">5.1. Fill in data</a></li>
+            <li class="nav-item ps-md-3 text-secondary"><a class="sidebar-link small p-1 subsection" href="#identifiers"
+                    style="color: #777777;">5.2. Identifiers</a></li>
+            <li class="nav-item ps-md-3 text-secondary"><a class="sidebar-link small p-1 subsection"
+                    href="#tensor-operations" style="color: #777777;">4.3. Tensor operations</a></li>
+            <li class="nav-item"> <a class="sidebar-link" href="#training">6. Training</a></li>
         </ul>
     </nav>
 
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"> <a class="sidebar-link" href="#setup">1. Setup</a></li>
+                    <li class="nav-item"> <a class="sidebar-link" href="#quickstart">2. Quickstart</a></li>
+                    <li class="nav-item"> <a class="sidebar-link" href="#gnn-builders">3. GNN Builders</a></li>
+					<li class="nav-item"> <a class="sidebar-link" href="#neuralang">4. Neuralang</a></li>
+                    <li class="nav-item"> <a class="sidebar-link" href="#create-data">5. Create data</a></li>
+                    <li class="nav-item"> <a class="sidebar-link" href="#training">6. Training</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
     <div id="content">
-		<h1>JGNN</h1>
+		<h1 style="text-align: center;">JGNN</h1>
 		<p>Graph Neural Networks (GNNs) are getting more and more popular, for example to
 		make predictions based on relational information, or to perform inference
 		on small datasets. JGNN provides cross-platform implementations of this machine
 		learning paradigm that do not require dedicated hardware or firmware. While
 		reading this guidebook, keep in mind that this is not a library for running
 		computationally intensive architectures; it has no GPU support and does not
-		plan to add any (unless the latter becomes integrated in the base Java virtual 
+		plan to add any (unless such support becomes integrated in the Java virtual 
 		machine). Instead, the goal is to provide highly portable solutions
 		that can run under smaller compute and available memory. So, while complex 
 		architectures like gated attention networks with many layers and hidden dimensions 
@@ -179,107 +221,133 @@
 	<section id="quickstart">
 	<h1>2. Quickstart</h1>
 
-	<p>Here we demonstrate JGNN on a node classification 
-	task. Graph classification is also supported, but we choose the simpler
-	concept for a first taste. For this task, GNN architectures are typically written 
-	as message-passing mechanisms that diffuse node representations across graphs,
-	and our demonstration focuses on this scenario. In particular, 
+	<p>Here we demonstrate usage of JGNN for node classification, that is, the inductive learning
+	task of inferring node labels given a graph's structure, node features, and a few node labels.
+	Classifying graphs is also supported, but it is a harder task to explain and set up. 
+	GNN architectures for the chosen node classification task are typically written 
+	as message-passing mechanisms; these diffuse node representations across edges, where
 	node neighbors pick up, aggregate (e.g., average), and transform
 	incoming representations to update theirs. Alternatives that boast higher 
-	expressive power do exist and are also supported, but simple architectures 
+	expressive power also exist and are supported, but simple architectures 
 	may be just as good or better than complex alternatives in solving 
-	practical problems
-	<a href="https://www.mdpi.com/2076-3417/14/11/4533">[Krasanakis et al., 2024]</a>.
-	Simple architectures also enjoy reduced resource consumption. Before delving deeper
-	into JGNN's functionalities, you are encouraged to work with 
-	the boilerplate code snippets provided here.</p>
+	practical problems <a href="https://www.mdpi.com/2076-3417/14/11/4533">[Krasanakis et al., 2024]</a>.
+	Simple architectures also enjoy reduced resource consumption.</p>
 	
-	
-	<p>Before starting with Java code, below we build some neural components
-	in a scripting language called Neurallang. JGNN can parse strings containing such definitions
-	to create trainable models with little effort. Other ways to declare
-	architectures exist too, but Neuralang declarations fully decouple GNN architectures from Java code. 
-	Notice that the language is function-based, where double dots <code class="language-java">:</code> 
-	indicate set or default hyperparameter values. Furthermore, the Neuralang keyword 
-	<code class="language-java">extern</code> indicates a value declared by the parsing Java code,
-	whereas values prepended with <code class="language-java">!</code> are broadcasted everywhere. 
-	Matrices and vectors are declared as required based on their dimensions and 
-	regulariation hyperparameter, where <code class="language-java">?</code> indicates hyperparameters
-	that are dynamically determined when parsing the code with Java.
-	More details on Neuralang are presented later.</p>
-	
-	<pre><code class="language-rust">fn classify(nodes, h, epochs: !3000, patience: !100, lr: !0.01) {
-	return softmax(h[nodes], dim: "row");
-}
-fn gcnlayer(A, h, hidden: 16, reg: 0.005) {
-	return A@h@matrix(?, hidden, reg) + vector(hidden);
-}
-fn gcn(A, h, classes: extern) {
-	h = gcnlayer(A, h);
-	h = dropout(relu(h), 0.5);
-	return gcnlayer(A, h, hidden: classes);
-}
-fn ngcn(A, h, nodes) {  // a node classification gcn
-	return classify(nodes, gcn(A,h));
-}</code></pre>
-
-	
-	<p>Let us now move to the GNN code. 
-	We first load the <code class="language-java">Cora</code> dataset from those shipped 
-	with the library for usage in prototyping and testing. The first time this dataset 
-	runs, it automatically downloads some data and stores them in a local <code class="language-java">downloads/</code>
-	folder. The data are then loaded into a graph adjacency matrix, node features, 
-	and node labels. Before doing anything else, we apply the renormalization trick,
-	which makes GNN computations numerically stable by adding self-loops to all nodes.
-	We also create a symmetric normalization of the adjacency matrix. which is required
-	by the model we impelement next. Both operations use in-place arithmetics to
-	directly alter raw data.</p>
+	<p>The demonstration starts by loading the <code class="language-java">Cora</code> dataset from those shipped 
+	with the library for out-of-the-box testing. The first time this dataset is 
+	constructed, it automatically downloads some data and stores them in a local <code class="language-java">downloads/</code>
+	folder. The data are then loaded into a sparse graph adjacency matrix, a dense node feature matrix, 
+	and a dense node label matrix. Sparse and dense representations are interchangeable in terms of operations,
+	but sparse matrices can store graphs with many nodes but relatively smaller degrees with greater memory efficiency. 
+	In the loaded matrices, each row contains the corresponding node's
+	neighbors, features, or one-hot encoding of labels. We also apply the renormalization trick and symmetric normalization on 
+	the dataset using in-place operations. The first of these makes GNN computations numerically stable by adding self-loops 
+	to all nodes, whereas the second is required by the model we impelement next.</p>
 	
 	<pre><code class="language-java">Dataset dataset = new Cora();
 dataset.graph().setMainDiagonal(1).setToSymmetricNormalization();</code></pre>
 	
-
-	<p>We now need to generate a trainable model. In GNNs, models are generated from model builders.
-	These differ by which Neuralang capabilities they can parse - mainly whether they go beyond
-	support of simple expressions involving operators only. The builder chosen here supports the whole 
-	language, but in turn misses out on some Java-side methods that help fill parts of the architecture
-	with boilerplate patterns. To use the selected builder, save the first Neuralang snippet 
-	to a file and retrieve it with the 
-	expression <code class="language-java">String architecture = Paths.get("filename.nn");</code>.
-	(Use a Rust language highlighter for visual assistance when writting in Neuralang.)
-	Alternatively, avoid external files by inlining the definition within Java code through 
-	a multiline string per <code class="language-java">String architecture = """ ... """;</code>.
-	This string is parsed within a functional programming chain, where
-	each method call returns the modelBuilder instance to continue calling more methods. 
-	</p>
 	
-	<p>For our model builder, we set remaining hyperparameters and overwrite the default value
-	for <code class="language-java">"hidden"</code> using the 
-	<code class="language-java">.config(String, double)</code> method. We also determine
-	which variables are constants, namely the adjacency matrix <code class="language-java">A</code> and node 
-	representation <code class="language-java">h</code>, and that node identifiers is a variable that serves 
-	as the architecture's inputs. There could be multiple inputs, so this distinction of what 
-	is a constant and what is a variable depends mostly on the which quantities change 
-	during training. In the case of node classification, both the adjacency matrix and
-	node features remain constant, as we work in one graph. Finally, the definition
-	sets an Neuralang expression as the architecture's output
-	by calling the <code class="language-java">.out(String)</code> method,
-	and applies the <code class="language-java">.autosize(Tensor...)</code> method to infer hyperparameter
-	values denoted with <code class="language-java">?</code> from an example input (for faster inference, we 
-	provide dataless list of node identifiers as input).</p>
+	<p>We now incrementally construct a trainable model using symbolic definitions resembling math 
+	notation. Symbolic expressions are part of a scripting-like language, called Neuralang,
+	that is covered in <a href="#neuralang">section 4</a>. However, for faster onboarding we stick to
+	the <code class="language-java">FastBuilder</code> class for creating models. This class's constructor
+	creates two constants <code>A</code> and <code>h0</code> from its two arguments to. Other constants
+	and input variables can be set too, but more on this later. After instantiation, we use the
+	following model builder methods to constuct a model. Some of these methods parse symbolic expressions 
+	to fastly declare machine learning components.
+	<ul>
+		<li><code>config</code> - Configures hyperparameter values. These can be used in all subsequent function and layer declarations.</li>
+		<li><code>function</code> - Declares a Neuralang function, in this case with inputs <code>A</code> and <code>h</code>.</li>
+		<li><code>layer</code> - Declares a layer that can use builtin and Neuralang functions. In this, the symbols <code>{l}</code> and <code>{l+1}</code> specifically are replaced by a layer counter.</li>
+		<li><code>classify</code> - Adds a softmax layer tailored to classification. This also silently declares an input <code>nodes</code> that represents a list of node indices where the outputs should be computed.</li>
+		<li><code>autosize</code> - Automatically sizes matrix and vector dimensions filled by <code>?</code>. This requires some input example, and here we provide a list of node identifiers, which we also make dataless (have only the correct dimensions without allocating memory). This method also checks for integrity errors in the declared architecture, such as computational paths that do not lead to an output.</li>
+	</ul>
+	The abode methods support a method chain paradigm where the modelBuilder instance is returned by each of 
+	its methods to access the next one. Below we use this builder to implement the Graph Convolutional Network (GCN) 
+	architecture <a href="https://arxiv.org/abs/1609.02907">[Kipf and Welling, 2017]</a>.
+	Details on the symbolic parts of definitions are presented later but, for the time being, we point to usage 
+	of the <code>matrix</code> and <code>vector</code> builtins to inline declarations of learnable parameter for
+	given dimensions and regularization. 
+	The builder stores internally a constructed model, obtained through <code>modelBuilder.getModel()</code>.
+	</p>
 
 	<pre><code class="language-java">long numSamples = dataset.samples().getSlice().size();
 long numClasses = dataset.labels().getCols();
-ModelBuilder modelBuilder = new Neuralang()
-	.parse(architecture)
-	.constant("A", dataset.graph())
-	.constant("h", dataset.features())
-	.var("nodes")
+ModelBuilder modelBuilder = new FastBuilder(dataset.graph(), dataset.features())
+	.config("reg", 0.005)
 	.config("classes", numClasses)
-	.config("hidden", numClasses+2)
-	.out("ngcn(A, h, nodes)")
+	.config("hidden", 64)
+	.function("gcnlayer", "(A,h){Adrop = dropout(A, 0.5); return Adrop@(h@matrix(?, hidden, reg))+vector(?);}")
+	.layer("h{l+1}=relu(gcnlayer(A, h{l}))")
+	.config("hidden", "classes")  // reassigns the output gcnlayer's "hidden" to be the number of "classes"
+	.layer("h{l+1}=gcnlayer(A, h{l})")
+	.classify()
 	.autosize(new EmptyTensor(numSamples));</code></pre>
-		
+	
+	
+	<p>Training epochs for the constructed model can be implemented
+	manually, by passing inputs, obtaining outputs, computing losses, and triggering backpropagation
+	on an optimizer. However, this may be complicated to write properly, so JGNN automates common 
+	training patterns with a <code>ModelTraining</code> class. Instances of this class
+	accept a method chain notation to set their parameters, like the number of epochs, patience 
+	for early stopping, the employed optimizer, and loss functions. An example is presented below,
+	where <code>Adam</code> optimization with learning rate <i>0.01</i> is performed, and a verbose 
+	variation of a validation loss keeps track of training progress. To run a full training process,
+	the defined strategy is passed to the model alongside input data, corresponding output data, as well
+	as training and validation slices.</p>
+	<p>Notice how, before training starts, a parameter initializer is also applied on the model for a cold
+	start. Selecting an initilizer is not part of training strategies 
+	to signify its model-dependent nature; dense layers should maintain the expected 
+	input variances in the output before the first epoch. Moreover,
+	the graph's adjacency matrix and node features are already declared as constants by the 
+	<code>FastBuilder</code> constructor, as node classification takes place on the same graph
+	with fully known node features. Instead, what is considered as inputs and outputs in this case
+	are the node identifiers (which in the <code>classify</code> method above are used to gather
+	the outputs of respective nodes) and corresponding labels. Labels that are not known (e.g., because
+	they refer to test data) still need to have some value, so as a convention if your are working
+	with your own data leave the one-hot label encoding of test nodes as zeroes. Doing so in this
+	example would not affect the outcome either. To recap, our full dataset consists of all node
+	identifiers and corresponding labels. The last two arguments of the <code>train</code> method
+	then accept training and validation data slices. Slices are effectively lists of integer entries 
+	pointing to rows of the datasets - find more later.
+	</p>
+	<pre><code class="language-java">ModelTraining trainer = new ModelTraining()
+	.setOptimizer(new Adam(0.01))
+	.setEpochs(3000)
+	.setPatience(100)
+	.setLoss(new CategoricalCrossEntropy())
+	.setValidationLoss(new VerboseLoss(new Accuracy()).setInterval(10));  // print validation every 10 epochs
+	
+Slice nodes = dataset.samples().getSlice().shuffle(); // a permutation of node identifiers
+Matrix inputData = Tensor.fromRange(nodes.size()).asColumn(); // each node has its identifier as an input
+Model model = modelBuilder.getModel()
+		.init(new XavierNormal())
+		.train(trainer, 
+				inputData,
+				dataset.labels(), 
+				nodes.range(0, 0.6),  // training slice
+				nodes.range(0.6, 0.8)  // validation slice
+				);</code></pre>
+	
+	<p>Trained models and their generating builders can be saved and loaded. These next snippet demonstrates
+	how raw predictions can be made too. During this process,
+	some matrix manipulation operations are employed to obtain transparent access to parts of input and output data
+	of the dataset.
+	</p>
+
+	<pre><code class="language-java">modelBuilder.save(Paths.get("gcn_cora.jgnn")); // needs a Path as an input
+Model loadedModel = ModelBuilder.load(Paths.get("gcn_cora.jgnn")).getModel(); // loading creates an intermediate modelbuilder
+
+Matrix output = loadedModel.predict(Tensor.fromRange(0, nodes.size()).asColumn()).get(0).cast(Matrix.class);
+double acc = 0;
+for(Long node : nodes.range(0.8, 1)) {
+	Matrix nodeLabels = dataset.labels().accessRow(node).asRow();
+	Tensor nodeOutput = output.accessRow(node).asRow();
+	acc += nodeOutput.argmax()==nodeLabels.argmax()?1:0;
+}
+System.out.println("Acc\t "+acc/nodes.range(0.8, 1).size());</code></pre>
+	
     </section>
 		
 
@@ -297,38 +365,144 @@ ModelBuilder modelBuilder = new Neuralang()
 	<h3 id="modelbuilder">3.1. ModelBuilder</h3>
 	[Under construction]
 	
-	<p>So far, we have discussed the propagation mechanisms of
-	GNNs, which consider the features of all nodes. However,
-	in a node classification setting, training data labels
-	are typically available only for certain nodes. We thus
-	need a mechanism to retrieve the predictions of the top
-	neural layer for certain nodes and pass them through a
-	softmax activation.</p>
-
-	<p>This can be achieved with normal neural model definitions
-	using the gather bracket operation after declaring a
-	variable of which nodes to retrieve:</p>
-
-	<pre><code class="language-java">.var("nodes")
-.layer("h{l} = softmax(h{l})")
-.operation("output = h{l}[nodes]")</code></pre>
-
-	<p>Recall that <code class="language-java">h{l}</code> always points to the top
-	layer when writing a new layer. This way, the built
-	model takes as inputs a set of nodes, performs the
-	forward pass of the architecture, and then selects the
-	provided nodes to use as outputs (and backpropagate
-	from). <strong>All</strong> nodes are needed for
-	training because they are made aware of each other via
-	the graph's structure. 
-	To simplify how node classification architectures are
-	defined, the above symbolic snippet is automatically
-	generated and applied by calling the
-	<code class="language-java">.classify()</code> method of the
-	<code class="language-java">FastBuilder</code> instead.
-	</p>
-
 	
+	
+	
+	you can use within expressions. Unless otherwise specified, you can replace <code>x</code> and <code>y</code> with any expression. Sometimes, <code>y</code> needs to be a constant defined either by presenting a number, calling <code>ModelBuilder.config(y, double)</code>, or calling <code>ModelBuilder.constant(y, double)</code> to set the numbers as hyperparameters.</p>
+
+    <table class="table" border=" 1">
+            <tr>
+                <th>Symbol</th>
+                <th>Type</th>
+                <th>Number of inputs</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>x = y</code></td>
+                <td>Operator</td>
+                <td>Assign to variable <code>x</code> the outcome of executing <code>y</code>.</td>
+            </tr>
+            <tr>
+                <td><code>x + y</code></td>
+                <td>Operator</td>
+                <td>Element-by-element addition.</td>
+            </tr>
+            <tr>
+                <td><code>x * y</code></td>
+                <td>Operator</td>
+                <td>Element-by-element multiplication.</td>
+            </tr>
+            <tr>
+                <td><code>x - y</code></td>
+                <td>Operator</td>
+                <td>Element-by-element subtraction.</td>
+            </tr>
+            <tr>
+                <td><code>x @ y</code></td>
+                <td>Operator</td>
+                <td>Matrix multiplication.</td>
+            </tr>
+            <tr>
+                <td><code>x | y</code></td>
+                <td>Operator</td>
+                <td>Row-wise concatenation of <code>x</code> and <code>y</code>.</td>
+            </tr>
+            <tr>
+                <td><code>x [y]</code></td>
+                <td>Operator</td>
+                <td>Gathers the rows of <code>x</code> with indexes <code>y</code>.</td>
+            </tr>
+            <tr>
+                <td><code>transpose(x)</code></td>
+                <td>Function</td>
+                <td>Transposes matrix <code>x</code>.</td>
+            </tr>
+            <tr>
+                <td><code>log(x)</code></td>
+                <td>Function</td>
+                <td>Apply logarithm on each tensor element.</td>
+            </tr>
+            <tr>
+                <td><code>relu(x)</code></td>
+                <td>Function</td>
+                <td>Apply relu on each tensor element.</td>
+            </tr>
+            <tr>
+                <td><code>tanh(x)</code></td>
+                <td>Function</td>
+                <td>Apply a tanh activation on each tensor element.</td>
+            </tr>
+            <tr>
+                <td><code>sigmoid(x)</code></td>
+                <td>Function</td>
+                <td>Apply a sigmoid activation on each tensor element.</td>
+            </tr>
+            <tr>
+                <td><code>dropout(x, rate)</code></td>
+                <td>Function</td>
+                <td>Apply training dropout on tensor <code>x</code> with constant dropout rate hyperparameter <code>rate</code>.</td>
+            </tr>
+            <tr>
+                <td><code>lrelu(x, slope)</code></td>
+                <td>Function</td>
+                <td>Leaky relu on tensor <code>x</code> with constant negative slope hyperparameter <code>slope</code>.</td>
+            </tr>
+            <tr>
+                <td><code>prelu(x)</code></td>
+                <td>Function</td>
+                <td>Leaky relu on tensor <code>x</code> with learnable negative slope.</td>
+            </tr>
+            <tr>
+                <td><code>softmax(x, dim)</code></td>
+                <td>Function</td>
+                <td>Apply a softmax reduction on <code>x</code>, where <code>dim</code> is either <code>dim:'row'</code> (default) or <code>dim:'col'</code>.</td>
+            </tr>
+            <tr>
+                <td><code>sum(x, dim)</code></td>
+                <td>Function</td>
+                <td>Apply a sum reduction on <code>x</code>, where <code>dim</code> is either <code>dim:'row'</code> (default) or <code>dim:'col'</code>.</td>
+            </tr>
+            <tr>
+                <td><code>sum(x, dim)</code></td>
+                <td>Function</td>
+                <td>Apply a sum reduction on <code>x</code>, where <code>dim</code> is either <code>dim:'row'</code> (default) or <code>dim:'col'</code>.</td>
+            </tr>
+            <tr>
+                <td><code>max(x, dim)</code></td>
+                <td>Function</td>
+                <td>Apply a max reduction on <code>x</code>, where <code>dim</code> is either <code>dim:'row'</code> (default) or <code>dim:'col'</code>.</td>
+            </tr>
+            <tr>
+                <td><code>min(x, dim)</code></td>
+                <td>Function</td>
+                <td>Apply a min reduction on <code>x</code>, where <code>dim</code> is either <code>dim:'row'</code> (default) or <code>dim:'col'</code>.</td>
+            </tr>
+            <tr>
+                <td><code>matrix(rows, cols)</code></td>
+                <td>Function</td>
+                <td>Generate a matrix parameter with respective hyperparameter dimensions.</td>
+            </tr>
+            <tr>
+                <td><code>matrix(rows, cols, reg)</code></td>
+                <td>Function</td>
+                <td>Generate a matrix parameter with respective hyperparameter dimensions, and L2 regularization hyperparameter <code>reg</code>.</td>
+            </tr>
+            <tr>
+                <td><code>vector(len)</code></td>
+                <td>Function</td>
+                <td>Generate a vector with size hyperparameter size <code>len</code>.</td>
+            </tr>
+            <tr>
+                <td><code>vector(len, reg)</code></td>
+                <td>Function</td>
+                <td>Generate a vector with size hyperparameter <code>len</code>, and L2 regularization hyperparameter <code>reg</code>.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p>Prefer using hyperparameters (set via <code>.config</code>) for matrix and vector creation, as these transfer their names to respective dimensions for error checking. For <code>dropout</code>, <code>matrix</code>, and <code>vector</code> you can also use the short names <code>drop</code>, <code>mat</code>, <code>vec</code>.</p>
+
 	<h3 id="fastbuilder">3.2. FastBuilder</h3>
 	<p>The <code class="language-java">FastBuilder</code> class for building GNN architectures extends the generic
 	<code class="language-java">LayerBuilder</code> with common graph neural network operations. The main difference 
@@ -379,8 +553,39 @@ ModelBuilder modelBuilder = new Neuralang()
 	if 1-2% accuracy gains are worth the loss of portability.</p>
 	
 	
-	<h3 id="neuralang">3.3. Neuralang</h3>
-	[Under construction] 
+	
+	<p>So far, we have discussed the propagation mechanisms of
+	GNNs, which consider the features of all nodes. However,
+	in a node classification setting, training data labels
+	are typically available only for certain nodes. We thus
+	need a mechanism to retrieve the predictions of the top
+	neural layer for certain nodes and pass them through a
+	softmax activation.</p>
+
+	<p>This can be achieved with normal neural model definitions
+	using the gather bracket operation after declaring a
+	variable of which nodes to retrieve:</p>
+
+	<pre><code class="language-java">.var("nodes")
+.layer("h{l} = softmax(h{l})")
+.operation("output = h{l}[nodes]")</code></pre>
+
+	<p>Recall that <code class="language-java">h{l}</code> always points to the top
+	layer when writing a new layer. This way, the built
+	model takes as inputs a set of nodes, performs the
+	forward pass of the architecture, and then selects the
+	provided nodes to use as outputs (and backpropagate
+	from). <strong>All</strong> nodes are needed for
+	training because they are made aware of each other via
+	the graph's structure. 
+	To simplify how node classification architectures are
+	defined, the above symbolic snippet is automatically
+	generated and applied by calling the
+	<code class="language-java">.classify()</code> method of the
+	<code class="language-java">FastBuilder</code> instead.
+	</p>
+
+	
 	
 	<h3 id="debugging">3.4. Debugging</h3>
 	<p>JGNN offers high-level tools for debugging
@@ -444,7 +649,70 @@ ModelBuilder modelBuilder = new Neuralang()
 at mklab.JGNN.nn.ModelBuilder.assertBackwardValidity(ModelBuilder.java:504)
 at nodeClassification.APPNP.main(APPNP.java:45)</code></pre>
 
-</section>
+	
+			<p>In addition to other operations, some methods
+			do not affect tensor or matrix values but
+			are only responsible for naming dimensions.
+			Functionally, these are decorative and aim
+			to improve debugging by throwing errors for
+			incompatible non-null names. For example,
+			adding two matrices with different dimension
+			names will result in an error. Likewise, the
+			inner dimension names during matrix
+			multiplication should agree. 
+			Arithmetic operations, <em>including</em>
+			matrix multiplication and copying,
+			automatically infer dimension names in the
+			result to ensure only compatible data types
+			are compared. Dimension names can be freely
+			changed for any Tensor <em>without</em>
+			backtracking changes (even for see-through
+			data types, such as the outcome of
+			<code class="language-java">asTransposed()</code>).
+			Matrices effectively have three
+			dimension names: for their rows, columns,
+			and inner data as long as they are treated
+			as tensors.</p>
+
+			<table class="table table-bordered">
+				<thead>
+					<tr>
+						<th>Operation</th>
+						<th>Type</th>
+						<th>Comments</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td><code class="language-java">Tensor setDimensionName(String name)</code></td>
+						<td>arithmetic</td>
+						<td>For naming tensor dimensions (of
+							the 1D space tensors lie
+							in).</td>
+					</tr>
+					<tr>
+						<td><code class="language-java">Tensor setRowName(String rowName)</code></td>
+						<td>arithmetic</td>
+						<td>For naming what kind of
+							information matrix rows hold
+							(e.g., "samples").</td>
+					</tr>
+					<tr>
+						<td><code class="language-java">Tensor setColName(String colName)</code></td>
+						<td>arithmetic</td>
+						<td>For naming what kind of
+							information matrix columns hold
+							(e.g., "features").</td>
+					</tr>
+					<tr>
+						<td><code class="language-java">Tensor setDimensionName(String rowName, String colName)</code></td>
+						<td>arithmetic</td>
+						<td>A shorthand of calling
+							<code class="language-java">setRowName(rowName).setColName(colName)</code>.
+						</td>
+					</tr>
+				</tbody>
+			</table>
 
 <p>There are two main mechanisms for identifying
 logically erroneous architectures: a) mismatched
@@ -464,10 +732,10 @@ debugging, prefer using functional expressions
 that declare hyperparameters:</p>
 
 <pre><code class="language-java">new ModelBuilder()
-.config("features", 7)
-.config("hidden", 64)
-.var("x")
-.operation("h = x@matrix(features, hidden)");</code></pre>
+	.config("features", 7)
+	.config("hidden", 64)
+	.var("x")
+	.operation("h = x@matrix(features, hidden)");</code></pre>
 
 <p>instead of the simpler:</p>
 
@@ -500,42 +768,157 @@ at mklab.JGNN.nn.NNOperation.runPrediction(NNOperation.java:170)
 	easy—the inner matrix dimensions of matrix
 	multiplication do not agree. However, we need to
 	find the error within our architecture to fix
-	it.</p>
-
-<p>To do this, continue reading and see the message
-	<code class="language-java">During the forward pass of class mklab.JGNN.nn.operations.MatMul: _tmp4 = null</code>. This tells us that the problem
+	it. To do this, the error message message states 
+	that the error occures.
+	<code>During the forward pass of class mklab.JGNN.nn.operations.MatMul: _tmp4 = null</code>. This tells us that the problem
 	occurs when trying to calculate
-	<code class="language-java">_tmp4</code>, which is currently assigned
+	<code>_tmp4</code>, which is currently assigned
 	a <code class="language-java">null</code> tensor as value. Some more
 	information is available to see what the
 	operation's inputs are like—in this case, they
 	coincide with the multiplication's inputs, but
 	this will not always be the case.
-</p>
-
-<p>The important point is to go back to the
+	The important point is to go back to the
 	execution tree and see during which exact
 	operation this variable is defined. There, we
 	will undoubtedly find that some dimension had 64
 	instead of 32 elements or conversely.</p>
 
-<h3>Monitoring Operations</h3>
-<p>In addition to all other debugging mechanisms,
-JGNN presents a way to show when forward and
-backward operations of specific code components
-are executed and with what kinds of arguments.
-This can be particularly useful when testing new
-components in real (complex) architectures.
-The practice consists of calling a
-<code class="language-java">monitor(...)</code> function within
-operations. This does not affect what
-expressions do and only enables printing
-execution tree operations on operation
-components. For example, the next snippet
-monitors the outcome of matrix multiplication:
-</p>
-<pre><code class="language-java">builder.operation("h = relu(monitor(x@matrix(features, 64)) + vector(64))")</code></pre>
+	<p>In addition to all other debugging mechanisms,
+	JGNN presents a way to show when forward and
+	backward operations of specific code components
+	are executed and with what kinds of arguments.
+	This can be particularly useful when testing new
+	components in real (complex) architectures.
+	The practice consists of calling a
+	<code class="language-java">monitor(...)</code> function within
+	operations. This does not affect what
+	expressions do and only enables printing
+	execution tree operations on operation
+	components. For example, the next snippet
+	monitors the outcome of matrix multiplication:
+	</p>
+	<pre><code class="language-java">builder.operation("h = relu(monitor(x@matrix(features, 64)) + vector(64))")</code></pre>
+		
+	</section>
 	
+	<section id="neuralang">
+	<h1>4. Neuralang</h1>
+	
+	<h5>The language</h5>
+	<p>Neuralang scripts consist of functions that declare machine learning
+	components and their interactions using a syntax inspired by the Mojo. 
+	language. Use a Rust highlighter to cover all keywords. 
+	Before explaining how to use the <code>Neuralang</code> model builder,
+	we first analyse some of the functions in the Quickstart section code 
+	to explain the lenguage's syntax. First, let us look at <code>classify</code> 
+	function that takes 
+	two inputs: <code>nodes</code> that correspond to node identifiers 
+	for classification, and a node feature matrix <code>h</code>. 
+	A softmax is returned for the features of the specified nodes. The function's 
+	signature also has several configuration values, whose defaults 
+	are indicated by a colon <code>:</code>. The same notation is used to 
+	set/overwrite configurations when calling functions, as we do for softmax 
+	to apply it row-wise. Think of configurations as keyword 
+	arguments of typical programming languages, with the difference that
+	they control hyperparameters, like dimension sizes or regularization.
+	Write exact values for configurations, as for now there no 
+	arithmetics take place for them. For example, a configuration 
+	<code>patience:2*50</code> creates an error.</p>
+		
+	<pre><code class="language-rust">fn classify(nodes, h, epochs: !3000, patience: !100, lr: !0.01) {
+	return softmax(h[nodes], dim: "row");
+}</code></pre>
+
+	<p>Exclamation marks <code>!</code> before numbers broadcast values
+	to all subsequent function calls that have configurations with the same 
+	name. The broadcasted defaults overwrite default values. Importantly, 
+	broadcasted values are also retrievable from JGNN's Neuralang model 
+	builder too; which is useful for Java integration. In this case, values
+	for the training process are obtained (see below). Configuration 
+	values have the priority:<br> 
+	1. function call arguments<br>
+	2. broacasted configurations (the last broadcasted value, including configurations set by Java)<br>
+	3. function signature defaults<br>
+	</p>
+	
+	<p>Next, let us look at the <code>gcnlayer</code> function. This accepts 
+	two parameters: an adjacency matrix <code>A</code> and input feature matrix <code>h</code>.
+	The configuration <code>hidden: 64</code> in the functions's signature 
+	specifies the deafult number of hidden units,
+	whereas <code>reg: 0.005</code> is the L2 regularization applied 
+	during machine learning. The questionmark <code>?</code> 
+	in matrix definitions lets the autosize feature of JGNN determine 
+	dimension sizes based on a test run - if possible. 
+	Finally, the function returns the activated output of a
+	GCN layer. 
+	
+	<pre><code class="language-rust">fn gcnlayer(A, h, hidden: 64, reg: 0.005) {
+	return A@h@matrix(?, hidden, reg) + vector(hidden);
+}</code></pre>
+	
+	<p>The last of the functions we tackle, the gcn function declares the popular Graph Convoluational Network (GCN) 
+	architecture and has as configuration the number of output classes. 
+	The function first applies a gcnlayer, and then applies another layer 
+	of the same type with the hidden units configuration set to the value of classes. 
+	Thus the output matches the number of classes, which is set as externally declared 
+	with the <code>extern</code> keyword; this signifies that the configuration has no default
+	and should be provided by Java's side of the implementation.</p>
+	
+	
+	
+	<h5>Java-side integration</h5>
+	
+	
+
+	<p>We now need generate a trainable model by incrementally constructing model builders.
+	These differ by which Neuralang capabilities they can parse - mainly whether they go beyond
+	support of simple expressions involving operators only. The builder chosen here supports the whole 
+	language, but in turn misses out on some Java-side methods that help fill parts of the architecture
+	with boilerplate patterns. To use the selected builder, save the first Neuralang snippet 
+	to a file and retrieve it with the 
+	expression <code class="language-java">String architecture = Paths.get("filename.nn");</code>.
+	(Use a Rust language highlighter for visual assistance when writting in Neuralang.)
+	Alternatively, avoid external files by inlining the definition within Java code through 
+	a multiline string per <code class="language-java">String architecture = """ ... """;</code>.
+	This string is parsed within a functional programming chain, where
+	each method call returns the modelBuilder instance to continue calling more methods. 
+	</p>
+	
+	
+	<p>For our model builder, we set remaining hyperparameters and overwrite the default value
+	for <code class="language-java">"hidden"</code> using the 
+	<code class="language-java">.config(String, double)</code> method. We also determine
+	which variables are constants, namely the adjacency matrix <code class="language-java">A</code> and node 
+	representation <code class="language-java">h</code>, and that node identifiers is a variable that serves 
+	as the architecture's inputs. There could be multiple inputs, so this distinction of what 
+	is a constant and what is a variable depends mostly on the which quantities change 
+	during training. In the case of node classification, both the adjacency matrix and
+	node features remain constant, as we work in one graph. Finally, the definition
+	sets an Neuralang expression as the architecture's output
+	by calling the <code class="language-java">.out(String)</code> method,
+	and applies the <code class="language-java">.autosize(Tensor...)</code> method to infer hyperparameter
+	values denoted with <code class="language-java">?</code> from an example input (for faster inference, we 
+	provide dataless list of node identifiers as input).</p>
+
+	<pre><code class="language-java">long numSamples = dataset.samples().getSlice().size();
+long numClasses = dataset.labels().getCols();
+ModelBuilder modelBuilder = new Neuralang()
+	.parse(architecture)
+	.constant("A", dataset.graph())
+	.constant("h", dataset.features())
+	.var("nodes")
+	.config("classes", numClasses)
+	.config("hidden", numClasses+2)
+	.out("ngcn(A, h, nodes)")
+	.autosize(new EmptyTensor(numSamples));</code></pre>
+		
+    </section>
+
+	
+
+</section>
+
 	<h3>3.4. Generalized message passing</h3>
 	<p>Similarly, JGNN also supports the the fully generized
 	message-passing scheme between node neighbors to support
@@ -586,15 +969,14 @@ monitors the outcome of matrix multiplication:
 		reduction, given that this has the same
 		theoretical expressive power as maximum-based
 		reduction but is easier to backpropagate
-		through. Perform this like so:</p>
+		through. Perform this like below. 
+		The sum is weighted per the values of
+		the adjacency matrix <code class="language-java">A</code>. Thus,
+		perform adjacency matrix normalization only if
+		you want such weighting to occur.</p>
 
 		<pre><code class="language-java">modelBuilder
 	.operation("received{l}=reduce(transformed_message{l}, A)")</code></pre>
-
-		<p>Note that the sum is weighted per the values of
-			the adjacency matrix <code class="language-java">A</code>. Thus,
-			perform adjacency matrix normalization only if
-			you want such weighting to occur.</p>
 
 		<p>You can finally define layers that transform node
 			representations while accounting for received
@@ -613,7 +995,7 @@ monitors the outcome of matrix multiplication:
 		<p>A common realization of message-passing GNNs is
 			via sparse-dense matrix multiplication to
 			emulate neighbor attention per
-			<code class="language-java">A.(h<sup>T</sup>h)</code>, where
+			<code>A.(h<sup>T</sup>h)</code>, where
 			<code class="language-java">A</code> is a sparse adjacency matrix,
 			<code class="language-java">.</code> is the Hadamard product
 			(element-by-element multiplication), and
@@ -708,11 +1090,11 @@ Model model = modelBuilder()
 
 
 	<section id="create-data">
-		<h1>4. Create Data</h1>
-		<p>If you have been following the tutorial, we have only used
-		automatically downloaded datasets till now. In practice, you
-		will want to use your own data. Here, we cover how to manually
-		fill in data, as well as which operations are provided to manipulate
+		<h1>5. Create Data</h1>
+		<p>JGNN provides automatically downloaded dataset classes that automatically
+		download their data and are ready to test with.
+		In practice, though, you will want to use your own data. We now cover how to 
+		manually fill in data, as well as which operations are provided to manipulate
 		those data. Read more of these operations to learn how to process neural
 		inputs, post-process learning outcomes, create custom
 		parameters, contribute to the library with more components,
@@ -722,7 +1104,7 @@ Model model = modelBuilder()
 		too deep in the first read of this guidebook.
 		</p>
 		
-		<h3 id="fill-in-data">4.1. Fill in data</h3>
+		<h3 id="fill-in-data">5.1. Fill in data</h3>
 		<p>In the simplest case, both the number of nodes or data samples, and
 		the number of feature dimensions are known beforehand. If so, create
 		dense feature matrices with the following code. This uses the 
@@ -779,7 +1161,7 @@ for(Entry&lt;Long, Long&gt; edge : edges)
 		.put(edge.getKey(), edge.getValue(), 1)
 		.put(edge.getValue(), edge.getKey(), 1);</code></pre>
 
-		<h3 id="identifiers">4.2. Identifiers</h3>
+		<h3 id="identifiers">5.2. Identifiers</h3>
 		<p>The above snippets all make use of numerical node identifiers. To
 		manage these, JGNN provides an <code class="language-java">IdConverter</code> class. 
 		You can convert hashable
@@ -812,7 +1194,7 @@ long predictedClassId = prediction.argmax();
 System.out.println(classIds.get(predictedClassId));</code></pre>
 	</section>
 	
-			<h3 id="tensor-operations">4.3. Tensor Operations</h3>
+			<h3 id="tensor-operations">5.3. Tensor Operations</h3>
 			<p>Tensor operations are performed element-by-element and
 				can be split into the following categories:</p>
 
@@ -999,8 +1381,9 @@ System.out.println(classIds.get(predictedClassId));</code></pre>
 			of elements. If there are many zero elements expected,
 			prefer using a sparse tensor.</p>
 
-			<pre><code class="language-java">Tensor denseTensor = new mklab.JGNN.tensor.DenseTensor(long size);
-Tensor sparseTensor = new mklab.JGNN.tensor.SparseTensor(long size);</code></pre>
+			<pre><code class="language-java">long size = ...;
+Tensor denseTensor = new mklab.JGNN.tensor.DenseTensor(size);
+Tensor sparseTensor = new mklab.JGNN.tensor.SparseTensor(size);</code></pre>
 
 			<p>For example, one-hot encodings for classification
 				problems can be generated with the following
@@ -1123,76 +1506,10 @@ Tensor oneHotEncoding = new mklab.JGNN.tensor.DenseTensor(numClasses).set(classI
 					</tr>
 				</tbody>
 			</table>
-
-			<h3 id="named-dimensions">4.4. Named Dimensions</h3>
-			<p>In addition to other operations, some methods
-			do not affect tensor or matrix values but
-			are only responsible for naming dimensions.
-			Functionally, these are decorative and aim
-			to improve debugging by throwing errors for
-			incompatible non-null names. For example,
-			adding two matrices with different dimension
-			names will result in an error. Likewise, the
-			inner dimension names during matrix
-			multiplication should agree. 
-			Arithmetic operations, <em>including</em>
-			matrix multiplication and copying,
-			automatically infer dimension names in the
-			result to ensure only compatible data types
-			are compared. Dimension names can be freely
-			changed for any Tensor <em>without</em>
-			backtracking changes (even for see-through
-			data types, such as the outcome of
-			<code class="language-java">asTransposed()</code>).
-			Matrices effectively have three
-			dimension names: for their rows, columns,
-			and inner data as long as they are treated
-			as tensors.</p>
-
-			<table class="table table-bordered">
-				<thead>
-					<tr>
-						<th>Operation</th>
-						<th>Type</th>
-						<th>Comments</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td><code class="language-java">Tensor setDimensionName(String name)</code></td>
-						<td>arithmetic</td>
-						<td>For naming tensor dimensions (of
-							the 1D space tensors lie
-							in).</td>
-					</tr>
-					<tr>
-						<td><code class="language-java">Tensor setRowName(String rowName)</code></td>
-						<td>arithmetic</td>
-						<td>For naming what kind of
-							information matrix rows hold
-							(e.g., "samples").</td>
-					</tr>
-					<tr>
-						<td><code class="language-java">Tensor setColName(String colName)</code></td>
-						<td>arithmetic</td>
-						<td>For naming what kind of
-							information matrix columns hold
-							(e.g., "features").</td>
-					</tr>
-					<tr>
-						<td><code class="language-java">Tensor setDimensionName(String rowName, String colName)</code></td>
-						<td>arithmetic</td>
-						<td>A shorthand of calling
-							<code class="language-java">setRowName(rowName).setColName(colName)</code>.
-						</td>
-					</tr>
-				</tbody>
-			</table>
-
-	
+			
 	
 	<section id="training">
-		<h1>5. Training</h1>
+		<h1>6. Training</h1>
 		<p>Most neural network architectures are designed with the idea
 		of learning to classify nodes or samples. However, GNNs also
 		provide the capability to classify entire graphs based on
@@ -1240,49 +1557,46 @@ ArrayList<Tensor> graphLabels = new ArrayList<Tensor>();</code></pre>
     .layer("h{l+1}=softmax(mean(h{l}, dim: 'row'))")
     .out("h{l}");</code></pre>
 
-            <section id="training-the-architecture">
-                <h3>Training the Architecture</h3>
-                <p>For the time being, training architectures like the above
-                    on prepared data requires manually calling the
-                    backpropagation for each epoch and each graph in the
-                    training batch. To do this, first retrieve the model and
-                    initialize its parameters:</p>
+			<p>For the time being, training architectures like the above
+				on prepared data requires manually calling the
+				backpropagation for each epoch and each graph in the
+				training batch. To do this, first retrieve the model and
+				initialize its parameters:</p>
 
-                <pre><code class="language-java">Model model = builder.getModel().init(new XavierNormal());</code></pre>
+			<pre><code class="language-java">Model model = builder.getModel().init(new XavierNormal());</code></pre>
 
-                <p>Next, define a loss function and set up a batch
-                    optimization strategy wrapping any base optimizer and
-                    accumulating parameter updates until
-                    <code class="language-java">BatchOptimizer.updateAll()</code> is called later
-                    on:
-                </p>
+			<p>Next, define a loss function and set up a batch
+				optimization strategy wrapping any base optimizer and
+				accumulating parameter updates until
+				<code class="language-java">BatchOptimizer.updateAll()</code> is called later
+				on:
+			</p>
 
-                <pre><code class="language-java">Loss loss = new CategoricalCrossEntropy();
+			<pre><code class="language-java">Loss loss = new CategoricalCrossEntropy();
 BatchOptimizer optimizer = new BatchOptimizer(new Adam(0.01));</code></pre>
 
-                <p>Finally, training can be conducted by iterating through
-                    epochs and training samples and appropriately calling
-                    the <code class="language-java">Model.train</code> for combinations of node
-                    features and graph adjacency matrix inputs and graph
-                    label outputs. At the end of each batch (e.g., each
-                    epoch), don't forget to call the
-                    <code class="language-java">optimizer.updateAll()</code> method to apply the
-                    accumulated gradients. This process can be realized with
-                    the following code:
-                </p>
+			<p>Finally, training can be conducted by iterating through
+				epochs and training samples and appropriately calling
+				the <code class="language-java">Model.train</code> for combinations of node
+				features and graph adjacency matrix inputs and graph
+				label outputs. At the end of each batch (e.g., each
+				epoch), don't forget to call the
+				<code class="language-java">optimizer.updateAll()</code> method to apply the
+				accumulated gradients. This process can be realized with
+				the following code:
+			</p>
 
-                <pre><code class="language-java">for(int epoch=0; epoch&lt;300; epoch++) {
-    for(int graphId=0; graphId&lt;graphLabels.size(); graphId++) {
-         Matrix adjacency = adjacencyMatrices.get(graphId);
-         Matrix features = nodeFeatures.get(graphId);
-         Tensor label = graphLabels.get(graphId);
-         model.train(loss, optimizer, 
-              Arrays.asList(features, adjacency), 
-              Arrays.asList(label));
-    }
-    optimizer.updateAll();
+			<pre><code class="language-java">for(int epoch=0; epoch&lt;300; epoch++) {
+	for(int graphId=0; graphId&lt;graphLabels.size(); graphId++) {
+		 Matrix adjacency = adjacencyMatrices.get(graphId);
+		 Matrix features = nodeFeatures.get(graphId);
+		 Tensor label = graphLabels.get(graphId);
+		 model.train(loss, optimizer, 
+			  Arrays.asList(features, adjacency), 
+			  Arrays.asList(label));
+	}
+	optimizer.updateAll();
 }</code></pre>
-            </section>
 
             <section id="sort-pooling">
                 <h3>Sort Pooling</h3>
@@ -1388,6 +1702,7 @@ ModelBuilder builder = new LayeredBuilder()
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-rust.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-xml.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
