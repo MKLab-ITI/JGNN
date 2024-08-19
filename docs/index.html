@@ -252,7 +252,8 @@ dataset.graph().setMainDiagonal(1).setToSymmetricNormalization();</code></pre>
 	notation. Symbolic expressions are part of a scripting-like language, called Neuralang,
 	that is covered in <a href="#neuralang">section 4</a>. However, for faster onboarding we stick to
 	the <code class="language-java">FastBuilder</code> class for creating models. This class's constructor
-	creates two constants <code>A</code> and <code>h0</code> from its two arguments to. Other constants
+	creates two constants <code>A</code> and <code>h0</code> from its two arguments, respectivel holding
+	the graph's adjacency matrix and node features. Other constants
 	and input variables can be set too, but more on this later. After instantiation, we use the
 	following model builder methods to constuct a model. Some of these methods parse symbolic expressions 
 	to fastly declare machine learning components.
