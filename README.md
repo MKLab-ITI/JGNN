@@ -19,6 +19,7 @@ requests for features and clarifications are welcome.
 
 ## :rocket: [Guidebook](https://mklab-iti.github.io/JGNN/)
 
+## :dart: [Javadoc](https://mklab-iti.github.io/JGNN/docs/javadoc/)
 
 ## :notebook: Citation
 

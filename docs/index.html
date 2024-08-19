@@ -196,7 +196,7 @@
 	<p>The simplest way to set up JGNN is to download it as JAR package from
 	the project's <a href="https://github.com/MKLab-ITI/JGNN/releases">releases</a> 
 	and add it in a Java project's dependencies. However, those working with Maven 
-	or Gradle can also add JGNN's latest release as a dependency from the JitPack 
+	or Gradle can also add JGNN's latest nightly release as a dependency from the JitPack 
 	repository. Follow the link below for full instructions.<br>
 	<a href="https://jitpack.io/#MKLab-ITI/JGNN"><img src="https://jitpack.io/v/MKLab-ITI/JGNN.svg" alt="download JGNN"></a>
 	</p>
@@ -213,7 +213,7 @@
 	&lt;dependency&gt;
 		&lt;groupId&gt;com.github.MKLab-ITI&lt;/groupId&gt;
 		&lt;artifactId&gt;JGNN&lt;/artifactId&gt;
-		&lt;version&gt;v1.3.20-nightly&lt;/version&gt;
+		&lt;version&gt;v1.3.24-nightly&lt;/version&gt;
 	&lt;/dependency&gt;
 &lt;/dependencies&gt;</code></pre>
 	</section>
@@ -221,8 +221,9 @@
 	<section id="quickstart">
 	<h1>2. Quickstart</h1>
 
-	<p>Here we demonstrate usage of JGNN for node classification, that is, the inductive learning
-	task of inferring node labels given a graph's structure, node features, and a few node labels.
+	<p>Here we demonstrate usage of JGNN for node classification. This is an inductive learning
+	task where node labels are predicted given a graph's structure, node features, and a few known
+	labels in the graph.
 	Classifying graphs is also supported, but it is a harder task to explain and set up. 
 	GNN architectures for the chosen node classification task are typically written 
 	as message-passing mechanisms; these diffuse node representations across edges, where
@@ -264,13 +265,13 @@ dataset.graph().setMainDiagonal(1).setToSymmetricNormalization();</code></pre>
 		<li><code>classify</code> - Adds a softmax layer tailored to classification. This also silently declares an input <code>nodes</code> that represents a list of node indices where the outputs should be computed.</li>
 		<li><code>autosize</code> - Automatically sizes matrix and vector dimensions filled by <code>?</code>. This requires some input example, and here we provide a list of node identifiers, which we also make dataless (have only the correct dimensions without allocating memory). This method also checks for integrity errors in the declared architecture, such as computational paths that do not lead to an output.</li>
 	</ul>
-	The abode methods support a method chain paradigm where the modelBuilder instance is returned by each of 
-	its methods to access the next one. Below we use this builder to implement the Graph Convolutional Network (GCN) 
+	JGNN promotes method chains, where the modelBuilder instance is returned by each of 
+	its methods to access the next one. Below we use this programming pattern to implement the Graph Convolutional Network (GCN) 
 	architecture <a href="https://arxiv.org/abs/1609.02907">[Kipf and Welling, 2017]</a>.
-	Details on the symbolic parts of definitions are presented later but, for the time being, we point to usage 
-	of the <code>matrix</code> and <code>vector</code> builtins to inline declarations of learnable parameter for
-	given dimensions and regularization. 
-	The builder stores internally a constructed model, obtained through <code>modelBuilder.getModel()</code>.
+	Details on the symbolic parts of definitions are presented later but, for the time being, we point to
+	the <code>matrix</code> and <code>vector</code> Neuralang functions. These inline declarations of learnable parameter for
+	given dimensions and regularization. The builder stores internally a constructed model, and the latter
+	can be retrieved through <code>modelBuilder.getModel()</code>.
 	</p>
 
 	<pre><code class="language-java">long numSamples = dataset.samples().getSlice().size();
@@ -294,13 +295,14 @@ ModelBuilder modelBuilder = new FastBuilder(dataset.graph(), dataset.features())
 	accept a method chain notation to set their parameters, like the number of epochs, patience 
 	for early stopping, the employed optimizer, and loss functions. An example is presented below,
 	where <code>Adam</code> optimization with learning rate <i>0.01</i> is performed, and a verbose 
-	variation of a validation loss keeps track of training progress. To run a full training process,
+	variation of a validation loss prints the progress progress. To run a full training process,
 	the defined strategy is passed to the model alongside input data, corresponding output data, as well
 	as training and validation slices.</p>
-	<p>Notice how, before training starts, a parameter initializer is also applied on the model for a cold
+	<p>Notice how, before training starts, a parameter initializer is also applied on the model for cold
 	start. Selecting an initilizer is not part of training strategies 
 	to signify its model-dependent nature; dense layers should maintain the expected 
-	input variances in the output before the first epoch. Moreover,
+	input variances in the output before the first epoch, and therefore the initializer depends
+	on the type of activation functions. Moreover,
 	the graph's adjacency matrix and node features are already declared as constants by the 
 	<code>FastBuilder</code> constructor, as node classification takes place on the same graph
 	with fully known node features. Instead, what is considered as inputs and outputs in this case
@@ -354,17 +356,50 @@ System.out.println("Acc\t "+acc/nodes.range(0.8, 1).size());</code></pre>
 
 	<section id="gnn-builders">
 	<h1>3. GNN Builders</h1>
-	<p>We already touched on the subject of GNN architecture builders when the Neuralang language
-	was first introduced in the introductory demonstration. To recap, there are different kinds of
-	builders, some of which do not implement all features of the language in favor of
-	simplifying parts of architecture definitions with hard-coded Java implementations. 
-	Here we cover the base GNNBuilder class that can only parse simple expressions, 
-	the FastBuilder class that introduces node classification boilerplate code, 
-	and the Neuralang class that parses the full language, including function definitions
-	and handling configurations through expressions.</p>
+	<p>We already touched on the subject of GNN model builders in the quickstart section,
+	where we saw one of them in action. However, there exist different kinds of
+	builders that offer kinds of convenience during model definition. 
+	All builders support method chain notation.	Currently implemented builders are:
+	<ul>
+		<li><b>GNNBuilder</b> - Parses simple Neuralang expressions. Prefer using <code>FastBuilder</code>,
+		which offers a superset of this one's functionalities.</li>
+		<li><b>FastBuilder</b> - Extends the <code>GNNBuilder</code> class with methods that inject 
+		boilerplate code often used in node classification. Use this builder of your want to keep track 
+		of the whole model definition in one place within Java code.</li>
+		<li><b>Neuralang</b> - Extends the <code>GNNBuilder</code> class so that it can parse all aspects 
+		of the Neuralang language, especially the expressions responsible for handling configuration.
+		Use this builder to maintain model definitions in one place (e.g., packed in one String
+		variable, or in one read file) to avoid weaving symbolic expressions in Java code.</li>
+	</ul>
 	
 	<h3 id="modelbuilder">3.1. ModelBuilder</h3>
-	[Under construction]
+	<p>This is the base model builder class that is extended by others. We describe it separately 
+	because it offers a wide breadth of functionalities that other builders inherit. Before looking
+	at how to use it, we need to tackle the concept of models. These are effectively collections
+	of <code>NNOperation</code> instances, each of which is an operation with specified inputs and outputs. 
+	Models can be manually written using Java code only. As an example, a simple model computing the expression 
+	<code class="language-rust">y=log(2*x+1)</code> is implemented below. This is still readable for simple
+	expressions, but very cumbersome to handle once actual architectures are created - hence the need for 
+	model builders. This guidebook does not go into details for the available types of <code>NNOperation</code>,
+	as they are rarely used directly in practice. To read on them, please visit JGNN's Javadoc.
+	</p>
+	
+	<pre><code class="language-java">Variable x = new Variable();
+Constant c1 = new Constant(Tensor.fromDouble(1)); // holds the constant "1"
+Constant c2 = new Constant(Tensor.fromDouble(2)); // holds the constant "2"
+NNOperation mult = new Multiply()
+	.addInput(x)
+	.addInput(c2);
+NNOperation add = new Add()
+	.addInput(mult)
+	.addInput(c1);
+NNOperation y = new Log()
+	.addInput(add);
+Model model = new Model()
+	.addInput(x)
+	.addOutput(y);
+	</code></pre>
+	
 	
 	
 	
