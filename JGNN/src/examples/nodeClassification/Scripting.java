@@ -14,6 +14,7 @@ import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.empy.EmptyTensor;
 import mklab.JGNN.nn.initializers.XavierNormal;
 import mklab.JGNN.nn.loss.CategoricalCrossEntropy;
+import mklab.JGNN.nn.loss.report.VerboseLoss;
 import mklab.JGNN.nn.optimizers.Adam;
 
 /**
@@ -31,18 +32,12 @@ public class Scripting {
 				return softmax(h[nodes], dim: "row");
 			}
 			fn gcnlayer(A, h, hidden: 16, reg: 0.005) {
-				h = A@h@matrix(?, hidden, reg) + vector(hidden);
-				return h;
+				return A@h@matrix(?, hidden, reg) + vector(hidden);
 			}
 			fn gcn(A, h, classes: extern) {
 				h = gcnlayer(A, h);
 				h = dropout(relu(h), 0.5);
-				h = gcnlayer(A, h, hidden: classes);
-				return h;
-			}
-			fn ngcn(A, h, nodes) {
-				h = classify(nodes, gcn(A,h));
-				return h;
+				return gcnlayer(A, h, hidden: classes);
 			}
 		""";
 		
@@ -55,14 +50,14 @@ public class Scripting {
 				.var("nodes")
 				.config("classes", numClasses)
 				.config("hidden", numClasses+2)
-				.out("ngcn(A,h, nodes)")
+				.out("classify(nodes, gcn(A,h))")
 				.autosize(new EmptyTensor(numSamples));
+		System.out.println("Preferred learning rate: "+modelBuilder.getConfig("lr"));
 		
 		ModelTraining trainer = new ModelTraining()
 				.configFrom(modelBuilder)
-				.setVerbose(true)
 				.setLoss(new CategoricalCrossEntropy())
-				.setValidationLoss(new CategoricalCrossEntropy());
+				.setValidationLoss(new VerboseLoss(new CategoricalCrossEntropy()));
 		
 		long tic = System.currentTimeMillis();
 		Slice nodes = dataset.samples().getSlice().shuffle(100);

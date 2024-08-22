@@ -3,11 +3,17 @@ package mklab.JGNN.adhoc.parsers;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import mklab.JGNN.adhoc.ModelBuilder;
 import mklab.JGNN.core.Tensor;
 
+/**
+ * Extends the base {@link ModelBuilder} with the full capabilities of the Neuralang 
+ * scripting language.
+ * 
+ * @author Emmanouil Krasanakis
+ * @see #parse(String)
+ * @see #parse(Path)
+ */
 public class Neuralang extends ModelBuilder {
 	public Neuralang() {
 	}
@@ -15,6 +21,15 @@ public class Neuralang extends ModelBuilder {
 		super.config(name, value);
 		return this;
 	}
+	/**
+	 * Parses a Neuralang source code file.
+	 * Reads a file like <code>Paths.get("models.nn")</code> 
+	 * from disk with {@link Files#readAllLines(Path)}, and parses
+	 * the loaded String.
+	 * @param path The source code file.
+	 * @return The Neuralang builder's instance.
+	 * @see #parse(String)
+	 */
 	public Neuralang parse(Path path) {
 		try {
 			parse(String.join("\n", Files.readAllLines(path)));
@@ -24,6 +39,12 @@ public class Neuralang extends ModelBuilder {
 		return this;
 	}
 	
+	/**
+	 * Parses Neuralang source code by handling function declarations in addition to
+	 * other expressions.
+	 * @param text The source code to parse.
+	 * @return The Neuralang builder's instance.
+	 */
 	public Neuralang parse(String text) {
 		int depth = 0;
 		String progress = "";

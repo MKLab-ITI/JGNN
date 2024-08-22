@@ -42,6 +42,8 @@ public class Quickstart {
 			.classify()
 			.autosize(new EmptyTensor(numSamples));
 		
+		System.out.println(modelBuilder.getConfig("lr"));
+		
 		ModelTraining trainer = new ModelTraining()
 				.setOptimizer(new Adam(0.01))
 				.setEpochs(3000)

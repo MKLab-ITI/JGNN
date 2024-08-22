@@ -94,6 +94,13 @@ public class ModelBuilder {
 	public Model getModel() {
 		return model;
 	}
+	
+	/**
+	 * Serializes the model builder instance into a Path, such as
+	 * <code>Paths.get("example.jgnn")</code>.
+	 * @param path A serialized path.
+	 * @return This builder's instance.
+	 */
 	public ModelBuilder save(Path path) {
 		try(BufferedWriter writer = Files.newBufferedWriter(path)){
 			writer.write(this.getClass().getCanonicalName()+"\n");
@@ -140,6 +147,13 @@ public class ModelBuilder {
 		return this;
 	}
 	
+	/**
+	 * Loads a ModelBuilder instance from the provided path, such as <code>Paths.get("example.jgnn")</code>. 
+	 * The instance may have been serialized with any class that extends the model builder.
+	 * 
+	 * @param path The provided path.
+	 * @return The loaded ModelBuilder instance.
+	 */
 	public static ModelBuilder load(Path path) {
 		ModelBuilder builder;
 		try(BufferedReader reader = Files.newBufferedReader(path)){
@@ -350,14 +364,16 @@ public class ModelBuilder {
 	/**
 	 * Declares a configuration hyperparameter, which can be used to declare
 	 * matrix and vector parameters during {@link #operation(String)} expressions.
-	 * For in-expression use of hyperparameters, delcare them with {@link #constant(String, double)}.
+	 * For in-expression use of hyperparameters, declare them with {@link #constant(String, double)}.
+	 * In Neuralang terms, this is implements the broadcasting operation.
 	 * @param name The name of the configuration hyperparameter.
 	 * @param value The value to be assigned to the hyperparameter.
-	 * 	Typically, provide a long number.
+	 *  This may also be a long number.
 	 * @return The builder's instance.
 	 * @see #operation(String)
 	 * @see #param(String, Tensor)
 	 * @see #param(String, double, Tensor)
+	 * @see #config(String, String)
 	 */
 	public ModelBuilder config(String name, double value) {
 		if(name.equals("?"))
@@ -366,19 +382,41 @@ public class ModelBuilder {
 		return this;
 	}
 	
-
+	/**
+	 * Applies {@link #config(String, double)} where the set value
+	 * is obtained from another configuration hyperaparameter.
+	 * @param name The name of the configuration hyperparameter to set.
+	 * @param value The name of the configuration hyperparameter whose value should be copied.
+	 * @return The builder's instance.
+	 * @see #config(String, double)
+	 */
 	public ModelBuilder config(String name, String value) {
-		Double val = configurations.get(value);
+		return config(name, getConfig(value));
+	}
+
+	/**
+	 * Retrieves a configuration hyperparameter's value.
+	 * @param name  The configuration's name.
+	 * @return The retrieved value;
+	 * @throws RuntimeException If a no configuration with the given name was found.
+	 * @see #getConfigOrDefault(String, double)
+	 */
+	public double getConfig(String name) {
+		Double val = configurations.get(name);
 		if(val==null)
-			throw new RuntimeException("No configuration "+value+" found");
+			throw new RuntimeException("No configuration "+name+" found");
 		this.configurations.put(name, val);
-		return this;
+		return val;
 	}
 	
-	public int getConfigOrDefault(String name, int defaultValue) {
-		return (int)(double)configurations.getOrDefault(name, (double) defaultValue);
-	}
-	
+	/**
+	 * Retrieves a configuration hyperparameter's value. If no such configuration
+	 * exists, a default value is returned instead.
+	 * @param name The configuration's name.
+	 * @param defaultValue The default to be retrieved if no such configuration was found.
+	 * @return The retrieved value;
+	 * @see #getConfig(String)
+	 */
 	public double getConfigOrDefault(String name, double defaultValue) {
 		return configurations.getOrDefault(name, defaultValue);
 	}

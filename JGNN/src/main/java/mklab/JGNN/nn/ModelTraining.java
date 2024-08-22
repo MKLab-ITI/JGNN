@@ -224,9 +224,9 @@ public class ModelTraining {
 	}
 	public ModelTraining configFrom(ModelBuilder modelBuilder) {
 		setOptimizer(new Adam(modelBuilder.getConfigOrDefault("lr", 0.01)));
-		setEpochs(modelBuilder.getConfigOrDefault("epochs", epochs));
-		numBatches = modelBuilder.getConfigOrDefault("batches", numBatches);
-		setPatience(modelBuilder.getConfigOrDefault("patience", patience));
+		setEpochs((int)modelBuilder.getConfigOrDefault("epochs", epochs));
+		numBatches = (int)modelBuilder.getConfigOrDefault("batches", numBatches);
+		setPatience((int)modelBuilder.getConfigOrDefault("patience", patience));
 		return this;
 	}
 }
