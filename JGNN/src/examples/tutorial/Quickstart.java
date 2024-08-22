@@ -1,8 +1,5 @@
 package tutorial;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
 import mklab.JGNN.adhoc.Dataset;
 import mklab.JGNN.adhoc.ModelBuilder;
 import mklab.JGNN.adhoc.datasets.Cora;
@@ -41,8 +38,6 @@ public class Quickstart {
 			.layer("h{l+1}=gcnlayer(A, h{l})")
 			.classify()
 			.autosize(new EmptyTensor(numSamples));
-		
-		System.out.println(modelBuilder.getConfig("lr"));
 		
 		ModelTraining trainer = new ModelTraining()
 				.setOptimizer(new Adam(0.01))

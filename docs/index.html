@@ -866,12 +866,12 @@ ModelBuilder builder = new LayeredBuilder()
 	<h3 id="neuralang">3.3. Neuralang</h3>
 		
 	<p>Neuralang scripts consist of functions that declare machine learning
-	components and their interactions using a syntax inspired by the 
+	components. These call each other and adopt a syntax inspired by the 
 	<a href="https://www.modular.com/mojo" target="_blank">Mojo</a> 
 	language. Use a Rust highlighter to cover all keywords, though. 
 	Before explaining how to use the <code class="language-java">Neuralang</code> model builder,
-	To get a sense of the language's syntax, we present and analyse code that leads to a full 
-	architecture definition. First, look at the <code>classify</code> 
+	we present and analyse code that supports a fully functional architecture.
+	First, look at the <code>classify</code> 
 	function, which for completeness is presented below.
 	This takes two tensor inputs: <code>nodes</code> that correspond to identifiers 
 	insicating which nodes should be classified (the output has a number of rows equal to the 
@@ -906,7 +906,8 @@ ModelBuilder builder = new LayeredBuilder()
 	3. Function signature defaults.<br>
 	</p>
 
-	<p>Next, let us look at the <code>gcnlayer</code> function. This accepts 
+	<p>Next, let us look at some functions creating the main body of an architecture.
+	First, <code>gcnlayer</code> accepts 
 	two parameters: an adjacency matrix <code>A</code> and input feature matrix <code>h</code>.
 	The configuration <code>hidden: 64</code> in the functions's signature 
 	specifies the deafult number of hidden units,
@@ -935,7 +936,7 @@ fn gcn(A, h, classes: extern) {
 
 
 	<p>We now move to parsing our declarations with the <code class="language-java">Neuralang</code>
-	model builder and using them to create an architecture. To this end, save your Neuralang code
+	model builder and using them to create an architecture. To this end, save your code
 	to a file and get is as a path <code class="language-java">Path architecture = Paths.get("filename.nn");</code>,
 	or avoid external files by inlining the definition within Java code through 
 	a multiline String per <code class="language-java">String architecture = """ ... """;</code>.
@@ -944,15 +945,15 @@ fn gcn(A, h, classes: extern) {
 	</p>
 
 
-	<p>For our model builder, we set remaining hyperparameters and overwrite the default value
-	for <code class="language-java">"hidden"</code> using the 
-	<code class="language-java">.config(String, double)</code> method. Now that 
-	we know about broadcasts, this is the method that implements them. We also determine
-	which variables are constants, namely the adjacency matrix <code>A</code> and node 
+	<p>For the model builder, the following snippet sets remaining hyperparameters 
+	and overwrites the default value
+	for <code class="language-java">"hidden"</code>. It also specifies
+	that certain variables are constants, namely the adjacency matrix <code>A</code> and node 
 	representation <code>h</code>, as well as that node identifiers is a variable that serves 
-	as the architecture's inputs. There could be multiple inputs, so this distinction of what 
+	as the architecture's inpu. There could be multiple inputs, so this distinction of what 
 	is a constant and what is a variable depends mostly on which quantities change 
-	during training. In the case of node classification, both the adjacency matrix and
+	during training and is managed by onlt the Java-side of the code. 
+	In the case of node classification, both the adjacency matrix and
 	node features remain constant, as we work in one graph. Finally, the definition
 	sets an Neuralang expression as the architecture's output
 	by calling the <code class="language-java">.out(String)</code> method,

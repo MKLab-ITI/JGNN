@@ -44,7 +44,7 @@ public class Learning {
 				.config("regularize", 1.E-5)
 				.var("x")
 				.operation("h = relu(x@matrix(features, 16, regularize)+vector(16))")
-				.operation("yhat = softmax(h@matrix(16, classes)+vector(classes), row)")
+				.operation("yhat = softmax(h@matrix(16, classes)+vector(classes), dim: 'row')")
 				.out("yhat")
 				.assertBackwardValidity();
 		

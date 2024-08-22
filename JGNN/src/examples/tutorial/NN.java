@@ -36,7 +36,7 @@ public class NN {
 				.layer("h{l+1} = relu(h{l}@matrix(features, hidden)+vector(hidden))")
 				.layerRepeat("h{l+1} = relu(h{l}@matrix(hidden, hidden)+vector(hidden))", 2)
 				.concat(2)
-				.layer("yhat = softmax(h{l}@matrix(2hidden, classes)+vector(classes), row)")
+				.layer("yhat = softmax(h{l}@matrix(2hidden, classes)+vector(classes), dim: 'row')")
 				.out("yhat");
 		
 		Slice sampleIds = dataset.samples().getSlice().shuffle(100);
