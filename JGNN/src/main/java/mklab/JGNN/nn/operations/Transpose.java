@@ -14,12 +14,13 @@ import mklab.JGNN.core.Tensor;
 public class Transpose extends NNOperation {
 	@Override
 	protected Tensor forward(List<Tensor> inputs) {
-		if(inputs.size()!=1)
+		if (inputs.size() != 1)
 			throw new IllegalArgumentException();
-		return ((Matrix)inputs.get(0)).asTransposed();
+		return ((Matrix) inputs.get(0)).asTransposed();
 	}
+
 	@Override
 	protected Tensor partial(int inputId, List<Tensor> inputs, Tensor output, Tensor error) {
-		return ((Matrix)error).asTransposed();
+		return ((Matrix) error).asTransposed();
 	}
 }

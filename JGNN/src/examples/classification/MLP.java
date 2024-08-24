@@ -2,10 +2,10 @@ package classification;
 
 import mklab.JGNN.adhoc.Dataset;
 import mklab.JGNN.adhoc.ModelBuilder;
+import mklab.JGNN.adhoc.ModelTraining;
 import mklab.JGNN.adhoc.datasets.Citeseer;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.nn.Model;
-import mklab.JGNN.nn.ModelTraining;
 import mklab.JGNN.core.Slice;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.nn.initializers.XavierNormal;

@@ -15,6 +15,7 @@ public class Identity extends NNOperation {
 	protected Tensor forward(List<Tensor> inputs) {
 		return inputs.get(0);
 	}
+
 	@Override
 	protected Tensor partial(int inputId, List<Tensor> inputs, Tensor output, Tensor error) {
 		return error;

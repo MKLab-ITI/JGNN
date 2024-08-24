@@ -8,9 +8,9 @@ import mklab.JGNN.core.util.Range;
 
 /**
  * Accesses a row of a {@link Matrix} as if it were a dense {@link Tensor}.
- * Prefer using {@link mklab.JGNN.core.Matrix#accessRow(long)}, which wraps usage
- * of this class. Instances of this class share elements with the matrix which
- * they access and do <i>not</i> allocate new memory.
+ * Prefer using {@link mklab.JGNN.core.Matrix#accessRow(long)}, which wraps
+ * usage of this class. Instances of this class share elements with the matrix
+ * which they access and do <i>not</i> allocate new memory.
  * 
  * @author Emmanouil Krasanakis
  * @see AccessCol
@@ -19,26 +19,28 @@ public class AccessRow extends Tensor {
 	private Matrix matrix;
 	private long row;
 	private long estimateNonZeroes;
+
 	/**
 	 * Instantiates a see-through access of a matrix row.
+	 * 
 	 * @param matrix The base matrix.
-	 * @param row Which row to access.
+	 * @param row    Which row to access.
 	 */
 	public AccessRow(Matrix matrix, long row) {
 		super(matrix.getCols());
 		this.matrix = matrix;
 		this.row = row;
 		this.setDimensionName(matrix.getRowName());
-		this.estimateNonZeroes = matrix.estimateNumNonZeroElements()/matrix.getRows();
-		if(row<0 || row>=matrix.getRows())
-			throw new IllegalArgumentException("Row "+row+" does not exist in "+matrix.describe());
+		this.estimateNonZeroes = matrix.estimateNumNonZeroElements() / matrix.getRows();
+		if (row < 0 || row >= matrix.getRows())
+			throw new IllegalArgumentException("Row " + row + " does not exist in " + matrix.describe());
 	}
-	
+
 	@Override
 	public long estimateNumNonZeroElements() {
 		return estimateNonZeroes;
 	}
-	
+
 	@Override
 	protected void allocate(long size) {
 	}

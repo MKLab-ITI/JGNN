@@ -1,6 +1,7 @@
 mklab.JGNN.adhoc
 mklab.JGNN.adhoc.datasets
 mklab.JGNN.adhoc.parsers
+mklab.JGNN.adhoc.train
 mklab.JGNN.core
 mklab.JGNN.core.distribution
 mklab.JGNN.core.empy

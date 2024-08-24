@@ -2,11 +2,12 @@ package nodeClassification;
 
 import mklab.JGNN.adhoc.Dataset;
 import mklab.JGNN.adhoc.ModelBuilder;
+import mklab.JGNN.adhoc.ModelTraining;
 import mklab.JGNN.adhoc.datasets.Citeseer;
 import mklab.JGNN.adhoc.parsers.FastBuilder;
+import mklab.JGNN.adhoc.train.NodeClassification;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.nn.Model;
-import mklab.JGNN.nn.ModelTraining;
 import mklab.JGNN.core.Slice;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.nn.initializers.XavierNormal;
@@ -34,7 +35,7 @@ public class GAT {
 				.classify()
 				.assertBackwardValidity();
 		
-		ModelTraining trainer = new ModelTraining()
+		ModelTraining trainer = new NodeClassification()
 				.setOptimizer(new Adam(0.01))
 				.setEpochs(300)
 				.setPatience(100)
@@ -48,7 +49,9 @@ public class GAT {
 				.init(new XavierNormal())
 				.train(trainer,
 						Tensor.fromRange(nodes.size()).asColumn(), 
-						dataset.labels(), nodes.range(0, 0.6), nodes.range(0.6, 0.8));
+						dataset.labels(), 
+						nodes.range(0, 0.6), 
+						nodes.range(0.6, 0.8));
 		
 		System.out.println("Training time "+(System.currentTimeMillis()-tic)/1000.);
 		Matrix output = model.predict(Tensor.fromRange(0, nodes.size()).asColumn()).get(0).cast(Matrix.class);

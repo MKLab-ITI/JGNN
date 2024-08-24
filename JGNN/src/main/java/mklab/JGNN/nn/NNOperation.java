@@ -387,12 +387,11 @@ public abstract class NNOperation {
 			}
 			if (data() != data)
 				throw new RuntimeException("Thread data object should not change within the same thread");
-			/*if (constantCache != null) {
-				data.lastOutput = constantCache;
-				if (debugging)
-					System.out.println("\tUsing cached value for " + describe());
-			} else*/
-				data.lastOutput = forward(lastInputs);
+			/*
+			 * if (constantCache != null) { data.lastOutput = constantCache; if (debugging)
+			 * System.out.println("\tUsing cached value for " + describe()); } else
+			 */
+			data.lastOutput = forward(lastInputs);
 			data.tapeError = null;
 			data.countTapeSources = 0;
 			if (isConstant() && isCachable())

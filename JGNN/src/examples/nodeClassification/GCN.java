@@ -5,11 +5,11 @@ import java.nio.file.Paths;
 
 import mklab.JGNN.adhoc.Dataset;
 import mklab.JGNN.adhoc.ModelBuilder;
+import mklab.JGNN.adhoc.ModelTraining;
 import mklab.JGNN.adhoc.datasets.Cora;
 import mklab.JGNN.adhoc.parsers.FastBuilder;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.nn.Model;
-import mklab.JGNN.nn.ModelTraining;
 import mklab.JGNN.core.Slice;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.empy.EmptyTensor;

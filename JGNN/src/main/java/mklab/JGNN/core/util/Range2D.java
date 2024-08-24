@@ -1,6 +1,5 @@
 package mklab.JGNN.core.util;
 
-import java.util.AbstractMap;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Map.Entry;
