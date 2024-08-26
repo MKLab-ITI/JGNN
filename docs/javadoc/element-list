@@ -1,10 +1,14 @@
+unnamed package
+classification
+graphClassification
+mklab.JGNN
 mklab.JGNN.adhoc
 mklab.JGNN.adhoc.datasets
 mklab.JGNN.adhoc.parsers
 mklab.JGNN.adhoc.train
 mklab.JGNN.core
 mklab.JGNN.core.distribution
-mklab.JGNN.core.empy
+mklab.JGNN.core.empty
 mklab.JGNN.core.matrix
 mklab.JGNN.core.tensor
 mklab.JGNN.core.util
@@ -17,3 +21,6 @@ mklab.JGNN.nn.loss.report
 mklab.JGNN.nn.operations
 mklab.JGNN.nn.optimizers
 mklab.JGNN.nn.pooling
+nodeClassification
+primitives
+tutorial

@@ -13,7 +13,7 @@ import mklab.JGNN.core.Matrix;
 import mklab.JGNN.nn.Model;
 import mklab.JGNN.core.Slice;
 import mklab.JGNN.core.Tensor;
-import mklab.JGNN.core.empy.EmptyTensor;
+import mklab.JGNN.core.empty.EmptyTensor;
 import mklab.JGNN.nn.initializers.XavierNormal;
 import mklab.JGNN.nn.loss.Accuracy;
 import mklab.JGNN.nn.loss.CategoricalCrossEntropy;

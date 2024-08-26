@@ -8,4 +8,4 @@
  * 
  * @author Emmanouil Krasanakis
  */
-package mklab.JGNN.core.empy;
+package mklab.JGNN.core.empty;

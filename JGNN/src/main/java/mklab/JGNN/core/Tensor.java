@@ -113,8 +113,8 @@ public abstract class Tensor implements Iterable<Long> {
 
 	/**
 	 * If supported by the subclassed tensor, invalidates calls to
-	 * {@link #release()} so that memory is a de-allocated only when object
-	 * references expire.
+	 * {@link #release()} so that memory is de-allocated only when object references
+	 * expire.
 	 * 
 	 * @see #release()
 	 * @deprecated This method may not be present in future versions of the library,
@@ -126,11 +126,12 @@ public abstract class Tensor implements Iterable<Long> {
 	 * Assign a value to a tensor element. All tensor operations use this function
 	 * to wrap element assignments.
 	 * 
-	 * @param pos   The position of the tensor element
-	 * @param value The value to assign
-	 * @throws RuntimeException If the value is NaN or the element position is less
-	 *                          than 0 or greater than {@link #size()}-1.
+	 * @param pos   The position of the tensor element.
+	 * @param value The value to assign.
+	 * @throws RuntimeException If the element position is less than 0 or greater
+	 *                          than {@link #size()}-1.
 	 * @return <code>this</code> Tensor instance.
+	 * @see #put(int, double)
 	 */
 	public abstract Tensor put(long pos, double value);
 
@@ -223,6 +224,9 @@ public abstract class Tensor implements Iterable<Long> {
 	/**
 	 * Creates a tensor of the same class and all elements set to zero, but size and
 	 * dimension names are obtained from a prototype tensor.
+	 * 
+	 * @param prototype The tensor whose size and dimension name is used.
+	 * @return A tensor with the same size as the prototype.
 	 */
 	public Tensor zeroCopy(Tensor prototype) {
 		return zeroCopy(prototype.size()).setDimensionName(prototype.getDimensionName());
@@ -238,7 +242,7 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @return <code>this</code> Tensor instance.
 	 */
 	public Tensor setDimensionName(Tensor other) {
-		//assertMatching(other);
+		// assertMatching(other);
 		if (other.getDimensionName() != null)
 			dimensionName = other.getDimensionName();
 		return this;

@@ -12,11 +12,12 @@ import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.util.Range;
 
 /**
- * Extends the {@link ModelTraining} class to be able to train {@link Model}
- * instances for attributed graph functions (AGFs). Training needs to account
- * for a list of graphs, corresponding graph node features, and corresponding
- * graph labels. Each label holds the one-hot encoding of each graph. Fill data
- * with the method {@link #addGraph(Matrix, Matrix, Tensor)}.
+ * Extends the {@link ModelTraining} class to be able to train
+ * {@link mklab.JGNN.nn.Model} instances for attributed graph functions (AGFs).
+ * Training needs to account for a list of graphs, corresponding graph node
+ * features, and corresponding graph labels. Each label holds the one-hot
+ * encoding of each graph. Fill data with the method
+ * {@link #addGraph(Matrix, Matrix, Tensor)}.
  * 
  * @author Emmanouil Krasanakis
  */

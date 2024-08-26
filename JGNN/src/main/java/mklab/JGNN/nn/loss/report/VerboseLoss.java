@@ -23,11 +23,11 @@ public class VerboseLoss extends Loss {
 	private int batchCount = 0;
 
 	/**
-	 * Instantiates a {@link VerboseLoss} given one or more comma-separated base losses 
-	 * to be wrapped. Use a method chain to modify when losses should be reported, and which output
-	 * stream is used.
+	 * Instantiates a {@link VerboseLoss} given one or more comma-separated base
+	 * losses to be wrapped. Use a method chain to modify when losses should be
+	 * reported, and which output stream is used.
 	 * 
-	 * @param baseLoss
+	 * @param baseLoss A list of comma-separated {@link Loss} instances.
 	 * @see #setInterval(int)
 	 * @see #setStream(PrintStream)
 	 */
@@ -58,24 +58,24 @@ public class VerboseLoss extends Loss {
 		this.out = out;
 		return this;
 	}
-	
-	
+
 	public void print() {
 		String message = "Epoch " + epoch + " ";
-		for(int i=0;i<baseLosses.length;i++) 
-			message += " " + baseLosses[i].getClass().getSimpleName() + " " + Math.round(Math.abs(values.get(i)/batchCount * 1000)) / 1000.0;
+		for (int i = 0; i < baseLosses.length; i++)
+			message += " " + baseLosses[i].getClass().getSimpleName() + " "
+					+ Math.round(Math.abs(values.get(i) / batchCount * 1000)) / 1000.0;
 		out.println(message);
 	}
-	
+
 	@Override
 	public void onEndEpoch() {
-		if (epoch == 0 || epoch % every == 0) 
+		if (epoch == 0 || epoch % every == 0)
 			print();
 		values.setToZero();
 		batchCount = 0;
 		epoch += 1;
 	}
-	
+
 	@Override
 	public void onEndTraining() {
 		epoch = 0;
@@ -83,12 +83,12 @@ public class VerboseLoss extends Loss {
 
 	@Override
 	public double evaluate(Tensor output, Tensor desired) {
-		if(values==null)
+		if (values == null)
 			values = new DenseTensor(baseLosses.length);
 		double value = baseLosses[0].evaluate(output, desired);
 		values.putAdd(0, value);
-		if (epoch == 0 || epoch % every == 0) 
-			for(int i=1;i<baseLosses.length;i++)
+		if (epoch == 0 || epoch % every == 0)
+			for (int i = 1; i < baseLosses.length; i++)
 				values.putAdd(i, baseLosses[i].evaluate(output, desired));
 		batchCount++;
 		return value;

@@ -10,13 +10,13 @@ import mklab.JGNN.core.Slice;
 import mklab.JGNN.core.matrix.WrapRows;
 
 /**
- * Extends the {@link ModelTraining} class to train {@link Model} instances from
- * feature and label matrices. This is a generic classification scheme that also
- * supports (and follows the training data flow of) traditional neural networks
- * that can produce batch predictions. If the model is a GNN, it is assumed that
- * it contains the graph adjacency matrix and the node features as constants,
- * and its input are node identifiers. This scheme is automated under
- * {@link mklab.JGNN.adhoc.parsers.FastBuilder#classify()}. In this case,
+ * Extends the {@link ModelTraining} class to train {@link mklab.JGNN.nn.Model}
+ * instances from feature and label matrices. This is a generic classification
+ * scheme that also supports (and follows the training data flow of) traditional
+ * neural networks that can produce batch predictions. If the model is a GNN, it
+ * is assumed that it contains the graph adjacency matrix and the node features
+ * as constants, and its input are node identifiers. This scheme is automated
+ * under {@link mklab.JGNN.adhoc.parsers.FastBuilder#classify()}. In this case,
  * classification features should be an identity vertical matrix of node
  * identifiers; in the simplest case a vertical matrix organization of
  * [0,1,2,3,4,...]. Labels should be a matrix with predictions for corresponding

@@ -42,8 +42,8 @@ public abstract class Loss {
 	}
 
 	/**
-	 * Called by {@link ModelTraining} instance to notify the loss that a
-	 * training loop just ended.
+	 * Called by {@link ModelTraining} instance to notify the loss that a training
+	 * loop just ended.
 	 */
 	public void onEndTraining() {
 	}

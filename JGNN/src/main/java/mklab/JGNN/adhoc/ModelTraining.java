@@ -38,6 +38,7 @@ public abstract class ModelTraining {
 
 	/**
 	 * @param verbose Whether an error message will be printed.
+	 * @return The model training instance.
 	 * @deprecated This method was available in earlier JGNN versions but will be
 	 *             gradually phased out. Instead, wrap the validation loss within
 	 *             {@link mklab.JGNN.nn.loss.report.VerboseLoss} to replicate the
@@ -54,16 +55,37 @@ public abstract class ModelTraining {
 	}
 
 	/**
-	 * Set
+	 * Sets which {@link mklab.JGNN.nn.Loss} should be applied on training batches
+	 * (the loss is averaged across batches, but is aggregated as a sum within each
+	 * batch by {@link BatchOptimizer}). Model training mainly uses the loss's
+	 * {@link mklab.JGNN.nn.Loss#derivative(Tensor, Tensor)} method, alongside
+	 * {@link mklab.JGNN.nn.Loss#onEndEpoch()} and
+	 * {@link mklab.JGNN.nn.Loss#onEndTraining()}. If no validation loss is set, in
+	 * which case the training loss is also used for validation.
 	 * 
-	 * @param loss
-	 * @return
+	 * @param loss The loss's instance.
+	 * @return The model training instance.
+	 * @see #setValidationLoss(Loss)
 	 */
 	public ModelTraining setLoss(Loss loss) {
 		this.loss = loss;
 		return this;
 	}
 
+	/**
+	 * Sets which {@link mklab.JGNN.nn.Loss} should be applied on validation data on
+	 * each epoch. The loss's {@link mklab.JGNN.nn.Loss#onEndEpoch()},
+	 * {@link mklab.JGNN.nn.Loss#onEndTraining()}, and
+	 * {@link mklab.JGNN.nn.Loss#evaluate(Tensor, Tensor)} methods are used. In the
+	 * case where validation is split into multiple instances of batch data, which
+	 * may be necessary for complex scenarios like graph classification, the loss
+	 * value is averaged across those batches. The methods mentioned above are not
+	 * used by losses employed in training.
+	 * 
+	 * @param loss The loss's instance.
+	 * @return The model training instance.
+	 * @see #setLoss(Loss)
+	 */
 	public ModelTraining setValidationLoss(Loss loss) {
 		this.validationLoss = loss;
 		return this;
@@ -73,7 +95,10 @@ public abstract class ModelTraining {
 	 * Sets an {@link Optimizer} instance to controls parameter updates during
 	 * training. If the provided optimizer is not an instance of
 	 * {@link BatchOptimizer}, it is forcefully wrapped by the latter. Training
-	 * calls the batch optimizer's update method after every batch.
+	 * calls the batch optimizer's update method after every batch. Each batch could
+	 * contain multiple instances of batch data. However, the total number of
+	 * applied gradient updates is always equal to the value set by
+	 * {@link #setNumBatches(int)}.
 	 * 
 	 * @param optimizer The desired optimizer.
 	 * @return <code>this</code> model training instance.
@@ -101,10 +126,9 @@ public abstract class ModelTraining {
 
 	/**
 	 * Sets whether the training strategy should reflect stochastic gradient descent
-	 * by randomly sampling from the training dataset to obtain data samples. If
-	 * <code>true</code>, both this feature and acceptable thread-based
-	 * paralellization is enabled. Parallelization makes use of JGNN's
-	 * {@link ThreadPool}.
+	 * by randomly sampling from the training data samples. If <code>true</code>,
+	 * both this feature and acceptable thread-based paralellization is enabled.
+	 * Parallelization uses JGNN's {@link ThreadPool}.
 	 * 
 	 * @param paralellization A boolean value indicating whether this feature is
 	 *                        enabled.
@@ -151,7 +175,8 @@ public abstract class ModelTraining {
 	 * This is a leftover method from an earlier version of JGNN's interface. For
 	 * the time being, there is no good alternative, but it will be phased out.
 	 * 
-	 * @deprecated This method's full implementation has been moved to {@link #train(Model)}
+	 * @deprecated This method's full implementation has been moved to
+	 *             {@link #train(Model)}
 	 */
 	public Model train(Model model, Matrix features, Matrix labels, Slice trainingSamples, Slice validationSamples) {
 		throw new RuntimeException(
@@ -234,7 +259,7 @@ public abstract class ModelTraining {
 				Runnable batchCode = new Runnable() {
 					@Override
 					public void run() {
-						for (BatchData batchData : getBatchData(batchId, epochId)) 
+						for (BatchData batchData : getBatchData(batchId, epochId))
 							model.train(loss, optimizer, batchData.getInputs(), batchData.getOutputs());
 						if (stochasticGradientDescent)
 							optimizer.updateAll();
@@ -271,6 +296,7 @@ public abstract class ModelTraining {
 
 			if (verbose)
 				System.out.println("Epoch " + epoch + " with loss " + totalLoss);
+			loss.onEndEpoch();
 			validLoss.onEndEpoch();
 			currentPatience -= 1;
 			if (currentPatience == 0)
@@ -278,6 +304,7 @@ public abstract class ModelTraining {
 		}
 		for (Parameter parameter : model.getParameters())
 			parameter.set(minLossParameters.get(parameter));
+		loss.onEndTraining();
 		validLoss.onEndTraining();
 		onEndTraining();
 		return model;
