@@ -4,6 +4,7 @@ import mklab.JGNN.adhoc.Dataset;
 import mklab.JGNN.adhoc.ModelBuilder;
 import mklab.JGNN.adhoc.ModelTraining;
 import mklab.JGNN.adhoc.datasets.Citeseer;
+import mklab.JGNN.adhoc.train.SampleClassification;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.nn.Model;
 import mklab.JGNN.nn.loss.Accuracy;
@@ -44,7 +45,7 @@ public class LogisticRegression {
 		
 		
 		long tic = System.currentTimeMillis();
-		Model model = new ModelTraining()
+		Model model = new SampleClassification()
 				.setOptimizer(new GradientDescent(0.01))
 				.setEpochs(600)
 				.setNumBatches(10)

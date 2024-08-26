@@ -105,7 +105,7 @@ public class VectorizedMatrix extends Matrix {
 
 	@Override
 	public Matrix matmul(Matrix with, boolean transposeThis, boolean transposeWith) {
-		if (with instanceof SparseMatrix)
+		if (!(with instanceof DenseMatrix) && !(with instanceof VectorizedMatrix))
 			return super.matmul(with, transposeThis, transposeWith);
 
 		// Determine the dimensions based on whether we transpose or not

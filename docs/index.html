@@ -298,7 +298,7 @@ ModelBuilder modelBuilder = new FastBuilder(dataset.graph(), dataset.features())
 	.config("hidden", 64)
 	.function("gcnlayer", "(A,h){Adrop = dropout(A, 0.5); return Adrop@(h@matrix(?, hidden, reg))+vector(?);}")
 	.layer("h{l+1}=relu(gcnlayer(A, h{l}))")
-	.config("hidden", "classes")  // reassigns the output gcnlayer's "hidden" to be the number of "classes"
+	.config("hidden", "classes")  // reassigns the output gcnlayer's "hidden" to be equal to the number of "classes"
 	.layer("h{l+1}=gcnlayer(A, h{l})")
 	.classify()
 	.autosize(new EmptyTensor(numSamples));</code></pre>
@@ -307,49 +307,57 @@ ModelBuilder modelBuilder = new FastBuilder(dataset.graph(), dataset.features())
 	<p>Training epochs for the created model can be implemented
 	manually, by passing inputs, obtaining outputs, computing losses, and triggering backpropagation
 	on an optimizer. As these steps may be complicated, JGNN automates common 
-	training patterns with a <code>ModelTraining</code> class. Instances of this class
-	accept a method chain notation to set their parameters, like the number of epochs, patience 
-	for early stopping, the employed optimizer, and loss functions. An example is presented below,
-	where <code>Adam</code> optimization with learning rate <i>0.01</i> is performed, and a verbose 
-	variation of a validation loss prints the progress. To run a full training process,
-	pass the defined strategy to a model alongside input data, corresponding output data, as well
-	as training and validation slices.</p>
-	<p>In the example, a parameter initializer is applied on the model before training is conducted.
-	This is a cold start scenario, as opposed to a warm start that continues training already
-	trained parameters.
-	Selecting an initializer is not part of training strategies 
+	training patterns by extending a base <code class="language-java">ModelTraining</code> class with training strategies
+	tailored to different data formats and predictive tasks. Find these subclasses in the 
+	<a href="https://mklab-iti.github.io/JGNN/javadoc/mklab/JGNN/adhoc/train/package-summary.html" target="_blank">adhoc.train</a> 
+	Javadoc. Instances of model trainers
+	accept a method chain notation to set their parameters. Parameters usually include training and validation data
+	(these should be made first and depend on the model training class) and aspects of the training strategy like the number of epochs, patience 
+	for early stopping, the employed optimizer, and loss functions. An example is presented below.</p>
+	
+	
+	<p>Of data needed for training, the graph adjacency matrix and node features are already declared as constants by the 
+	<code class="language-java">FastBuilder</code> constructor, as node classification takes place on the same graph
+	with fully known node features. Thus, input features are a column of node identifiers, which 
+	<code>classify</code> method above uses to gather
+	the predictions on respective nodes. Architecture outputs are softmax approximation of the one-hot 
+	encodings of respective node labels. The simplest way to handle missing labels for test data without modifying
+	the example is to leave their one-hot encodings as zeroes only.
+	Additionally, this particular training strategy accepts training and validation data slices, where slices are lists 
+	of integer entries pointing to rows of inputs and outputs - find more later.</p>
+	
+	
+	<p>To finish describing the training strategy, the example selects
+	<code class="language-java">Adam</code> optimization with learning rate <i>0.01</i>, and training
+	over many epochs with early stopping. A verbose 
+	loss prints every 10 epochs the progress of cross entropy and accuracy on validation data, where the
+	first of these two is used for the early stopping criterion. 
+	To run a full training process, pass a strategy to a model. 
+	In a cold start scenario, apply a parameter initializer first before training is conducted.
+	A warm start that resumes training from some previously trained outcomes would skip this step.
+	Selecting an initializer is not part of the training strategy 
 	to signify its model-dependent nature; dense layers should maintain the expected 
 	input variances in the output before the first epoch, and therefore the initializer depends
-	on the type of activation functions. Moreover,
-	the graph's adjacency matrix and node features are already declared as constants by the 
-	<code>FastBuilder</code> constructor, as node classification takes place on the same graph
-	with fully known node features. Architecture anputs are the node identifiers, which in the 
-	<code>classify</code> method above are used to gather
-	the predictions on respective nodes, and desired outputs are the corresponding labels from
-	the dataset. Labels that are not known still need to have some value; as a convention when working
-	with your own data, leave the one-hot label encoding of test nodes as zeroes. Doing so in our
-	present example would not affect the outcome either. 
-	The last two training arguments of the <code>train</code> method
-	then accept training and validation data slices. Slices are effectively lists of integer entries 
-	pointing to rows of inputs and outputs - find more later.
+	on the type of activation functions.
 	</p>
-	<pre><code class="language-java">ModelTraining trainer = new ModelTraining()
+	<pre><code class="language-java">Slice nodes = dataset.samples().getSlice().shuffle(); // a permutation of node identifiers
+Matrix inputFeatures = Tensor.fromRange(nodes.size()).asColumn(); // each node has its identifier as an input (equivalent to: nodes.samplesAsFeatures())
+ModelTraining trainer = new SampleClassification()
+    // training data
+	.setFeatures(inputFeatures)
+	.setLabels(dataset.labels())
+	.setTrainingSamples(nodes.range(0, 0.6))
+	.setValidationSamples(nodes.range(0.6, 0.8))
+	// training strategy
 	.setOptimizer(new Adam(0.01))
 	.setEpochs(3000)
 	.setPatience(100)
 	.setLoss(new CategoricalCrossEntropy())
-	.setValidationLoss(new VerboseLoss(new Accuracy()).setInterval(10));  // print validation every 10 epochs
-	
-Slice nodes = dataset.samples().getSlice().shuffle(); // a permutation of node identifiers
-Matrix inputData = Tensor.fromRange(nodes.size()).asColumn(); // each node has its identifier as an input
+	.setValidationLoss(new VerboseLoss(new CategoricalCrossEntropy(), new Accuracy()).setInterval(10));  // print every 10 epochs
+
 Model model = modelBuilder.getModel()
-		.init(new XavierNormal())
-		.train(trainer, 
-				inputData,
-				dataset.labels(), 
-				nodes.range(0, 0.6),  // training slice
-				nodes.range(0.6, 0.8)  // validation slice
-				);</code></pre>
+	.init(new XavierNormal())
+	.train(trainer);</code></pre>
 	
 	<p>Trained models and their generating builders can be saved and loaded. The next snippet demonstrates
 	how raw predictions can be made too. During this process,
@@ -358,7 +366,7 @@ Model model = modelBuilder.getModel()
 	</p>
 
 	<pre><code class="language-java">modelBuilder.save(Paths.get("gcn_cora.jgnn")); // needs a Path as an input
-Model loadedModel = ModelBuilder.load(Paths.get("gcn_cora.jgnn")).getModel(); // loading creates an intermediate modelbuilder
+Model loadedModel = ModelBuilder.load(Paths.get("gcn_cora.jgnn")).getModel(); // loading creates a new modelbuilder from which to get the model
 
 Matrix output = loadedModel.predict(Tensor.fromRange(0, nodes.size()).asColumn()).get(0).cast(Matrix.class);
 double acc = 0;

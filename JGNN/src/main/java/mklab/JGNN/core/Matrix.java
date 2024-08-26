@@ -108,9 +108,9 @@ public abstract class Matrix extends Tensor {
 
 	public Matrix setDimensionName(Tensor other) {
 		super.setDimensionName(other);
-		if (rowName == null)
+		if (other.cast(Matrix.class).getRowName() != null)
 			rowName = other.cast(Matrix.class).getRowName();
-		if (colName == null)
+		if (other.cast(Matrix.class).getColName() != null)
 			colName = other.cast(Matrix.class).getColName();
 		return this;
 	}
@@ -487,7 +487,7 @@ public abstract class Matrix extends Tensor {
 	@Override
 	public String describe() {
 		return getClass().getSimpleName() + " (" + (rowName == null ? "" : (rowName + " ")) + rows + ","
-				+ (colName == null ? "" : (" " + colName + " ")) + cols + ")";
+				+ (colName == null ? "" : (" " + colName + " ")) + cols + ")" + " extending "+super.describe();
 	}
 
 	/**

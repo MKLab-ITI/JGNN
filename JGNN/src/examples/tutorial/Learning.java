@@ -5,6 +5,7 @@ import mklab.JGNN.adhoc.ModelBuilder;
 import mklab.JGNN.adhoc.ModelTraining;
 import mklab.JGNN.adhoc.datasets.Citeseer;
 import mklab.JGNN.adhoc.datasets.Cora;
+import mklab.JGNN.adhoc.train.SampleClassification;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.nn.Model;
 import mklab.JGNN.core.Slice;
@@ -29,7 +30,7 @@ public class Learning {
 		long numClasses = labels.getCols();
 
 		Slice sampleIds = dataset.samples().getSlice().shuffle();
-		ModelTraining trainer = new ModelTraining()
+		ModelTraining trainer = new SampleClassification()
 			.setOptimizer(new Adam(0.01))
 			.setEpochs(10)
 			.setPatience(100)

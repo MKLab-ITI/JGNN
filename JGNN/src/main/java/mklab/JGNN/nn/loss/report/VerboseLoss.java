@@ -3,6 +3,7 @@ package mklab.JGNN.nn.loss.report;
 import java.io.PrintStream;
 
 import mklab.JGNN.core.Tensor;
+import mklab.JGNN.core.tensor.DenseTensor;
 import mklab.JGNN.nn.Loss;
 
 /**
@@ -16,24 +17,22 @@ import mklab.JGNN.nn.Loss;
 public class VerboseLoss extends Loss {
 	private int epoch = 0;
 	private int every = 1;
-	private Loss baseLoss;
+	private Loss[] baseLosses;
 	private PrintStream out;
-
-	public void reset() {
-		epoch = 0;
-	}
+	private Tensor values;
+	private int batchCount = 0;
 
 	/**
-	 * Instantiates a {@link VerboseLoss} given a base loss to be wrapped. Use a
-	 * method chain to modify when losses should be reported, and which output
+	 * Instantiates a {@link VerboseLoss} given one or more comma-separated base losses 
+	 * to be wrapped. Use a method chain to modify when losses should be reported, and which output
 	 * stream is used.
 	 * 
 	 * @param baseLoss
 	 * @see #setInterval(int)
 	 * @see #setStream(PrintStream)
 	 */
-	public VerboseLoss(Loss baseLoss) {
-		this.baseLoss = baseLoss;
+	public VerboseLoss(Loss... baseLosses) {
+		this.baseLosses = baseLosses;
 		out = System.out;
 	}
 
@@ -59,20 +58,45 @@ public class VerboseLoss extends Loss {
 		this.out = out;
 		return this;
 	}
+	
+	
+	public void print() {
+		String message = "Epoch " + epoch + " ";
+		for(int i=0;i<baseLosses.length;i++) 
+			message += " " + baseLosses[i].getClass().getSimpleName() + " " + Math.round(Math.abs(values.get(i)/batchCount * 1000)) / 1000.0;
+		out.println(message);
+	}
+	
+	@Override
+	public void onEndEpoch() {
+		if (epoch == 0 || epoch % every == 0) 
+			print();
+		values.setToZero();
+		batchCount = 0;
+		epoch += 1;
+	}
+	
+	@Override
+	public void onEndTraining() {
+		epoch = 0;
+	}
 
 	@Override
 	public double evaluate(Tensor output, Tensor desired) {
-		epoch += 1;
-		double value = baseLoss.evaluate(output, desired);
-		if (epoch == 0 || epoch % every == 0)
-			out.println("Epoch " + epoch + " " + baseLoss.getClass().getSimpleName() + " "
-					+ Math.round(Math.abs(value * 1000)) / 1000.0);
+		if(values==null)
+			values = new DenseTensor(baseLosses.length);
+		double value = baseLosses[0].evaluate(output, desired);
+		values.putAdd(0, value);
+		if (epoch == 0 || epoch % every == 0) 
+			for(int i=1;i<baseLosses.length;i++)
+				values.putAdd(i, baseLosses[i].evaluate(output, desired));
+		batchCount++;
 		return value;
 	}
 
 	@Override
 	public Tensor derivative(Tensor output, Tensor desired) {
-		return baseLoss.derivative(output, desired);
+		return baseLosses[0].derivative(output, desired);
 	}
 
 }

@@ -7,12 +7,14 @@ import mklab.JGNN.adhoc.ModelBuilder;
 import mklab.JGNN.adhoc.ModelTraining;
 import mklab.JGNN.adhoc.datasets.Cora;
 import mklab.JGNN.adhoc.parsers.Neuralang;
+import mklab.JGNN.adhoc.train.SampleClassification;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.nn.Model;
 import mklab.JGNN.core.Slice;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.empy.EmptyTensor;
 import mklab.JGNN.nn.initializers.XavierNormal;
+import mklab.JGNN.nn.loss.Accuracy;
 import mklab.JGNN.nn.loss.CategoricalCrossEntropy;
 import mklab.JGNN.nn.loss.report.VerboseLoss;
 import mklab.JGNN.nn.optimizers.Adam;
@@ -54,18 +56,22 @@ public class Scripting {
 				.autosize(new EmptyTensor(numSamples));
 		System.out.println("Preferred learning rate: "+modelBuilder.getConfig("lr"));
 		
-		ModelTraining trainer = new ModelTraining()
+		Slice nodes = dataset.samples().getSlice().shuffle(100);
+		ModelTraining trainer = new SampleClassification()
+				// set data
+				.setFeatures(nodes.samplesAsFeatures())
+				.setOutputs(dataset.labels())
+				.setTrainingSamples(nodes.range(0, 0.6))
+				.setValidationSamples(nodes.range(0.6, 0.8))
+				// configure how training is conducted
 				.configFrom(modelBuilder)
 				.setLoss(new CategoricalCrossEntropy())
-				.setValidationLoss(new VerboseLoss(new CategoricalCrossEntropy()));
+				.setValidationLoss(new VerboseLoss(new CategoricalCrossEntropy(), new Accuracy()));
 		
 		long tic = System.currentTimeMillis();
-		Slice nodes = dataset.samples().getSlice().shuffle(100);
 		Model model = modelBuilder.getModel()
 				.init(new XavierNormal())
-				.train(trainer,
-						Tensor.fromRange(nodes.size()).asColumn(), 
-						dataset.labels(), nodes.range(0, 0.6), nodes.range(0.6, 0.8));
+				.train(trainer);
 		
 		System.out.println("Training time "+(System.currentTimeMillis()-tic)/1000.);
 		Matrix output = model.predict(Tensor.fromRange(0, nodes.size()).asColumn()).get(0).cast(Matrix.class);

@@ -3,18 +3,14 @@ package graphClassification;
 import java.util.Arrays;
 
 import mklab.JGNN.adhoc.ModelBuilder;
-import mklab.JGNN.adhoc.ModelTraining;
 import mklab.JGNN.adhoc.parsers.LayeredBuilder;
-import mklab.JGNN.adhoc.train.AGFTraining;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.ThreadPool;
 import mklab.JGNN.nn.Loss;
 import mklab.JGNN.nn.Model;
 import mklab.JGNN.nn.initializers.XavierNormal;
-import mklab.JGNN.nn.loss.Accuracy;
 import mklab.JGNN.nn.loss.CategoricalCrossEntropy;
-import mklab.JGNN.nn.loss.report.VerboseLoss;
 import mklab.JGNN.nn.optimizers.Adam;
 import mklab.JGNN.nn.optimizers.BatchOptimizer;
 
@@ -23,7 +19,7 @@ import mklab.JGNN.nn.optimizers.BatchOptimizer;
  * @author github.com/gavalian
  * @author Emmanouil Krasanakis
  */
-public class SortPooling {
+public class SortPoolingManual {
     
     public static void main(String[] args){
         long reduced = 5;  // input graphs need to have at least that many nodes, lower values decrease accuracy
@@ -49,30 +45,40 @@ public class SortPooling {
         TrajectoryData dtrain = new TrajectoryData(8000);
         TrajectoryData dtest = new TrajectoryData(2000);
         
-        ModelTraining trainer = new AGFTraining()
-        		.setGraphs(dtrain.graphs)
-        		.setNodeFeatures(dtrain.features)
-        		.setGraphLabels(dtrain.labels)
-        		.setValidationSplit(0.2)
-        		.setEpochs(300)
-        		.setOptimizer(new Adam(0.001))
-        		.setLoss(new CategoricalCrossEntropy())
-        		//.setNumBatches(10)
-        		//.setParallelizedStochasticGradientDescent(true)
-        		.setValidationLoss(new VerboseLoss(new CategoricalCrossEntropy(), new Accuracy()));
-        
-        Model model = builder.getModel()
-        		.init(new XavierNormal())
-        		.train(trainer);
+        Model model = builder.getModel().init(new XavierNormal());
+        BatchOptimizer optimizer = new BatchOptimizer(new Adam(0.01));
+        Loss loss = new CategoricalCrossEntropy();
+        for(int epoch=0; epoch<600; epoch++) {
+            // gradient update over all graphs
+            for(int graphId=0; graphId<dtrain.graphs.size(); graphId++) {
+            	int graphIdentifier = graphId;
+            	// each gradient calculation into a new thread pool task
+            	ThreadPool.getInstance().submit(new Runnable() {
+            		@Override
+            		public void run() {
+            	        //System.out.println(dtrain.graphs.get(graphIdentifier).sum());
+		                Matrix adjacency = dtrain.graphs.get(graphIdentifier);
+		                Matrix features= dtrain.features.get(graphIdentifier);
+		                Tensor graphLabel = dtrain.labels.get(graphIdentifier).asRow();
+		                
+		                model.train(loss, optimizer, 
+		                        Arrays.asList(features, adjacency), 
+		                        Arrays.asList(graphLabel));
+            		}
+            	});
+            	ThreadPool.getInstance().waitForConclusion();  // wait for all gradients to compute
+            }
+            optimizer.updateAll();  // apply gradients on model parameters
             
-        double acc = 0.0;
-        for(int graphId=0; graphId<dtest.graphs.size(); graphId++) {
-            Matrix adjacency = dtest.graphs.get(graphId);
-            Matrix features= dtest.features.get(graphId);
-            Tensor graphLabel = dtest.labels.get(graphId);
-            if(model.predict(Arrays.asList(features, adjacency)).get(0).argmax()==graphLabel.argmax())
-                acc += 1;
+            double acc = 0.0;
+            for(int graphId=0; graphId<dtest.graphs.size(); graphId++) {
+                Matrix adjacency = dtest.graphs.get(graphId);
+                Matrix features= dtest.features.get(graphId);
+                Tensor graphLabel = dtest.labels.get(graphId);
+                if(model.predict(Arrays.asList(features, adjacency)).get(0).argmax()==graphLabel.argmax())
+                    acc += 1;
+            }
+            System.out.println("iter = " + epoch + "  " + acc/dtest.graphs.size());
         }
-        System.out.println("Test accuracy " + acc/dtest.graphs.size());
     }
 }

@@ -6,6 +6,7 @@ import mklab.JGNN.adhoc.ModelTraining;
 import mklab.JGNN.adhoc.datasets.Cora;
 import mklab.JGNN.adhoc.parsers.FastBuilder;
 import mklab.JGNN.adhoc.parsers.Neuralang;
+import mklab.JGNN.adhoc.train.SampleClassification;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.nn.Model;
 import mklab.JGNN.core.Slice;
@@ -54,7 +55,7 @@ public class Quickstart {
 				.autosize(new EmptyTensor(numSamples));
 		System.out.println("Preferred learning rate: "+modelBuilder.getConfig("lr"));
 		
-		ModelTraining trainer = new ModelTraining()
+		ModelTraining trainer = new SampleClassification()
 				.configFrom(modelBuilder)
 				.setLoss(new CategoricalCrossEntropy())
 				.setValidationLoss(new VerboseLoss(new CategoricalCrossEntropy()));

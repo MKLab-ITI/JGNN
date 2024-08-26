@@ -1,11 +1,17 @@
 package mklab.JGNN.adhoc;
 
+import java.util.HashMap;
+import java.util.List;
+
 import mklab.JGNN.core.Matrix;
+import mklab.JGNN.core.Memory;
 import mklab.JGNN.core.Slice;
+import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.ThreadPool;
 import mklab.JGNN.nn.Loss;
 import mklab.JGNN.nn.Model;
 import mklab.JGNN.nn.Optimizer;
+import mklab.JGNN.nn.inputs.Parameter;
 import mklab.JGNN.nn.optimizers.Adam;
 import mklab.JGNN.nn.optimizers.BatchOptimizer;
 
@@ -17,7 +23,7 @@ import mklab.JGNN.nn.optimizers.BatchOptimizer;
  * 
  * @author Emmanouil Krasanakis
  */
-public class ModelTraining {
+public abstract class ModelTraining {
 	protected BatchOptimizer optimizer;
 	protected int numBatches = 1;
 	protected int epochs = 300;
@@ -142,17 +148,139 @@ public class ModelTraining {
 	}
 
 	/**
-	 * This is a leftover method from an earlier version of JGNN's interface.
+	 * This is a leftover method from an earlier version of JGNN's interface. For
+	 * the time being, there is no good alternative, but it will be phased out.
 	 * 
-	 * @deprecated This method has been moved to
-	 *             {@link mklab.JGNN.adhoc.train.NodeClassification#train(Model, Matrix, Matrix, Slice, Slice)}
+	 * @deprecated This method's full implementation has been moved to {@link #train(Model)}
 	 */
 	public Model train(Model model, Matrix features, Matrix labels, Slice trainingSamples, Slice validationSamples) {
 		throw new RuntimeException(
-				"The ModelTraining.train method has been moved to NodeClassification.train since version 1.3.28. "
-						+ "\n    For valid code, create a NodeClassification instance instead of a ModelTraining instance. "
-						+ "\n    This method may be made abstract or removed completely in future versions, and will probably be replaced"
-						+ "\n    with a uniform interface for any predictive task.");
+				"The ModelTraining.train method with more than one arguments is deprecated since version 1.3.28."
+						+ "\n    For valid code, create a NodeClassification instance instead of a ModelTraining instance, "
+						+ "\n    set its data, and call the method ModelTraining.train(Model) instead.");
+	}
+
+	/**
+	 * Performs necessary training operations at the beginning of each epoch. These
+	 * typically consist of dataset shuffling if
+	 * {@link #setParallelizedStochasticGradientDescent(boolean)} is enabled.
+	 * 
+	 * @param epoch The epoch that now starts. Takes values 0,1,2,...,epochs-1,
+	 *              though early stopping may not reach the maximum number.
+	 */
+	protected abstract void onStartEpoch(int epoch);
+
+	/**
+	 * Performs any cleanup operations at the end of the {@link #train(Model)} loop.
+	 * This method is mostly used to "unlock" data insertions to the training
+	 * process.
+	 */
+	protected void onEndTraining() {
+	}
+
+	/**
+	 * Returns a list {@link BatchData} instance to be used for a specific batch and
+	 * training epoch. This list may have only one entry if the whole batch can be
+	 * organized into one pair of model inputs-outputs (e.g., in node
+	 * classification). This method is overloaded by classes extending
+	 * {@link ModelTraining} to let them work as dataset loaders. Batch data may be
+	 * created anew each time, though they are often transparent views of parts of
+	 * training data. Batch data generation may be parallelized, depending on the
+	 * whether {@link #setParallelizedStochasticGradientDescent(boolean)} is
+	 * enabled. If some operations (e.g., data shuffling) take place at the
+	 * beginning of each epoch, they instead reside in the {@link #startEpoch()}
+	 * method.
+	 * 
+	 * @param batch The batch identifier. Takes values 0,1,2,..,numBatches-1.
+	 * @param epoch The epoch in which the batch is extracted. Takes values
+	 *              0,1,2,...,epochs-1, though early stopping may not reach the
+	 *              maximum number.
+	 * @return An list of batch data instances.
+	 */
+	protected abstract List<BatchData> getBatchData(int batch, int epoch);
+
+	/**
+	 * Returns a {@link BatchData} instance to be used for validation at a given
+	 * training epoch. This list may have only one entry if the whole batch can be
+	 * organized into one pair of model inputs-outputs (e.g., in node
+	 * classification). This method is overloaded by classes extending
+	 * {@link ModelTraining} to let them work as dataset loaders. Batch data may be
+	 * created anew each time, though they are often transparent views of parts of
+	 * training data.
+	 * 
+	 * @param epoch The epoch in which the batch is extracted. Takes values
+	 *              0,1,2,...,epochs-1, though early stopping may not reach the
+	 *              maximum number.
+	 * @return An list of batch data instances.
+	 */
+	protected abstract List<BatchData> getValidationData(int epoch);
+
+	/**
+	 * Trains the parameters of a {@link Model} based on current settings and the
+	 * data.
+	 * 
+	 * @param model The model instance to train.
+	 */
+	public Model train(Model model) {
+		double minLoss = Double.POSITIVE_INFINITY;
+		HashMap<Parameter, Tensor> minLossParameters = new HashMap<Parameter, Tensor>();
+		int currentPatience = patience;
+		Loss validLoss = validationLoss != null ? validationLoss : loss;
+		for (int epoch = 0; epoch < epochs; epoch++) {
+			onStartEpoch(epoch);
+			int epochId = epoch;
+			for (int batch = 0; batch < numBatches; batch++) {
+				int batchId = batch;
+				Runnable batchCode = new Runnable() {
+					@Override
+					public void run() {
+						for (BatchData batchData : getBatchData(batchId, epochId)) 
+							model.train(loss, optimizer, batchData.getInputs(), batchData.getOutputs());
+						if (stochasticGradientDescent)
+							optimizer.updateAll();
+					}
+				};
+				if (paralellization)
+					ThreadPool.getInstance().submit(batchCode);
+				else
+					batchCode.run();
+				// System.out.println(System.currentTimeMillis()-tic);
+			}
+			if (paralellization)
+				ThreadPool.getInstance().waitForConclusion();
+			if (!stochasticGradientDescent)
+				optimizer.updateAll();
+
+			Memory.scope().enter();
+			double totalLoss = 0;
+			List<BatchData> allValidationData = getValidationData(epoch);
+			for (BatchData validationData : allValidationData) {
+				List<Tensor> outputs = model.predict(validationData.getInputs());
+				totalLoss += validLoss.evaluate(outputs.get(0), validationData.getOutputs().get(0));
+			}
+			Memory.scope().exit();
+			if (totalLoss != 0)
+				totalLoss /= allValidationData.size();
+
+			if (totalLoss < minLoss) {
+				currentPatience = patience;
+				minLoss = totalLoss;
+				for (Parameter parameter : model.getParameters())
+					minLossParameters.put(parameter, parameter.get().copy());
+			}
+
+			if (verbose)
+				System.out.println("Epoch " + epoch + " with loss " + totalLoss);
+			validLoss.onEndEpoch();
+			currentPatience -= 1;
+			if (currentPatience == 0)
+				break;
+		}
+		for (Parameter parameter : model.getParameters())
+			parameter.set(minLossParameters.get(parameter));
+		validLoss.onEndTraining();
+		onEndTraining();
+		return model;
 	}
 
 	/**

@@ -6,12 +6,14 @@ import mklab.JGNN.adhoc.ModelBuilder;
 import mklab.JGNN.adhoc.ModelTraining;
 import mklab.JGNN.adhoc.datasets.Citeseer;
 import mklab.JGNN.adhoc.parsers.LayeredBuilder;
+import mklab.JGNN.adhoc.train.SampleClassification;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.nn.Model;
 import mklab.JGNN.core.Slice;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.nn.initializers.XavierNormal;
 import mklab.JGNN.nn.loss.BinaryCrossEntropy;
+import mklab.JGNN.nn.loss.report.VerboseLoss;
 import mklab.JGNN.nn.optimizers.Adam;
 
 /**
@@ -23,7 +25,7 @@ public class NN {
 
 	public static void main(String[] args) {
 		Dataset dataset = new Citeseer();
-		Matrix labels = dataset.labels().setDimensionName("samples", "labels");
+		Matrix labels = dataset.labels().setDimensionName("samples", "classes");
 		Matrix features = dataset.features().setDimensionName("samples", "features");
 		
 		long numFeatures = features.getCols();
@@ -31,24 +33,30 @@ public class NN {
 		ModelBuilder modelBuilder = new LayeredBuilder()
 				.config("features", numFeatures)
 				.config("classes", numClasses)
-				.config("hidden", 64)
-				.config("2hidden", 2*64)
+				.config("hidden", 16)
+				.config("2hidden", 2*16)
 				.layer("h{l+1} = relu(h{l}@matrix(features, hidden)+vector(hidden))")
 				.layerRepeat("h{l+1} = relu(h{l}@matrix(hidden, hidden)+vector(hidden))", 2)
-				.concat(2)
+				.concat(2) // TODO: this is very slow
 				.layer("yhat = softmax(h{l}@matrix(2hidden, classes)+vector(classes), dim: 'row')")
 				.out("yhat");
 		
 		Slice sampleIds = dataset.samples().getSlice().shuffle(100);
-		long tic = System.currentTimeMillis();
-		Model model = new ModelTraining()
+		ModelTraining trainer = new SampleClassification()
+				.setFeatures(features)
+				.setOutputs(labels)
+				.setTrainingSamples(sampleIds.range(0, 0.7))
+				.setValidationSamples(sampleIds.range(0.7, 0.8))
 				.setOptimizer(new Adam(0.01))
 				.setEpochs(3000)
 				.setPatience(10)
 				.setLoss(new BinaryCrossEntropy())
-				.setValidationLoss(new BinaryCrossEntropy())
-				.train(new XavierNormal().apply(modelBuilder.getModel()), 
-						features, labels, sampleIds.range(0, 0.7), sampleIds.range(0.7, 0.8));
+				.setValidationLoss(new VerboseLoss(new BinaryCrossEntropy()));
+
+		long tic = System.currentTimeMillis();
+		Model model = modelBuilder.getModel()
+				.init(new XavierNormal())
+				.train(trainer);
 		long toc = System.currentTimeMillis();
 
 		double acc = 0;

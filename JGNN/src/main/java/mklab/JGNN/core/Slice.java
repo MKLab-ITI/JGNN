@@ -18,7 +18,7 @@ public class Slice implements Iterable<Long> {
 	private List<Long> ids;
 
 	/**
-	 * Instantiates the data slice from a collection of element identifiers.
+	 * Instantiates a data slice from a collection of element identifiers.
 	 * 
 	 * @param collection An iterable of longs.
 	 */

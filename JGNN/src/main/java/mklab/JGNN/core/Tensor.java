@@ -238,8 +238,8 @@ public abstract class Tensor implements Iterable<Long> {
 	 * @return <code>this</code> Tensor instance.
 	 */
 	public Tensor setDimensionName(Tensor other) {
-		assertMatching(other);
-		if (dimensionName == null)
+		//assertMatching(other);
+		if (other.getDimensionName() != null)
 			dimensionName = other.getDimensionName();
 		return this;
 	}

@@ -105,7 +105,7 @@ public class DenseMatrix extends Matrix {
 
 	@Override
 	public Matrix matmul(Matrix with, boolean transposeThis, boolean transposeWith) {
-		if (with instanceof SparseMatrix)
+		if (!(with instanceof DenseMatrix) && !(with instanceof VectorizedMatrix))
 			return super.matmul(with, transposeThis, transposeWith);
 
 		// Determine the dimensions based on whether we transpose or not
@@ -124,8 +124,7 @@ public class DenseMatrix extends Matrix {
 
 		// Create the resulting matrix
 		DenseMatrix ret = new DenseMatrix(rowsThis, colsWith);
-		double[] with_tensor_values = (with instanceof VectorizedMatrix) ? ((VectorizedMatrix) with).tensor.values
-				: ((DenseMatrix) with).tensor.values;
+		double[] with_tensor_values = (with instanceof VectorizedMatrix) ? ((VectorizedMatrix) with).tensor.values: ((DenseMatrix) with).tensor.values;
 
 		for (int col2 = 0; col2 < colsWith; ++col2) {
 			for (int row = 0; row < rowsThis; ++row) {

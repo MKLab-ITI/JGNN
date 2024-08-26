@@ -8,6 +8,7 @@ import mklab.JGNN.adhoc.ModelBuilder;
 import mklab.JGNN.adhoc.ModelTraining;
 import mklab.JGNN.adhoc.datasets.Cora;
 import mklab.JGNN.adhoc.parsers.FastBuilder;
+import mklab.JGNN.adhoc.train.SampleClassification;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.nn.Model;
 import mklab.JGNN.core.Slice;
@@ -42,24 +43,24 @@ public class GCN {
 			.classify()
 			.autosize(new EmptyTensor(numSamples));
 		
-		ModelTraining trainer = new ModelTraining()
+		Slice nodes = dataset.samples().getSlice().shuffle(100);
+		ModelTraining trainer = new SampleClassification()
+				// set data
+				.setFeatures(nodes.samplesAsFeatures())
+				.setOutputs(dataset.labels())
+				.setTrainingSamples(nodes.range(0, 0.6))
+				.setValidationSamples(nodes.range(0.6, 0.8))
+				// configure how training is conducted
 				.setOptimizer(new Adam(0.01))
-				.setEpochs(3000)
+				.setEpochs(300)
 				.setPatience(100)
 				.setLoss(new CategoricalCrossEntropy())
-				.setValidationLoss(new VerboseLoss(new Accuracy()).setInterval(10));
+				.setValidationLoss(new VerboseLoss(new CategoricalCrossEntropy(), new Accuracy()));
 		
 		long tic = System.currentTimeMillis();
-		Slice nodes = dataset.samples().getSlice().shuffle(); // a permutation of node identifiers
-		Matrix inputData = Tensor.fromRange(nodes.size()).asColumn(); // each node has its identifier as an input
 		Model model = modelBuilder.getModel()
 				.init(new XavierNormal())
-				.train(trainer, 
-						inputData,
-						dataset.labels(), 
-						nodes.range(0, 0.6),  // train slice
-						nodes.range(0.6, 0.8)  // validation slice
-						);
+				.train(trainer);
 		
 		System.out.println("Training time "+(System.currentTimeMillis()-tic)/1000.);
 		//modelBuilder.save(Paths.get("gcn_cora.jgnn"));

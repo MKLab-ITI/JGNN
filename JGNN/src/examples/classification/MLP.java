@@ -4,6 +4,7 @@ import mklab.JGNN.adhoc.Dataset;
 import mklab.JGNN.adhoc.ModelBuilder;
 import mklab.JGNN.adhoc.ModelTraining;
 import mklab.JGNN.adhoc.datasets.Citeseer;
+import mklab.JGNN.adhoc.train.SampleClassification;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.nn.Model;
 import mklab.JGNN.core.Slice;
@@ -11,6 +12,7 @@ import mklab.JGNN.core.Tensor;
 import mklab.JGNN.nn.initializers.XavierNormal;
 import mklab.JGNN.nn.loss.Accuracy;
 import mklab.JGNN.nn.loss.BinaryCrossEntropy;
+import mklab.JGNN.nn.loss.report.VerboseLoss;
 import mklab.JGNN.nn.optimizers.Adam;
 
 /**
@@ -42,20 +44,24 @@ public class MLP {
 		
 		Slice nodeIds = dataset.samples().getSlice().shuffle(100);
 		
-		long tic = System.currentTimeMillis();
-		Model model = new ModelTraining()
+		Slice nodes = dataset.samples().getSlice().shuffle(100);
+		ModelTraining trainer = new SampleClassification()
+				.setFeatures(dataset.features())
+				.setOutputs(dataset.labels())
+				.setTrainingSamples(nodes.range(0, 0.6))
+				.setValidationSamples(nodes.range(0.6, 0.8))
 				.setOptimizer(new Adam(0.01))
 				.setEpochs(3000)
 				.setPatience(300)
 				.setNumBatches(20)
 				.setParallelizedStochasticGradientDescent(true)
 				.setLoss(new BinaryCrossEntropy())
-				.setVerbose(true)
-				.setValidationLoss(new Accuracy())
-				.train(new XavierNormal().apply(modelBuilder.getModel()), 
-						dataset.features(), 
-						dataset.labels(),
-						nodeIds.range(0, 0.7), nodeIds.range(0.7, 0.8));
+				.setValidationLoss(new VerboseLoss(new Accuracy()));
+		
+		long tic = System.currentTimeMillis();
+		Model model = modelBuilder.getModel()
+				.init(new XavierNormal())
+				.train(trainer);
 		long toc = System.currentTimeMillis();
 
 		double acc = 0;

@@ -32,4 +32,19 @@ public abstract class Loss {
 	 * @see #evaluate(Tensor, Tensor)
 	 */
 	public abstract Tensor derivative(Tensor output, Tensor desired);
+
+	/**
+	 * Called by {@link ModelTraining} instances to notify the loss that an epoch
+	 * just ended. This is called only once per epoch and is where training progress
+	 * should be reported to the user, if at all.
+	 */
+	public void onEndEpoch() {
+	}
+
+	/**
+	 * Called by {@link ModelTraining} instance to notify the loss that a
+	 * training loop just ended.
+	 */
+	public void onEndTraining() {
+	}
 }

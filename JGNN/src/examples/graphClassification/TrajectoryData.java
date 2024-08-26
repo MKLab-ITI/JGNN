@@ -73,8 +73,8 @@ public class TrajectoryData {
             this.features.add(ft);
             this.features.add(ff);
             
-            this.labels.add(new DenseTensor(2).put(0, 1.0));
-            this.labels.add(new DenseTensor(2).put(1, 1.0));
+            this.labels.add(new DenseTensor(2).put(0, 1.0).asRow());
+            this.labels.add(new DenseTensor(2).put(1, 1.0).asRow());
         }
     }
 }
