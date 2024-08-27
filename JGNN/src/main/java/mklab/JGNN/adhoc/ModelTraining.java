@@ -102,7 +102,7 @@ public abstract class ModelTraining {
 	 * 
 	 * @param optimizer The desired optimizer.
 	 * @return <code>this</code> model training instance.
-	 * @see #train(Model, Matrix, Matrix, Slice, Slice)
+	 * @see #train(Model)
 	 */
 	public ModelTraining setOptimizer(Optimizer optimizer) {
 		if (optimizer instanceof BatchOptimizer)
@@ -259,7 +259,7 @@ public abstract class ModelTraining {
 				Runnable batchCode = new Runnable() {
 					@Override
 					public void run() {
-						for (BatchData batchData : getBatchData(batchId, epochId))
+						for (BatchData batchData : getBatchData(batchId, epochId)) 
 							model.train(loss, optimizer, batchData.getInputs(), batchData.getOutputs());
 						if (stochasticGradientDescent)
 							optimizer.updateAll();
@@ -275,7 +275,8 @@ public abstract class ModelTraining {
 				ThreadPool.getInstance().waitForConclusion();
 			if (!stochasticGradientDescent)
 				optimizer.updateAll();
-
+			loss.onEndEpoch();
+			
 			Memory.scope().enter();
 			double totalLoss = 0;
 			List<BatchData> allValidationData = getValidationData(epoch);
@@ -296,7 +297,6 @@ public abstract class ModelTraining {
 
 			if (verbose)
 				System.out.println("Epoch " + epoch + " with loss " + totalLoss);
-			loss.onEndEpoch();
 			validLoss.onEndEpoch();
 			currentPatience -= 1;
 			if (currentPatience == 0)

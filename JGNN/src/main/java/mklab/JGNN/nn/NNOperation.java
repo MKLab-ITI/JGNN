@@ -42,6 +42,24 @@ public abstract class NNOperation {
 		public Tensor lastOutput;
 		public Tensor tapeError;
 		public int countTapeSources;
+		private int isLocked = -1;
+		private int threadId;
+		public int getThreadId() {
+			return threadId;
+		}
+		public synchronized void lock() {
+			if(isLocked!=-1)
+				throw new RuntimeException("Locked by thread #"+isLocked);
+			threadId = ThreadPool.getCurrentThreadId();;
+			isLocked = threadId;
+		}
+		public synchronized Tensor unlock() {
+			if(isLocked!=ThreadPool.getCurrentThreadId())
+				throw new RuntimeException("Trying to unlock a different thread");
+			Tensor ret = lastOutput;
+			isLocked = -1;
+			return ret;
+		}
 	}
 
 	private HashMap<Integer, ThreadData> data = new HashMap<Integer, ThreadData>();
@@ -51,11 +69,8 @@ public abstract class NNOperation {
 		ThreadData ret;
 		synchronized (data) {
 			ret = data.get(threadId);
-		}
-		if (ret == null) {
-			synchronized (data) {
+			if (ret == null) 
 				data.put(threadId, ret = new ThreadData());
-			}
 		}
 		return ret;
 	}
@@ -69,7 +84,7 @@ public abstract class NNOperation {
 	}
 
 	/**
-	 * Retrieves an concise description of the operation that shows metadata and
+	 * Retrieves a concise description of the operation that shows metadata and
 	 * potential data descriptions processed by the current thread.
 	 * 
 	 * @return A <code>String</code> description.
@@ -77,9 +92,10 @@ public abstract class NNOperation {
 	 * @see #view()
 	 */
 	public String describe() {
+		ThreadData data = data();
 		return this.getClass() + ": " + (description != null ? description : ("#" + this.hashCode())) + " = "
-				+ (data().lastOutput != null ? data().lastOutput.describe() : "NA")
-				+ (isConstant() ? " (constant)" : "");
+				+ (data.lastOutput != null ? data.lastOutput.describe() : "NA")
+				+ (isConstant() ? " (constant)" : "")+" in thread #"+data.getThreadId();
 	}
 
 	/**
@@ -183,9 +199,11 @@ public abstract class NNOperation {
 
 	public final void clearPrediction() {
 		ThreadData data = data();
-		if (data.lastOutput == null)
-			return;
-		data.lastOutput = null;
+		synchronized(data) {
+			if (data.lastOutput == null)
+				return;
+			data.lastOutput = null;
+		}
 		for (NNOperation input : inputs)
 			input.clearPrediction();
 	}
@@ -217,8 +235,9 @@ public abstract class NNOperation {
 	public final Tensor runPrediction() {
 		try {
 			ThreadData data = data();
+			data.lock();
 			if (data.lastOutput != null)
-				return data.lastOutput;
+				return data.unlock();
 			ArrayList<Tensor> lastInputs = new ArrayList<Tensor>(inputs.size());
 			for (NNOperation input : inputs)
 				lastInputs.add(input.runPrediction());
@@ -230,9 +249,11 @@ public abstract class NNOperation {
 			 * inputs.get(inputId).data().lastOutput = null;
 			 */
 			if (debugging) {
-				System.out.println("Predicting " + describe() + " for inputs:");
-				for (Tensor input : lastInputs)
-					System.out.println("\t" + input.describe());
+				synchronized(System.err) {
+					System.out.println("Thread "+data.getThreadId()+" Predicting " + describe() + " for inputs:");
+					for (Tensor input : lastInputs)
+						System.out.println("\t" + input.describe());
+				}
 				/*
 				 * if(data()!=data) System.out.println(data+" -> "+data());
 				 */
@@ -252,13 +273,16 @@ public abstract class NNOperation {
 				constantCache = data.lastOutput;
 			if (debugging)
 				System.out.println("\t=> " + describe());
-			return data.lastOutput;
+			return data.unlock();
 		} catch (Exception e) {
-			System.err.println(e.toString());
-			System.err.println("During the forward pass of " + describe() + " with the following inputs:");
-			for (NNOperation input : inputs)
-				System.err.println("\t" + input.describe());
-			e.printStackTrace();
+			synchronized(System.err) {
+				System.err.println(e.toString());
+				System.err.println("In thread #"+ThreadPool.getCurrentThreadId());
+				System.err.println("During the forward pass of " + describe() + " with the following inputs:");
+				for (NNOperation input : inputs)
+					System.err.println("\t" + input.describe());
+				e.printStackTrace();
+			}
 			System.exit(1);
 			return null;
 		}
@@ -298,18 +322,24 @@ public abstract class NNOperation {
 				if (!inputs.get(i).isConstant())
 					inputs.get(i).backpropagate(optimizer, partial(i, lastInputs, data.lastOutput, data.tapeError));
 			trainParameters(optimizer, data.tapeError);
-			if (debugging)
-				System.out.println(
-						"Finished backpropagation on " + describe() + " on thread " + ThreadPool.getCurrentThreadId());
+			if (debugging) {
+				synchronized(System.err) {
+					System.out.println(
+							"Finished backpropagation on " + describe() + " on thread " + ThreadPool.getCurrentThreadId());
+				}
+			}
 			data.tapeError = null;
 		} catch (Exception e) {
-			System.err.println(e.toString());
-			System.err.println("During the backward pass of " + describe() + " with derivative:");
-			System.err.println("\t " + (error == null ? "null" : error.describe()));
-			System.err.println("and the following inputs:");
-			for (NNOperation input : inputs)
-				System.err.println("\t" + input.describe());
-			e.printStackTrace();
+			synchronized(System.err) {
+				System.err.println(e.toString());
+				System.err.println("In thread #"+ThreadPool.getCurrentThreadId());
+				System.err.println("During the backward pass of " + describe() + " with derivative:");
+				System.err.println("\t " + (error == null ? "null" : error.describe()));
+				System.err.println("and the following inputs:");
+				for (NNOperation input : inputs)
+					System.err.println("\t" + input.describe());
+				e.printStackTrace();
+			}
 			System.exit(1);
 		}
 	}
@@ -368,10 +398,11 @@ public abstract class NNOperation {
 	}
 
 	public Tensor runPredictionAndAutosize() {
+		ThreadData data = data();
 		try {
-			ThreadData data = data();
+			data.lock();
 			if (data.lastOutput != null)
-				return data.lastOutput;
+				return data.unlock();
 			ArrayList<Tensor> lastInputs = new ArrayList<Tensor>(inputs.size());
 			for (NNOperation input : inputs)
 				lastInputs.add(input.runPredictionAndAutosize());
@@ -398,13 +429,17 @@ public abstract class NNOperation {
 				constantCache = data.lastOutput;
 			if (debugging)
 				System.out.println("\t=> " + describe());
-			return data.lastOutput;
+			return data.unlock();
 		} catch (Exception e) {
-			System.err.println(e.toString());
-			System.err.println("During the forward pass of " + describe() + " with the following inputs:");
-			for (NNOperation input : inputs)
-				System.err.println("\t" + input.describe());
-			e.printStackTrace();
+			data.unlock();
+			synchronized(System.err) {
+				System.err.println(e.toString());
+				System.err.println("In thread #"+ThreadPool.getCurrentThreadId());
+				System.err.println("During the forward pass of " + describe() + " with the following inputs:");
+				for (NNOperation input : inputs)
+					System.err.println("\t" + input.describe());
+				e.printStackTrace();
+			}
 			System.exit(1);
 			return null;
 		}

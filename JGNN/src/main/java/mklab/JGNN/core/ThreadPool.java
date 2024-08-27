@@ -59,6 +59,7 @@ public class ThreadPool {
 					int threadId = getUnusedId();
 					if (threadId == -1)
 						throw new RuntimeException("Tried to instantiate thread without an available id");
+					//System.out.println("Starting thread #"+threadId);
 					threadIds.put(Thread.currentThread(), threadId);
 					usedIds.add(threadId);
 				}
@@ -67,6 +68,7 @@ public class ThreadPool {
 					int threadId = getCurrentThreadId();
 					threadIds.remove(this);
 					usedIds.remove(threadId);
+					//System.out.println("Ending thread #"+threadId);
 				}
 			}
 		};

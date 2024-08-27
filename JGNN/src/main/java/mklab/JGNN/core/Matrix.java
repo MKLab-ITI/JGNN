@@ -487,7 +487,7 @@ public abstract class Matrix extends Tensor {
 	@Override
 	public String describe() {
 		return getClass().getSimpleName() + " (" + (rowName == null ? "" : (rowName + " ")) + rows + ","
-				+ (colName == null ? "" : (" " + colName + " ")) + cols + ")" + " extending "+super.describe();
+				+ (colName == null ? "" : (" " + colName + " ")) + cols + ")";// + " extending "+super.describe();
 	}
 
 	/**

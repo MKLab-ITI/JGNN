@@ -57,8 +57,8 @@ public class SortPooling {
         		.setEpochs(300)
         		.setOptimizer(new Adam(0.001))
         		.setLoss(new CategoricalCrossEntropy())
-        		//.setNumBatches(10)
-        		//.setParallelizedStochasticGradientDescent(true)
+        		.setNumBatches(10)
+        		.setParallelizedStochasticGradientDescent(true)
         		.setValidationLoss(new VerboseLoss(new CategoricalCrossEntropy(), new Accuracy()));
         
         Model model = builder.getModel()
