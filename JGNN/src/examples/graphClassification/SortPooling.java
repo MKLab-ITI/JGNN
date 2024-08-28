@@ -55,11 +55,11 @@ public class SortPooling {
         		.setGraphLabels(dtrain.labels)
         		.setValidationSplit(0.2)
         		.setEpochs(300)
-        		.setOptimizer(new Adam(0.001))
+        		.setOptimizer(new Adam(0.01))
         		.setLoss(new CategoricalCrossEntropy())
         		.setNumBatches(10)
         		.setParallelizedStochasticGradientDescent(true)
-        		.setValidationLoss(new VerboseLoss(new CategoricalCrossEntropy(), new Accuracy()));
+        		.setValidationLoss(new VerboseLoss(new CategoricalCrossEntropy(), new Accuracy()).setPrintOnImprovement(true));
         
         Model model = builder.getModel()
         		.init(new XavierNormal())

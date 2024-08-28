@@ -21,6 +21,8 @@ requests for features and clarifications are welcome.
 
 ## :dart: [Javadoc](https://mklab-iti.github.io/JGNN/javadoc/)
 
+## :computer: [Tutorials](tutorials/README.md)
+
 ## :notebook: Citation
 
 ```

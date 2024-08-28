@@ -21,6 +21,8 @@ public class VerboseLoss extends Loss {
 	private PrintStream out;
 	private Tensor values;
 	private int batchCount = 0;
+	private boolean printOnImproveOnly = false;
+	private double bestLoss = Double.POSITIVE_INFINITY;
 
 	/**
 	 * Instantiates a {@link VerboseLoss} given one or more comma-separated base
@@ -42,9 +44,26 @@ public class VerboseLoss extends Loss {
 	 * @param every The loss is reported on epochs 0, every, 2every, ... Default is
 	 *              1.
 	 * @return <code>this</code> verbose loss instance.
+	 * @see #setPrintOnImprovement(boolean)
 	 */
 	public VerboseLoss setInterval(int every) {
 		this.every = every;
+		return this;
+	}
+
+	/**
+	 * Changes by which criteria losses should be printed, that is, on every fixed
+	 * count of epochs set by {@link #setInterval(int)} or whenever the primary loss
+	 * (the first one enclosed in the constructor) decreases.
+	 * 
+	 * @param printOnImproveOnly Whether losses should be printed only when the
+	 *                           primary loss (which is used for trained parameter
+	 *                           selection and early stopping) decreases. Default is
+	 *                           false.
+	 * @return <code>this</code> verbose loss instance.
+	 */
+	public VerboseLoss setPrintOnImprovement(boolean printOnImproveOnly) {
+		this.printOnImproveOnly = printOnImproveOnly;
 		return this;
 	}
 
@@ -59,6 +78,9 @@ public class VerboseLoss extends Loss {
 		return this;
 	}
 
+	/**
+	 * Prints the current state of accumulated losses.
+	 */
 	public void print() {
 		String message = "Epoch " + epoch + " ";
 		for (int i = 0; i < baseLosses.length; i++)
@@ -69,7 +91,13 @@ public class VerboseLoss extends Loss {
 
 	@Override
 	public void onEndEpoch() {
-		if (epoch == 0 || epoch % every == 0)
+		double value = values.get(0);
+		if (value < bestLoss)
+			bestLoss = value;
+		if (printOnImproveOnly) {
+			if (value == bestLoss)
+				print();
+		} else if ((epoch == 0 || epoch % every == 0))
 			print();
 		values.setToZero();
 		batchCount = 0;
@@ -79,6 +107,7 @@ public class VerboseLoss extends Loss {
 	@Override
 	public void onEndTraining() {
 		epoch = 0;
+		bestLoss = Double.POSITIVE_INFINITY;
 	}
 
 	@Override
