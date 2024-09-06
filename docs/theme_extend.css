@@ -1,0 +1,96 @@
+.gemoji {
+  height: 1em;
+  width: 1em;
+  vertical-align: -0.15em;
+}
+
+.doc {
+  padding-left: 20px;
+  margin-bottom: 30px;
+  margin-top: -15px;
+  border-left: 5px solid rgba(230, 230, 230);
+}
+
+.explain {
+  margin-top: 10px;
+}
+
+.wy-side-nav-search {
+    background-color: #d2d2d2; /* Replace with your desired color code */
+}
+
+.parameters {
+    background-color: #D0D0D0;
+    border: none;
+    padding: 0 4px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    color: #007777;
+    border-radius: 6px;
+    margin-top: 6px;
+}
+
+.component {
+    background-color: #CC5555;
+    border: none;
+    color: white;
+    padding: 2px 10px;
+    text-align: left;
+    text-decoration: none;
+    display: inline-block;
+    width: 100%;
+    font-size: 24px;
+    margin: 0 2px 0 2px;
+    border-radius: 2px;
+}
+
+.code-block {
+    margin-top: -10px;
+}
+
+.card {
+  width: 18rem;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.card-title {
+  font-weight: bold;
+}
+
+.card-text {
+  color: #888;
+  font-size: 14px;
+}
+
+.card-link {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 5px;
+}
+
+.card-link:hover {
+  background-color: #0056b3;
+}
+
+@media (max-width: 768px) {
+    .card-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .card {
+        width: 90%; /* Adjust width as needed */
+        margin-bottom: 10px;
+    }
+}

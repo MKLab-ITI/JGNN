@@ -451,6 +451,14 @@ System.out.println(model.predict(Tensor.fromDouble(2)));
 	to declare several inputs and outputs. Inputs need to be only one symbol, but a whole expression
 	for evaluation can be declared in outputs.
 	</p>
+	
+	<pre><code class="language-java">ModelBuilder modelBuilder = new ModelBuilder()
+	.var("x")
+	.operation("y = log(2*x+1)")
+	.out("y");
+System.out.println(model.predict(Tensor.fromDouble(2)));
+</code></pre>
+
 	<p>
 	The operation parses string expressions that are typically structured 
 	as assignments to symbols; the right-hand side of assignments accepts several operators and functions that 
@@ -467,13 +475,6 @@ System.out.println(model.predict(Tensor.fromDouble(2)));
 	a parenthesis and the function's body enclosed in brackets. Learn more about Neuralang functions in 
 	<a href="#neuralang">section 3.3</a>.
 	</p>
-	
-	<pre><code class="language-java">ModelBuilder modelBuilder = new ModelBuilder()
-	.var("x")
-	.operation("y = log(2*x+1)")
-	.out("y");
-System.out.println(model.predict(Tensor.fromDouble(2)));
-</code></pre>
 	
 	<p>Model definitions have so far been too simple to be employed in practice;
 	we need trainable parameters, which are created inline with the <code>matrix</code>

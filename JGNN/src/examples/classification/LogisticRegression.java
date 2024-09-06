@@ -7,13 +7,16 @@ import mklab.JGNN.adhoc.datasets.Citeseer;
 import mklab.JGNN.adhoc.train.SampleClassification;
 import mklab.JGNN.core.Matrix;
 import mklab.JGNN.nn.Model;
+import mklab.JGNN.nn.initializers.XavierNormal;
 import mklab.JGNN.nn.loss.Accuracy;
 import mklab.JGNN.nn.loss.BinaryCrossEntropy;
+import mklab.JGNN.nn.loss.report.VerboseLoss;
 import mklab.JGNN.core.Slice;
 import mklab.JGNN.core.Tensor;
 import mklab.JGNN.core.matrix.DenseMatrix;
 import mklab.JGNN.core.tensor.DenseTensor;
 import mklab.JGNN.nn.optimizers.GradientDescent;
+import mklab.JGNN.nn.optimizers.Adam;
 
 /**
  * Demonstrates classification with logistic regression.
@@ -45,18 +48,22 @@ public class LogisticRegression {
 		
 		
 		long tic = System.currentTimeMillis();
-		Model model = new SampleClassification()
+		ModelTraining trainer = new SampleClassification()
+				.setFeatures(dataset.features())
+				.setOutputs(dataset.labels())
+				.setTrainingSamples(nodeIds.range(0, 0.6))
+				.setValidationSamples(nodeIds.range(0.6, 0.8))
 				.setOptimizer(new GradientDescent(0.01))
 				.setEpochs(600)
+				.setOptimizer(new Adam(0.01))
 				.setNumBatches(10)
 				.setParallelizedStochasticGradientDescent(true)
 				.setLoss(new BinaryCrossEntropy())
-				.setValidationLoss(new Accuracy())
-				.setVerbose(true)
-				.train(modelBuilder.getModel(), 
-						dataset.features(), 
-						dataset.labels(), 
-						nodeIds.range(0, 0.6), nodeIds.range(0.6, 0.8));
+				.setValidationLoss(new VerboseLoss(new Accuracy()));
+			
+		Model model = modelBuilder.getModel()
+				.init(new XavierNormal())
+				.train(trainer);
 		long toc = System.currentTimeMillis();
 
 		double acc = 0;
