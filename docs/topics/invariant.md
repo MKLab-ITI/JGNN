@@ -5,6 +5,8 @@ Many scenarios are constrained on **equivariant** GNNs, whose outputs maintain t
 However, there are cases where the desired behavior is for GNNs to be **invariant**, meaning that the model's predictions should remain unchanged regardless of any permutation applied to the input nodes. This is particularly important when the task involves classifying entire graphs rather than individual nodes, as the model should produce a consistent output for the same graph structure, regardless of how its nodes are ordered.
 
 
+## Graph pooling
+
 To impose invariance in a GNN, take an existing equivariant architecture and apply an invariant operation on top. You may want to perform further transformations (e.g., using dense layers) afterward, but the core idea remains the same. JGNN provides two types of invariant operations, also known as pooling: 
 
 1. **Reduction-based pooling** is straightforward to implement by using a dimensionality reduction mechanism, such as `min`, `max`, `sum`, or `mean`, applied *column-wise* on the output feature matrix. Since each row corresponds to a different node's features, the result of the reduction is a one-dimensional vector where each entry aggregates feature values across all nodes.

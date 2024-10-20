@@ -3,7 +3,6 @@ package tutorial;
 import mklab.JGNN.adhoc.Dataset;
 import mklab.JGNN.adhoc.ModelBuilder;
 import mklab.JGNN.adhoc.ModelTraining;
-import mklab.JGNN.adhoc.datasets.Citeseer;
 import mklab.JGNN.adhoc.datasets.Cora;
 import mklab.JGNN.adhoc.train.SampleClassification;
 import mklab.JGNN.core.Matrix;
