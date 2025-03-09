@@ -59,8 +59,14 @@
 
         .sidebar-link.active {
             color: #fff;
-            background-color: #007bff;
+            background-color: #33bbff;
             border-radius: 4px;
+        }
+        .sidebar-link.subsection {
+            color: #777;
+        }
+        .sidebar-link.subsection.active {
+            color: #fff;
         }
 
 
@@ -129,42 +135,53 @@
         }
     </style>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const sidebarLinks = document.querySelectorAll('.sidebar-link');
+		document.addEventListener("DOMContentLoaded", function () {
+			const sidebarLinks = document.querySelectorAll('.sidebar-link');
+			const sections = document.querySelectorAll('section');
 
-            function removeActiveClasses() {
-                sidebarLinks.forEach(link => link.classList.remove('active'));
-            }
+			function removeActiveClasses() {
+				sidebarLinks.forEach(link => link.classList.remove('active'));
+			}
 
-            function addActiveClass(link) {
-                removeActiveClasses();
-                link.classList.add('active');
-            }
+			function addActiveClass(link) {
+				removeActiveClasses();
+				if (link) link.classList.add('active');
+			}
 
-            const options = {
-                root: null,
-                rootMargin: '0px',
-                threshold: 0.2
-            };
+			function getClosestSection() {
+				let minDistance = Infinity;
+				let closestSection = null;
+				const scrollY = window.scrollY;
+				sections.forEach(section => {
+					const offset = Math.abs(section.offsetTop - scrollY - 100); // Adjust for fixed navbar offset
+					if (offset < minDistance) {
+						minDistance = offset;
+						closestSection = section;
+					}
+				});
+				return closestSection;
+			}
 
-            const observerCallback = (entries, observer) => {
-                entries.forEach(entry => {
-                    const id = entry.target.getAttribute('id');
-                    const link = document.querySelector(`.sidebar-link[href="#${id}"]`);
+			function updateActiveSection() {
+				const section = getClosestSection();
+				if (section) addActiveClass(document.querySelector(`.sidebar-link[href="#${section.id}"]`));
+			}
+			window.addEventListener("scroll", updateActiveSection);
+			sidebarLinks.forEach(link => {link.addEventListener("click", function (event) {
+				event.preventDefault();
+				const targetId = this.getAttribute("href").substring(1);
+				const targetSection = document.getElementById(targetId);
 
-                    if (entry.isIntersecting) {
-                        addActiveClass(link);
-                    }
-                });
-            };
+				if (targetSection) {window.scrollTo({
+					top: targetSection.offsetTop - 80,
+					behavior: "smooth"
+				});}
+			});});
+			window.addEventListener("load", updateActiveSection);
+		});
+		</script>
 
-            const observer = new IntersectionObserver(observerCallback, options);
 
-            document.querySelectorAll('section').forEach(section => {
-                observer.observe(section);
-            });
-        });
-    </script>
 </head>
 
 <body>
@@ -174,21 +191,14 @@
             <li class="nav-item"> <a class="sidebar-link" href="#setup">1. Setup</a></li>
             <li class="nav-item"> <a class="sidebar-link" href="#quickstart">2. Quickstart</a></li>
             <li class="nav-item"> <a class="sidebar-link" href="#gnn-builders">3. GNN Builders</a></li>
-            <li class="nav-item ps-md-3 text-secondary"><a class="sidebar-link small p-1 subsection" href="#modelbuilder"
-                    style="color: #777777;">3.1. ModelBuilder</a></li>
-            <li class="nav-item ps-md-3 text-secondary"><a class="sidebar-link small p-1 subsection" href="#fastbuilder"
-                    style="color: #777777;">3.2. FastBuilder</a></li>
-			<li class="nav-item ps-md-3 text-secondary"><a class="sidebar-link small p-1 subsection" href="#neuralang"
-					style="color: #777777;">3.3. Neuralang</a></li>
-            <li class="nav-item ps-md-3 text-secondary"><a class="sidebar-link small p-1 subsection" href="#debugging"
-                    style="color: #777777;">3.4. Debugging</a></li>
+            <li class="nav-item ps-md-3"><a class="sidebar-link small p-1 subsection" href="#modelbuilder">3.1. ModelBuilder</a></li>
+            <li class="nav-item ps-md-3"><a class="sidebar-link small p-1 subsection" href="#fastbuilder">3.2. FastBuilder</a></li>
+			<li class="nav-item ps-md-3"><a class="sidebar-link small p-1 subsection" href="#neuralang">3.3. Neuralang</a></li>
+            <li class="nav-item ps-md-3"><a class="sidebar-link small p-1 subsection" href="#debugging">3.4. Debugging</a></li>
             <li class="nav-item"> <a class="sidebar-link" href="#training">4. Training</a></li>
-			<li class="nav-item ps-md-3 text-secondary"><a class="sidebar-link small p-1 subsection" href="#create-data"
-					style="color: #777777;">4.1. Create data</a></li>
-            <li class="nav-item ps-md-3 text-secondary"><a class="sidebar-link small p-1 subsection" href="#node-classification"
-                    style="color: #777777;">4.2. Node classification</a></li>
-				<li class="nav-item ps-md-3 text-secondary"><a class="sidebar-link small p-1 subsection" href="#graph-classification"
-						style="color: #777777;">4.3. Graph classification</a></li>
+			<li class="nav-item ps-md-3"><a class="sidebar-link small p-1 subsection" href="#create-data">4.1. Create data</a></li>
+            <li class="nav-item ps-md-3"><a class="sidebar-link small p-1 subsection" href="#node-classification">4.2. Node classification</a></li>
+			<li class="nav-item ps-md-3"><a class="sidebar-link small p-1 subsection" href="#graph-classification">4.3. Graph classification</a></li>
         </ul>
     </nav>
 
@@ -218,12 +228,12 @@
 	<p class="text-center"><em>Resource efficient machine learning and graph neural networks in native Java.</em>
 	</p>
 
-	<p>Graph Neural Networks (GNNs) are getting more and more popular as a machine learning paradigm,
+	<p>Graph Neural Networks (GNNs) are getting more and more popular,
 	for example to make predictions
 	based on relational information, or to perform inference on small datasets. JGNN is a library that
-	provides cross-platform implementations of this paradigm without the need for dedicated
-	hardware or firmware; create highly portable models that fit and are trained in
-	a few megabytes of memory.
+	provides cross-platform implementations of this paradigm and traditional neural networks
+	without the need for dedicated hardware or firmware; create highly portable models that fit and
+	are trained in a few megabytes of memory.
 	</p>
 
 	<p>
@@ -448,34 +458,56 @@ System.out.println("Acc\t "+acc/nodes.range(0.8, 1).size());</code></pre>
 		Use this builder to maintain model definitions in one place (e.g., packed in one string
 		variable, or in one file) and avoid weaving symbolic expressions in Java code.</li>
 	</ul>
-	In this section we cover these three builder classes and summarize debugging mechanisms that
-	check the integrity of constructed models, visualize their data flow, and monitor specific
+	In this section we cover these three builder classes. We also summarize debugging mechanisms for
+	checking the integrity of constructed models, visualize their data flow, and monitor specific
 	data at runtime.</p>
 	
+	<section id="modelbuilder">
 	<h3 id="modelbuilder">3.1. ModelBuilder</h3>
-	<p>This is the base model builder class; it offers a wide breadth of functionalities that other builders extend. 
-	Before looking at how to use it, though, we need to see what JGNN models look like under the hood. 
-	Models are collections of <code  class="language-java">NNOperation</code> instances, each representing a numerical computation with
-	specified inputs and outputs of
-	JGNN's <code>Tensor</code> type. Tensors will be covered later; for now, it suffices to think of them as
-	numerical vectors, which are sometimes endowed with matrix dimensions.
+	<p>This is the base model builder class; it offers a wide breadth of functionalities that other builders extend. Models
+	take tensors as input and outputs. Tensors will be covered later; for now, it suffices to think of them as
+	numerical vectors, which are sometimes endowed with matrix dimensions. The models themselves are built from Java classes
+	that indicate sub-operations. However, this can be too verbose many lines of code are needed to declare even simple expressions,
+	making models cumbersome to read and maintain - hence the need for
+	builders that construct the models from concise symbolic expressions.</p>
+	<p>To create a model with the <code class="language-java">ModelBuilder</code> class,
+	instantiating the builder, use a method chain to declare an input variable
+	with the <code class="language-java">.var(String)</code> method, parse an expression with the 
+	<code class="language-java">.operation(String)</code> method, and finally declare which symbol holds
+	outputs with the <code class="language-java">.out(String)</code> method.
+	The first and last of these methods can be called multiple times
+	to declare several inputs and outputs. Inputs need to be only one symbol, but a whole expression
+	for evaluation can be declared in outputs. Obtain the created model's instance with the <code class="language-java">.getModel()</code> method.
 	</p>
+
 	<p>
-	This guidebook does not list operation classes, as they are rarely used directly and can be found the Javadoc, namely
-	<a href="https://mklab-iti.github.io/JGNN/javadoc/mklab/JGNN/nn/inputs/package-summary.html" target="_blank">nn.inputs</a>,
-	<a href="https://mklab-iti.github.io/JGNN/javadoc/mklab/JGNN/nn/activations/package-summary.html" target="_blank">nn.activations</a>,
-	and 
-	<a href="https://mklab-iti.github.io/JGNN/javadoc/mklab/JGNN/nn/pooling/package-summary.html" target="_blank">nn.pooling</a>.
-	Create models in pure Java like the example computes, where the expression
-	<code class="language-rust">y=log(2*x+1)</code> does not have any trainable parameters.
-	After defining models, run them with the method <code class="language-java">Tensor Model.predict(Tensor...)</code>.	
-	This takes as input one or more comma-separated tensors that match the model's
-	inputs (in the same order) and computes a list of output tensors. If inputs are dynamically created, 
-	an overloaded version of the same method supports an array list of input tensors
-	<code class="language-java">Tensor Model.predict(ArrayList&lt;Tensor&gt;)</code>.
+	After defining models, use them to make predictions like below.
+	The prediction method takes as input one or more comma-separated tensors that match the model's
+	inputs (in the same order) and computes a list of output tensors. If inputs are dynamically created,
+	an overloaded version of the same method supports passing an array list of input tensors instead.
 	</p>
 	
-	<pre><code class="language-java">Variable x = new Variable();
+	<pre><code class="language-java">ModelBuilder modelBuilder = new ModelBuilder()
+	.var("x")
+	.operation("y = log(2*x+1)")
+	.out("y");
+Model model = modelBuilder.getModel();
+System.out.println(model.predict(Tensor.fromDouble(2)));
+</code></pre>
+
+	<details><summary>Equivalent Java implementation without the builder.</summary>
+		<p>Under the hood, JGNN models are collections of <code class="language-java">NNOperation</code> instances, each representing a numerical computation with
+		specified inputs and outputs of
+		JGNN's <code class="language-java">Tensor</code> type. This guidebook does not list operation classes, as they are rarely used directly and can be found the Javadoc, namely
+		<a href="https://mklab-iti.github.io/JGNN/javadoc/mklab/JGNN/nn/inputs/package-summary.html" target="_blank">nn.inputs</a>,
+		<a href="https://mklab-iti.github.io/JGNN/javadoc/mklab/JGNN/nn/activations/package-summary.html" target="_blank">nn.activations</a>,
+		and
+		<a href="https://mklab-iti.github.io/JGNN/javadoc/mklab/JGNN/nn/pooling/package-summary.html" target="_blank">nn.pooling</a>.
+		Create models in pure Java like the example below, where the expression
+		<code class="language-rust">y=log(2*x+1)</code> does not have any trainable parameters.
+		</p>
+
+		<pre><code class="language-java">Variable x = new Variable();
 Constant c1 = new Constant(Tensor.fromDouble(1)); // holds the constant "1"
 Constant c2 = new Constant(Tensor.fromDouble(2)); // holds the constant "2"
 NNOperation mult = new Multiply()
@@ -490,27 +522,8 @@ Model model = new Model()
 	.addInput(x)
 	.addOutput(y);
 System.out.println(model.predict(Tensor.fromDouble(2))); // one-element input
-	</code></pre>
-	
-	<p>Judging by the fact that several lines of code are needed to declare even simple expressions,
-	pure Java code for creating full models tends to be cumbersome to read and maintain - hence the need for 
-	builders that construct the models from concise symbolic expressions. Let us recreate the above example
-	with the <code class="language-java">ModelBuilder</code> class. 
-	After instantiating the builder, use a method chain to declare an input variable
-	with the <code class="language-java">.var(String)</code> method, parse an expression with the 
-	<code class="language-java">.operation(String)</code> method, and finally declare which symbol holds
-	outputs with the <code class="language-java">.out(String)</code> method.
-	The first and last of these methods can be called multiple times
-	to declare several inputs and outputs. Inputs need to be only one symbol, but a whole expression
-	for evaluation can be declared in outputs.
-	</p>
-	
-	<pre><code class="language-java">ModelBuilder modelBuilder = new ModelBuilder()
-	.var("x")
-	.operation("y = log(2*x+1)")
-	.out("y");
-System.out.println(model.predict(Tensor.fromDouble(2)));
-</code></pre>
+		</code></pre>
+		</details>
 
 	<details><summary>Differences between expression parsing and Neuralang.</summary>
 	<p>
@@ -723,22 +736,24 @@ System.out.println(model.predict(Tensor.fromDouble(2)));
 
 	<p>Model definitions have so far been too simple to be employed in practice;
 	we need trainable parameters, which are created inline with the <code>matrix</code>
-	and <code>vector</code> functions. There is equivalent Java code for this, but its usage
-	is discouraged to keep model definitions simple.
+	and <code>vector</code> Neuralang functions. Do not use equivalent Java code, because
+	it is better to keep model definitions simple.
 	Additionally, there may be constants and configuration hyperparameters. Of these, constants reflect
-	untrainable tensors and set with  <code class="language-java">ModelBuilder.const(String, Tensor)</code>.
+	untrainable tensors and set in a builder with <code class="language-java">.const(String, Tensor)</code>.
 	Both numbers in the last snippet's symbolic definition are internally parsed into constants.
 	</p>
 	<p>
 	On the other hand, configuration hyperparameters are numerical values used by the parser and
-	set with <code class="language-java">ModelBuilder.config(String, double)</code>. Provide another
+	set for a builder with <code class="language-java">.config(String, double)</code>. Provide another
 	configuration's name as the second argument to copy its value.
 	On the other hand, hyperparameters can be used as arguments to dimension sizes and regularization.
-	Retrieve previously set hyperparameters though
-	<code class="language-java">ModelBuilder.getConfigOrDefault(String, double)</code>, where the second argumement may be ommitted.
+	Retrieve previously set builder hyperparameters though
+	<code class="language-java">.getConfigOrDefault(String, double)</code>, where the second argumement may be ommitted.
 	This is mostly useful for bringing into code hyperparameters declared in Neuralang scripts.
 	</p>
+	</section>
 
+	<section id="fastbuilder">
 	<h3 id="fastbuilder">3.2. FastBuilder</h3>
 	<p>The <code class="language-java">FastBuilder</code> class for building GNN architectures extends the generic
 	<code class="language-java">ModelBuilder</code> with common graph neural network operations. The main difference 
@@ -945,8 +960,9 @@ ModelBuilder builder = new LayeredBuilder()
 	for each feature dimension, aggregates feature values across all nodes.
 	</p>
 	</details>
+	</section>
 	
-
+	<section id="neuralang">
 	<h3 id="neuralang">3.3. Neuralang</h3>
 		
 	<p>Neuralang scripts consist of functions that declare machine learning
@@ -1095,8 +1111,9 @@ System.out.println("Preferred learning rate: "+modelBuilder.getConfig("lr"));</c
 	values denoted with <code class="language-java">?</code> from an example input.
 	For faster completion of the model, we provide a dataless list of node identifiers as input.</p>
 	</details>
+	</section>
 	
-	
+	<section id="debugging">
 	<h3 id="debugging">3.4. Debugging</h3>
 	<p>JGNN offers high-level tools for debugging
 		architectures. Here we cover what diagnostics to run, and how to make
@@ -1153,6 +1170,7 @@ at nodeClassification.APPNP.main(APPNP.java:45)</code></pre>
 	<p>Some tensor or matrix methods do not
 	correspond to numerical operations but
 	are only responsible for naming dimensions.
+	</section>
 	Functionally, such methods are largely decorative,
 	but they cab improve debugging by throwing errors for
 	incompatible non-null names. For example,
@@ -1292,7 +1310,7 @@ at mklab.JGNN.nn.NNOperation.runPrediction(NNOperation.java:170)
 	monitors the outcome of matrix multiplication:
 	</p>
 	<pre><code class="language-java">builder.operation("h = relu(monitor(x@matrix(features, 64)) + vector(64))")</code></pre>
-		
+	</section>
 	</section>
 
 	<section id="training">
@@ -1309,6 +1327,7 @@ at mklab.JGNN.nn.NNOperation.runPrediction(NNOperation.java:170)
 		(reach out with requests for helper classes for other kinds of predictive tasks 
 		in the project's GitHub issues).</p>
 
+		<section id="create-data">
 		<h3 id="create-data">4.1. Create data</h3>
 		<p>JGNN contains dataset classes that automatically download and load 
 		datasets for out-of-the-box experimentation. These datasets can be found
@@ -1447,7 +1466,8 @@ Tensor prediction = labels.accessRow(nodeId);
 long predictedClassId = prediction.argmax();
 System.out.println(classIds.get(predictedClassId));</code></pre>
 			
-
+		</section>
+		<section id="node-classification">
 		<h3 id="node-classification">4.2. Node classification</h3>
 		<p>
 		Node classification models can be backpropagated by considering a list of node indeces and desired
@@ -1468,11 +1488,10 @@ Model model = modelBuilder()
 			nodes.range(trainSplit, validationSplit));
 		</code></pre>
 
+		</section>
 
-
+		<section id="graph-classification">
 		<h3 id="graph-classification">4.3. Graph classification</h3>
-
-
 		<p>Most neural network architectures are designed with the idea
 		of learning to classify nodes or samples. However, GNNs also
 		provide the capability to classify entire graphs based on
@@ -1604,6 +1623,7 @@ BatchOptimizer optimizer = new BatchOptimizer(new Adam(0.01));</code></pre>
         System.out.println("iter = " + epoch + "  " + acc/dtest.adjucency.size());
     }
 }</code></pre>
+    </section>
     </section>
 
     </div>
