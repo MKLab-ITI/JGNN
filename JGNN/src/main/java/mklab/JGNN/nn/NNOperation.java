@@ -50,12 +50,12 @@ public abstract class NNOperation {
 		public synchronized void lock() {
 			if(isLocked!=-1)
 				throw new RuntimeException("Locked by thread #"+isLocked);
-			threadId = ThreadPool.getCurrentThreadId();;
+			threadId = ThreadPool.getCurrentThreadId();
 			isLocked = threadId;
 		}
 		public synchronized Tensor unlock() {
-			if(isLocked!=ThreadPool.getCurrentThreadId())
-				throw new RuntimeException("Trying to unlock a different thread");
+			//if(isLocked!=ThreadPool.getCurrentThreadId())
+			//	throw new RuntimeException("Trying to unlock a different thread");
 			Tensor ret = lastOutput;
 			isLocked = -1;
 			return ret;
@@ -258,8 +258,8 @@ public abstract class NNOperation {
 				 * if(data()!=data) System.out.println(data+" -> "+data());
 				 */
 			}
-			if (data() != data)
-				throw new RuntimeException("Thread data object should not change within the same thread");
+			//if (data() != data)
+			//	throw new RuntimeException("Thread data object should not change within the same thread");
 
 			if (constantCache != null) {
 				data.lastOutput = constantCache;

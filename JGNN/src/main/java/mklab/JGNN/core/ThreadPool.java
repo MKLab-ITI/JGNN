@@ -15,8 +15,8 @@ import java.util.concurrent.TimeUnit;
  * @author Emmanouil Krasanakis
  */
 public class ThreadPool {
-	private HashMap<Thread, Integer> threadIds = new HashMap<Thread, Integer>();
-	private HashSet<Integer> usedIds = new HashSet<Integer>();
+	private static HashMap<Thread, Integer> threadIds = new HashMap<Thread, Integer>();
+	private static HashSet<Integer> usedIds = new HashSet<Integer>();
 	private ThreadPoolExecutor executor;
 	private int maxThreads;
 
@@ -55,18 +55,19 @@ public class ThreadPool {
 		Thread thread = new Thread() {
 			@Override
 			public void run() {
+				Thread current = Thread.currentThread();
+				int threadId;
 				synchronized (threadIds) {
-					int threadId = getUnusedId();
+					threadId = getUnusedId();
 					if (threadId == -1)
 						throw new RuntimeException("Tried to instantiate thread without an available id");
 					//System.out.println("Starting thread #"+threadId);
-					threadIds.put(Thread.currentThread(), threadId);
+					threadIds.put(current, threadId);
 					usedIds.add(threadId);
 				}
 				runnable.run();
 				synchronized (threadIds) {
-					int threadId = getCurrentThreadId();
-					threadIds.remove(this);
+					threadIds.remove(current);
 					usedIds.remove(threadId);
 					//System.out.println("Ending thread #"+threadId);
 				}
@@ -83,7 +84,11 @@ public class ThreadPool {
 	 * @return An integer id.
 	 */
 	public static Integer getCurrentThreadId() {
-		Integer ret = getInstance().threadIds.get(Thread.currentThread());
+		Integer ret;
+		Thread current = Thread.currentThread();
+		synchronized (threadIds) {
+			ret = threadIds.get(current);
+		}
 		return ret == null ? -1 : (int) ret;
 	}
 

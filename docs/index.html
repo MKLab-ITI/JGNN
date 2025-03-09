@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JGNN</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-vs.min.css"
         integrity="sha512-Jn4HzkCnzA7Bc+lbSQHAMeen0EhSTy71o9yJbXZtQx9VvozKVBV/2zfR3VyuDFIxGvHgbOMMNvb80l+jxFBC1Q=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -62,6 +63,39 @@
             border-radius: 4px;
         }
 
+
+        details {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease-in-out;
+            margin-bottom: 1em;
+        }
+
+        details[open] {
+            background-color: #e9ecef;
+        }
+
+        summary {
+            cursor: pointer;
+            list-style: none;
+        }
+
+        summary::before {
+            content: "▶ ";
+            font-size: 14px;
+            color: #007bff;
+            transition: transform 0.2s;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        details[open] summary::before {
+            content: "▼ ";
+            margin-bottom: 1em;
+        }
+
         @media (max-width: 767.98px) {
             #sidebar {
                 display: none;
@@ -88,6 +122,9 @@
         @media (min-width: 768px) {
             .navbar {
                 display: none;
+            }
+            #content {
+                max-width: 800px;
             }
         }
     </style>
@@ -173,39 +210,31 @@
     </nav>
 
     <div id="content">
-		<h1 style="text-align: center;">JGNN</h1>
-		<p>Graph Neural Networks (GNNs) are getting more and more popular as a machine learning paradigm,
-		for example to make predictions 
-		based on relational information, or to perform inference on small datasets. JGNN is a library that
-		provides cross-platform implementations of this paradigm without the need for dedicated 
-		hardware or firmware; create highly portable models that fit and are trained in
-		a few megabytes of memory. While reading this guidebook, keep in mind that this is not a library 
-		for running computationally intensive stuff; it has no GPU support and we do not plan to 
-		add any (unless such support becomes integrated in the Java virtual machine). So, while source code is
-		highly optimized and complex architectures are supported, 
-		running them fastly on graphs with many nodes may require compromises in the number of learned 
-		parameters or running time.</p>
-		
-		<p>This guidebook is organized into four sections that focus on 
-		practical use. After this brief introduction and
-		instructions for how to set things up, <a href="#quickstart">section 2</a> 
-		gives a taste of what using the library looks like. Then,
-		<a href="#gnn-builders">section 3</a> describes the
-		library's builder patter for constructing GNN models. Model construction
-		includes symbolic expression parsing for machine learning operations,
-		which drastically simplifies coding. Parsed expressions follow the Neuralang 
-		scripting language for model definitions. Finally, <a href="#training">section 4</a> describes
-		interfaces for training on automatically generated or customized data and testing. It also takes a deep dive
-		into obtaining raw model predictions, and using them in custom training
-		and evaluation schemes.
-		</p>
-		
-		<p>
-		In addition to the above-described material, JGNN's full programmatic
-		interface is provided as <a href="https://mklab-iti.github.io/JGNN/javadoc/" target="_blank">Javadoc</a>,
-		and domain-specific examples reside in the project's <a href="https://github.com/MKLab-ITI/JGNN" target="_blank">GitHub repository</a>.
-		</p>
-		
+	<h1 class="text-center">JGNN</h1>
+	<div class="text-center m-3">
+		<a href="https://mklab-iti.github.io/JGNN/javadoc/" target="_blank" class="btn btn-warning">Javadoc</a>
+		<a href="https://github.com/MKLab-ITI/JGNN" target="_blank" class="btn btn-warning">GitHub</a>
+	</div>
+	<p class="text-center"><em>Resource efficient machine learning and graph neural networks in native Java.</em>
+	</p>
+
+	<p>Graph Neural Networks (GNNs) are getting more and more popular as a machine learning paradigm,
+	for example to make predictions
+	based on relational information, or to perform inference on small datasets. JGNN is a library that
+	provides cross-platform implementations of this paradigm without the need for dedicated
+	hardware or firmware; create highly portable models that fit and are trained in
+	a few megabytes of memory.
+	</p>
+
+	<p>
+	Keep in mind that this is not a library
+	for computationally intensive architectures; it does support multiple CPU cores and contains
+	highly optimized code, but has no GPU support and we do not plan to
+	add any (unless such support gets integrated in the Java virtual machine). So, while complex architectures
+	are supported and scale to graphs with many nodes, running them fastly requires compromises in the number of learned
+	parameters or running time.
+	</p>
+
 	<section id="setup">
 	<h1>1. Setup</h1>
 	<p>The simplest way to set up JGNN is to download it as a JAR package from
@@ -236,10 +265,13 @@
 	<section id="quickstart">
 	<h1>2. Quickstart</h1>
 
-	<p>Here we demonstrate usage of JGNN for node classification. This is an inductive learning
-	task that predicts node labels given a graph's structure, node features, and a some already known
-	labels. Classifying graphs is also supported, although it is a harder task to explain and set up. 
-	GNN architectures for node classification are typically written 
+	<p>Here we demonstrate JGNN for node classification. This is an inductive learning
+	task that fills in node labels given a graph's structure, node features, and some already known
+	labels. Classifying graphs is also supported, although it is a harder task to explain details.
+	</p>
+
+	<p>
+	GNN architectures are typically written
 	as message passing mechanisms; they diffuse node representations across edges, where
 	node neighbors pick up, aggregate (e.g., average), and transform
 	incoming representations to update theirs. Alternatives that boast higher 
@@ -248,46 +280,44 @@
 	practical problems <a href="https://www.mdpi.com/2076-3417/14/11/4533">[Krasanakis et al., 2024]</a>.
 	Simple architectures also enjoy reduced resource consumption.</p>
 	
-	<p>Our demonstration starts by loading the <code class="language-java">Cora</code> dataset from those shipped 
+	<p>Start with the following commands that load the <code class="language-java">Cora</code> dataset from those shipped
 	with the library for out-of-the-box testing. The first time an instance of this dataset is created,
-	it downloads its raw data from a web resource and stores them in a local <code class="language-java">downloads/</code>
-	folder. The data are then loaded into a sparse graph adjacency matrix, a dense node feature matrix, 
-	and a dense node label matrix. Sparse and dense representations are interchangeable in terms of operations,
-	with the main difference being that sparse matrices are much more efficient when they contain lots of zeros.
-	In the loaded matrices, each row contains the corresponding node's
-	neighbors, features, or one-hot encoding of labels. We apply the renormalization trick and
-	symmetric normalization on the dataset's adjacency matrix using in-place operations for minimal memory footprint;
-	the first of the two makes GNN computations numerically stable by adding self-loops 
-	to all nodes, while renormalization is required by spectral-based GNNs, such as 
-	the model we implement next.</p>
+	it downloads raw data from a web resource and stores them in a local <code class="language-java">downloads/</code>
+	folder. The data are then loaded into a sparse graph adjacency matrix, a dense node feature matrix,
+	and a dense node label matrix.
+	Each row in those matrices contains the corresponding node's
+	neighbors, features, or one-hot encoding of labels.</p>
+
+	<p>The second command applies the renormalization trick and
+	symmetric normalization on the adjacency matrix; these respectively make GNN computations numerically stable by adding self-loops
+	to all nodes and enable graph spectral theory properties. The in-place variation of those operations is used for minimal memory footprint.</p>
 	
 	<pre><code class="language-java">Dataset dataset = new Cora();
 dataset.graph().setMainDiagonal(1).setToSymmetricNormalization();</code></pre>
-	
+
+	<p class="alert alert-info d-flex align-items-center" role="alert">
+		<i class="bi bi-info-circle-fill me-2 fs-3"></i>
+		Sparse and dense representations are interoperable. Sparsity is more efficient for lots of zeros,
+		so internal computations automatically select matrix types for outcomes.
+	</p>
+
 	
 	<p>We now incrementally create a trainable model using symbolic expressions that resemble math 
-	notation. The expressions are part of a scripting language, called Neuralang,
-	that is covered in <a href="#neuralang">section 3.3</a>. However, for faster onboarding, stick to
-	the <code class="language-java">FastBuilder</code> class for creating models; this ommits some of
-	the language's features in favor of providing programmatic shortcuts for boilerplate code. Its constructor
+	notation. The expressions are part of a scripting language called <i>Neuralang</i>. For fast onboarding, stick to
+	the <code class="language-java">FastBuilder</code> class for creating models, which ommits some of
+	the language's features in favor of providing programmatic shortcuts for boilerplate. Its constructor
 	accepts two arguments <code>A</code> and <code>h0</code>, respectivel holding
-	the graph's adjacency matrix and node features. These are internally set as constant symbols that 
-	parse expressions can use. Other constants and input variables can be set too, 
-	but more on this later. After instantiation, use some
-	model builder methods to declare a model's dataflow. Some of these methods parse the aforementioned expressions.
-	<ul>
-		<li><code>config</code> - Configures hyperparameter values. These can be used in all subsequent function and layer declarations.</li>
-		<li><code>function</code> - Declares a Neuralang function, in this case with inputs <code>A</code> and <code>h</code>.</li>
-		<li><code>layer</code> - Declares a layer that can use builtin and Neuralang functions. In this, the symbols <code>{l}</code> and <code>{l+1}</code> specifically are replaced by a layer counter.</li>
-		<li><code>classify</code> - Adds a softmax layer tailored to classification. This also silently declares an input <code>nodes</code> that represents a list of node indices where the outputs should be computed.</li>
-		<li><code>autosize</code> - Automatically sizes matrix and vector dimensions that were originally defnoted with a questionmark <code>?</code>. This method requires some input example, and here we provide a list of node identifiers, which we also make dataless (have only the correct dimensions without allocating memory). This method also checks for integrity errors in the declared architecture, such as computational paths that do not lead to an output.</li>
-	</ul>
-	JGNN promotes method chains, where the builder's instance is returned by each of 
-	its methods to access the next one. Below we use this programming pattern to implement the Graph Convolutional Network (GCN) 
+	the graph's adjacency matrix and node features. These are set as constant symbols and can be used in expressions;
+	other constants and input variables can be set too,
+	but more on this later.</p>
+
+	<p>
+	JGNN promotes functional programming method chains, where the builder's instance is returned by each of
+	its methods. Below we use this pattern to implement the Graph Convolutional Network (GCN)
 	architecture <a href="https://arxiv.org/abs/1609.02907">[Kipf and Welling, 2017]</a>.
-	Details on the symbolic parts of definitions are presented later but, for the time being, we point to
-	the <code>matrix</code> and <code>vector</code> Neuralang functions. These inline declarations of learnable parameter for
-	given dimensions and regularization. Access the builder's created model via <code>modelBuilder.getModel()</code>.
+	For the time being, notice the <code>matrix</code> and <code>vector</code> functions in scripted expressions;
+	these inline declarations of learnable parameter for
+	given dimensions and regularization.
 	</p>
 
 	<pre><code class="language-java">long numSamples = dataset.samples().getSlice().size();
@@ -302,73 +332,94 @@ ModelBuilder modelBuilder = new FastBuilder(dataset.graph(), dataset.features())
 	.layer("h{l+1}=gcnlayer(A, h{l})")
 	.classify()
 	.autosize(new EmptyTensor(numSamples));</code></pre>
+
+	<details><summary>Commonly used methods of <code class="language-java">FastBuilder</code>.</summary>
+
+	<ul>
+		<li><code>config</code> - Configures hyperparameter values. These can be used in all subsequent function and layer declarations.</li>
+		<li><code>function</code> - Declares a Neuralang function, in this case with inputs <code>A</code> and <code>h</code>.</li>
+		<li><code>layer</code> - Declares a layer that can use builtin and Neuralang functions. In this, the symbols <code>{l}</code> and <code>{l+1}</code> specifically are replaced by a layer counter.</li>
+		<li><code>classify</code> - Adds a softmax layer tailored to classification. This also silently declares an input <code>nodes</code> that represents a list of node indices where the outputs should be computed.</li>
+		<li><code>autosize</code> - Automatically sizes matrix and vector dimensions that were originally defnoted with a questionmark <code>?</code>. This method requires some input example, and here we provide a list of node identifiers, which we also make dataless (have only the correct dimensions without allocating memory). This method also checks for integrity errors in the declared architecture, such as computational paths that do not lead to an output.</li>
+	</ul>
+	</details>
 	
 	
-	<p>Training epochs for the created model can be implemented
-	manually, by passing inputs, obtaining outputs, computing losses, and triggering backpropagation
-	on an optimizer. As these steps may be complicated, JGNN automates common 
-	training patterns by extending a base <code class="language-java">ModelTraining</code> class with training strategies
+	<p>Training can be implemented
+	manually, by using inputs to compute outputs on the built model, computing losses, and triggering backpropagation
+	on an optimizer. JGNN automates common
+	patterns by extending a base <code class="language-java">ModelTraining</code> class with strategies
 	tailored to different data formats and predictive tasks. Find these subclasses in the 
 	<a href="https://mklab-iti.github.io/JGNN/javadoc/mklab/JGNN/adhoc/train/package-summary.html" target="_blank">adhoc.train</a> 
 	Javadoc. Instances of model trainers
-	accept a method chain notation to set their parameters. Parameters usually include training and validation data
-	(these should be made first and depend on the model training class) and aspects of the training strategy like the number of epochs, patience 
+	accept chain notation to set parameters like training and validation data
+	(these should be created first and depend on the model training class) and aspects of the learning strategy like the number of epochs, patience
 	for early stopping, the employed optimizer, and loss functions. An example is presented below.</p>
-	
-	
-	<p>Of data needed for training, the graph adjacency matrix and node features are already declared as constants by the 
-	<code class="language-java">FastBuilder</code> constructor, as node classification takes place on the same graph
-	with fully known node features. Thus, input features are a column of node identifiers, which 
-	<code>classify</code> method above uses to gather
-	the predictions on respective nodes. Architecture outputs are softmax approximation of the one-hot 
-	encodings of respective node labels. The simplest way to handle missing labels for test data without modifying
-	the example is to leave their one-hot encodings as zeroes only.
-	Additionally, this particular training strategy accepts training and validation data slices, where slices are lists 
-	of integer entries pointing to rows of inputs and outputs - find more later.</p>
-	
-	
-	<p>To finish describing the training strategy, the example selects
-	<code class="language-java">Adam</code> optimization with learning rate <i>0.01</i>, and training
-	over many epochs with early stopping. A verbose 
-	loss prints every 10 epochs the progress of cross entropy and accuracy on validation data, where the
-	first of these two is used for the early stopping criterion. 
-	To run a full training process, pass a strategy to a model. 
-	In a cold start scenario, apply a parameter initializer first before training is conducted.
-	A warm start that resumes training from some previously trained outcomes would skip this step.
-	Selecting an initializer is not part of the training strategy 
-	to signify its model-dependent nature; dense layers should maintain the expected 
-	input variances in the output before the first epoch, and therefore the initializer depends
-	on the type of activation functions.
-	</p>
-	<pre><code class="language-java">Slice nodes = dataset.samples().getSlice().shuffle(); // a permutation of node identifiers
-Matrix inputFeatures = Tensor.fromRange(nodes.size()).asColumn(); // each node has its identifier as an input (equivalent to: nodes.samplesAsFeatures())
+
+	<pre><code class="language-java">Slice nodes = dataset.samples().getSlice().shuffle(); // permutes node int ids
+Matrix inputFeatures = Tensor.fromRange(nodes.size()).asColumn();
+Loss loggingLoss = new VerboseLoss(new CategoricalCrossEntropy(), new Accuracy())
+	.setInterval(10);
+
 ModelTraining trainer = new SampleClassification()
-    // training data
+    // data
 	.setFeatures(inputFeatures)
 	.setLabels(dataset.labels())
 	.setTrainingSamples(nodes.range(0, 0.6))
 	.setValidationSamples(nodes.range(0.6, 0.8))
-	// training strategy
+	// learning strategy
 	.setOptimizer(new Adam(0.01))
 	.setEpochs(3000)
 	.setPatience(100)
 	.setLoss(new CategoricalCrossEntropy())
-	.setValidationLoss(new VerboseLoss(new CategoricalCrossEntropy(), new Accuracy()).setInterval(10));  // print every 10 epochs
+	.setValidationLoss(loggingLoss);
 
 Model model = modelBuilder.getModel()
 	.init(new XavierNormal())
 	.train(trainer);</code></pre>
+
+
+	<details><summary>About the example training strategy.</summary>
+
+	<p>Of data needed for training, the graph adjacency matrix and node features are already declared as constants by the
+	<code class="language-java">FastBuilder</code> constructor, as node classification takes place on the same graph
+	with fully known node features. Thus, input features are a column of node identifiers, which the
+	<code>classify</code> method uses to gather
+	the predictions on respective nodes. Architecture outputs are softmax approximation of the one-hot
+	encodings of respective node labels. The simplest way to handle missing labels for test data without modifying
+	the example is to leave their one-hot encodings as zeroes only.
+	Additionally, this particular training strategy accepts training and validation data slices, where slices are lists
+	of integer entries pointing to rows of inputs and outputs - find more later.</p>
+
+
+	<p>The example further selects
+	<code class="language-java">Adam</code> optimization with learning rate <i>0.01</i>, and training
+	over many epochs with early stopping. A verbose
+	loss prints every 10 epochs the progress of cross entropy and accuracy on validation data, where the
+	first of these two is used for the early stopping criterion.
+	To run a full training process, pass a strategy to a model.
+	In a cold start scenario, apply a parameter initializer first before training is conducted.
+	A warm start that resumes training from some previously trained outcomes would skip this step.
+	Selecting an initializer is not part of the learning strategy
+	to signify its model-dependent nature; dense layers should maintain the expected
+	input variances in the output before the first epoch, and therefore the initializer depends
+	on the type of activation functions.
+	</p>
+	</details>
 	
 	<p>Trained models and their generating builders can be saved and loaded. The next snippet demonstrates
 	how raw predictions can be made too. During this process,
 	some matrix manipulation operations are employed to obtain transparent access to parts of input and output data
-	of the dataset.
+	of the dataset without copying memory.
 	</p>
 
 	<pre><code class="language-java">modelBuilder.save(Paths.get("gcn_cora.jgnn")); // needs a Path as an input
-Model loadedModel = ModelBuilder.load(Paths.get("gcn_cora.jgnn")).getModel(); // loading creates a new modelbuilder from which to get the model
+Model loadedModel = ModelBuilder.load(Paths.get("gcn_cora.jgnn")).getModel();
 
-Matrix output = loadedModel.predict(Tensor.fromRange(0, nodes.size()).asColumn()).get(0).cast(Matrix.class);
+Matrix output = loadedModel
+	.predict(Tensor.fromRange(0, nodes.size()).asColumn())
+	.get(0) // get our one output from the list of outputs
+	.cast(Matrix.class); // functional cast
 double acc = 0;
 for(Long node : nodes.range(0.8, 1)) {
 	Matrix nodeLabels = dataset.labels().accessRow(node).asRow();
@@ -386,12 +437,12 @@ System.out.println("Acc\t "+acc/nodes.range(0.8, 1).size());</code></pre>
 	where one of them was used to create a model. There exist different kinds of
 	builders that offer different conveniences.
 	<ul>
-		<li><b>GNNBuilder</b> - Parses strings of simple Neuralang expressions.</li>
-		<li><b>FastBuilder</b> - Extends the <code>GNNBuilder</code> class with methods that inject 
+		<li><b>ModelBuilder</b> - Parses strings of simple Neuralang expressions.</li>
+		<li><b>FastBuilder</b> - Extends the <code class="language-java">ModelBuilder</code> class with methods that inject
 		boilerplate code for the inputs, outputs, and layers of node classification tasks.
-		Prefer this builder of your want to keep track 
+		Prefer this builder to keep track
 		of the whole model definition in one place within Java code.</li>
-		<li><b>Neuralang</b> - Extends the <code>GNNBuilder</code> class so that it can parse all aspects 
+		<li><b>Neuralang</b> - Extends the <code class="language-java">ModelBuilder</code> class so that it can parse all aspects
 		of the Neuralang language, such as functional declarations of machine learning modules,
 		where parts of function signatures manage configuration hyperparameters.
 		Use this builder to maintain model definitions in one place (e.g., packed in one string
@@ -407,19 +458,21 @@ System.out.println("Acc\t "+acc/nodes.range(0.8, 1).size());</code></pre>
 	Models are collections of <code  class="language-java">NNOperation</code> instances, each representing a numerical computation with
 	specified inputs and outputs of
 	JGNN's <code>Tensor</code> type. Tensors will be covered later; for now, it suffices to think of them as
-	numerical vectors, which are sometimes endowed with matrix dimensions. This guidebook does not list operation classes, as they are rarely used directly and can be found the Javadoc, namely 
+	numerical vectors, which are sometimes endowed with matrix dimensions.
+	</p>
+	<p>
+	This guidebook does not list operation classes, as they are rarely used directly and can be found the Javadoc, namely
 	<a href="https://mklab-iti.github.io/JGNN/javadoc/mklab/JGNN/nn/inputs/package-summary.html" target="_blank">nn.inputs</a>,
 	<a href="https://mklab-iti.github.io/JGNN/javadoc/mklab/JGNN/nn/activations/package-summary.html" target="_blank">nn.activations</a>,
 	and 
 	<a href="https://mklab-iti.github.io/JGNN/javadoc/mklab/JGNN/nn/pooling/package-summary.html" target="_blank">nn.pooling</a>.
-	Create models in pure Java like below. The example computes the expression 
-	<code class="language-rust">y=log(2*x+1)</code> without any trainable parameters.
+	Create models in pure Java like the example computes, where the expression
+	<code class="language-rust">y=log(2*x+1)</code> does not have any trainable parameters.
 	After defining models, run them with the method <code class="language-java">Tensor Model.predict(Tensor...)</code>.	
 	This takes as input one or more comma-separated tensors that match the model's
 	inputs (in the same order) and computes a list of output tensors. If inputs are dynamically created, 
 	an overloaded version of the same method supports an array list of input tensors
 	<code class="language-java">Tensor Model.predict(ArrayList&lt;Tensor&gt;)</code>.
-	The snippet below includes a prediction for an input that consists of one tensor of one element.
 	</p>
 	
 	<pre><code class="language-java">Variable x = new Variable();
@@ -436,7 +489,7 @@ NNOperation y = new Log()
 Model model = new Model()
 	.addInput(x)
 	.addOutput(y);
-System.out.println(model.predict(Tensor.fromDouble(2)));
+System.out.println(model.predict(Tensor.fromDouble(2))); // one-element input
 	</code></pre>
 	
 	<p>Judging by the fact that several lines of code are needed to declare even simple expressions,
@@ -459,48 +512,37 @@ System.out.println(model.predict(Tensor.fromDouble(2)));
 System.out.println(model.predict(Tensor.fromDouble(2)));
 </code></pre>
 
+	<details><summary>Differences between expression parsing and Neuralang.</summary>
 	<p>
-	The operation parses string expressions that are typically structured 
+	The <code>operation</code> method parses string expressions that are typically structured
 	as assignments to symbols; the right-hand side of assignments accepts several operators and functions that 
 	are listed in the next table. Models allow multiple operations too, which are parsed through either multiple 
 	method calls or by being separated with a semicolon <code>;</code> within larger string expressions.
-	All methods need to use previously declared symbols. For example, parsing <code class="language-java">.out("symbol")</code> 
+	All methods need to use previously declared symbols.
+	</p>
+	<p>
+	For example, parsing <code class="language-java">.out("symbol")</code>
 	throws an exception if no operation previously assigned to the symbol or declared it as an input. For logic
 	safety, <b>symbols cannot be overwritten or set to updated values outside of Neuralang functions</b>.
+	</p>
+	<p>
 	Finally, the base model builder
-	class supports a roundabout declaration of Neuralang functions with expressions like this snippet taken from the Quickstart
-	section:
+	class supports a roundabout declaration of Neuralang functions with expressions like this snippet taken from the Quickstart:
 	<code  class="language-java">.function("gcnlayer", "(A,h){return A@(h@matrix(?, hidden, reg))+vector(?);}")</code>.
 	In this, the first method argument is the declared function symbol's name, and the second should necessarily have the arguments enclosed in
-	a parenthesis and the function's body enclosed in brackets. Learn more about Neuralang functions in 
-	<a href="#neuralang">section 3.3</a>.
+	a parenthesis and the function's body enclosed in brackets. Learn more about Neuralang functions in the language's description
+	in the namesake section.
 	</p>
-	
-	<p>Model definitions have so far been too simple to be employed in practice;
-	we need trainable parameters, which are created inline with the <code>matrix</code>
-	and <code>vector</code> functions. There is also an equivalent Java
-	method <code class="language-java">ModelBuilder.param(String, Tensor)</code> that assigns an initialized Tensor
-	to a variable name, but its usage is discouraged to keep model definitions simple. 
-	Additionally, there may be constants and configuration hyperparameters. Of these, constants reflect 
-	untrainable tensors and set with  <code class="language-java">ModelBuilder.const(String, Tensor)</code>,
-	whereas configuration hyperparameters are numerical values used by the parser and 
-	set with <code class="language-java">ModelBuilder.config(String, double)</code>, or 
-	<code class="language-java">ModelBuilder.config(String, String)</code> if the second argument value
-	should be copied from another configuration.
-	Both numbers in the last snippet's symbolic definition are internally parsed into constants.
-	On the other hand, hyperparameters can be used as arguments to dimension sizes and regularization.
-	Retrieve previously set hyperparameters though <code class="language-java">double ModelBuilder.getConfig(String)</code> 
-	or <code class="language-java">double ModelBuilder.getConfigOrDefault(String, double)</code>  
-	to replace the error with a default value if the configuration is not found. The usefulness of retrieving
-	configurations will become apparent later on.
-	</p>
-	
+	</details>
+
+	<details><summary>Table of parsable expressions.</summary>
+
 	<p>
-	Next is a table of available operations that you can use in expressions. Standard
+	Here is a table of available operations that you can use in expressions. Standard
 	priority rules for priority and parentheses apply.
-	Prefer using configuration hyperparameters 
-	to set matrix and vector creation, as these transfer their names to respective dimensions for error 
-	checking - more on this in <a href="#debugging">section 3.4</a>.
+	Prefer using configuration hyperparameters
+	to set matrix and vector creation, as these transfer their names to respective dimensions for error
+	checking - more on this later.
 	</p>
 
     <table class="table" border=" 1">
@@ -677,7 +719,25 @@ System.out.println(model.predict(Tensor.fromDouble(2)));
 				<td>Shorthand notation <code>vector</code>.</td>
             </tr>
         </tbody>
-    </table>
+    </table></details>
+
+	<p>Model definitions have so far been too simple to be employed in practice;
+	we need trainable parameters, which are created inline with the <code>matrix</code>
+	and <code>vector</code> functions. There is equivalent Java code for this, but its usage
+	is discouraged to keep model definitions simple.
+	Additionally, there may be constants and configuration hyperparameters. Of these, constants reflect
+	untrainable tensors and set with  <code class="language-java">ModelBuilder.const(String, Tensor)</code>.
+	Both numbers in the last snippet's symbolic definition are internally parsed into constants.
+	</p>
+	<p>
+	On the other hand, configuration hyperparameters are numerical values used by the parser and
+	set with <code class="language-java">ModelBuilder.config(String, double)</code>. Provide another
+	configuration's name as the second argument to copy its value.
+	On the other hand, hyperparameters can be used as arguments to dimension sizes and regularization.
+	Retrieve previously set hyperparameters though
+	<code class="language-java">ModelBuilder.getConfigOrDefault(String, double)</code>, where the second argumement may be ommitted.
+	This is mostly useful for bringing into code hyperparameters declared in Neuralang scripts.
+	</p>
 
 	<h3 id="fastbuilder">3.2. FastBuilder</h3>
 	<p>The <code class="language-java">FastBuilder</code> class for building GNN architectures extends the generic
@@ -687,7 +747,10 @@ System.out.println(model.predict(Tensor.fromDouble(2)));
 	and a feature matrix <code>h0</code>. 
 	This builder further supports the notation <code>symbol{l}</code>,
 	where the layer counter replaces the symbol part <code>{l}</code> with 0 for the first layer,
-	1 for the second, and so on. Prefer the notation <code>h{l}</code> to refer to the node representation
+	1 for the second, and so on.
+	</p>
+	<p>
+	Prefer the notation <code>h{l}</code> to refer to the node representation
 	matrix of the current layer; for the first layer, this is parsed as <code>h0</code>, which is the constant
 	set by the constructor.
 	<code class="language-java">FastBuilder</code> instances also offer a <code class="language-java">FastBuilder.layer(String)</code>
@@ -697,26 +760,26 @@ System.out.println(model.predict(Tensor.fromDouble(2)));
 	symbolic expressions read similarly to what you would find in a paper.
 	</p>
 
-	<pre><code class="language-java">FastBuilder modelBuilder = new FastBuilder(adjacency, features)  // sets A, h0
-	.layer("h{l+1}=relu(A@(h{l}@matrix(features, hidden, reg))+vector(hidden))")  // parses h1 = relu(A@(h0	@ ...
-	.layer("h{l+1}=A@(h{l}@matrix(hidden, classes, reg))+vector(classes)"); // parses h2 = A@(h1@ ...
-	</code></pre>
-
-	<p>Before continuing, let us give some context for the above implementation.
-	The base operation of message passing GNNs, which are often used for node classification,
+	<p>The base operation of message passing GNNs, which are often used for node classification,
 	is to propagate node representations to neighbors via graph edges. Then, neighbors aggregate
-	the received representation, where aggregation typically consists of a weighted average per 
-	the normalized adjacency matrix's edge weights. For symmetric normalization, this the
+	the received representation, where aggregation typically consists of a weighted average per
+	the normalized adjacency matrix's edge weights. For symmetric normalization, the
 	weighted sum is compatible with spectral graph signal processing. The operation to perform
 	one propagation can be written as <code class="language-java">.layer("h{l+1}=A @ h{l}")</code>.
 	The propagation's outcome is typically transformed further by passing through a dense
 	layer.</p>
 
-	<p> Several have been proposed as improvements of this scheme.
-	However, they tend to incur marginal accuracy improvements at the cost of more compute. 
-	Stay away from complex architectures when learning from large graphs, as JGNN is designed to 
-	be lightweight but does not (and is not planned to) leverage GPUs. 
-	The library still supports the improvements listed below, since they could be used when
+	<pre><code class="language-java">FastBuilder modelBuilder = new FastBuilder(adjacency, features)  // sets A, h0
+	.layer("h{l+1}=relu(A@(h{l}@matrix(features, hidden, reg))+vector(hidden))")  // h1 = ...
+	.layer("h{l+1}=A@(h{l}@matrix(hidden, classes, reg))+vector(classes)"); // h2 = ...
+	</code></pre>
+
+	<details><summary>Improving representation diffusion at the cost of resources.</summary>
+	<p> Several improvements  of thre representation diffusion scheme have been proposed.
+	However, they tend to incur marginal accuracy improvements at the cost of compute or memory space.
+	</p>
+	<p>
+	JGNN still supports the improvements listed below, since they could be used when
 	running time is not a pressing issue (e.g., for transfer or stream learning that applies updates
 	for a few epochs), or to analyse smaller graphs: </p>
 	
@@ -779,6 +842,8 @@ System.out.println(model.predict(Tensor.fromDouble(2)));
 	.operation("received{l}=reduce(transformed_message{l}, A)");</code></pre>
 		</li>
 	</ul>
+
+	</details>
 	
 	
 	<p>So far, we discussed the propagation mechanisms of
@@ -799,49 +864,25 @@ System.out.println(model.predict(Tensor.fromDouble(2)));
 	.operation("output = h{l}[nodes]")
 	.out("output");</code></pre>
 
-	<p>So far we tackled only 
-	<b>equivariant</b> GNNs, whose outputs
-	follow any node permutations applied on their inputs.
-	In simple terms, if the order of node idenfitifiers is modified
-	(both in the graph adjacency matrix and in node feature matrices),
-	the order of rows will be similarly modified for outputs.
-	Most operations described so far are equivariant (those that are not
-	explicitly say so), so that their
-	synthesis is also equivariant. However, there 
-	are cases where created GNNs should be <b>invariant</b>,
-	which means that they should create predictions that remain
-	the same despite any input permutations. Invariance is 
-	the property to impose when classifying graphs, where
-	one prediction should be made for the whole graph.</p>
-
-	<p>Imposing invariance is simple enough; take an equivariant
-	architecture and then apply an invariant operation on top.
-	You may want to perform further transformations (e.g., some
-	dense layers) afterwards, but the general idea remains
-	the same. JGNN offers two types of invariant operations, also
-	known as pooling:
-	reductions and sort-based pooling. Of these, reductions 
-	are straightforward to implement
-	by taking a dimensionality reduction mechanism (<code>min</code>,
-	<code>max</code>, <code>sum</code>, <code>mean</code>) 
-	applying it <i>column-wise</i> on the output feature matrix.
-	Recall that each row has the features of a different node, 
-	so the result of reduction yields an one-dimensional vector that,
-	for each feature dimension, aggregates feature values across all nodes.
+	<p>
+	It is often the case that GNNs need to make predictions for the
+	whole graph - a task that falls under the more general category of learning invariant GNNs.
+	In the simplest case, node representations would be
+	reduced for each input graph to obtain one representation. However,
+	this is a symmetric operation and therefore fails to distinguish between
+	the structural positioning of nodes to be pooled, which is often important.
+	One computationally light alternative,
+	which you can use in your models,
+	is sorting nodes based on learned features
+	before concatenating their features into one vector for each graph.
 	</p>
-
-	<p>Reduction-based pooling performs a symmetric operation and
-	therefore fail to distinguish between 
-	the structural positioning of nodes to be pooled. 
-	One computationally light alternative, 
-	which JGNN implements, is sorting nodes based on learned features
-	before concatenating their features into one vector for
-	each graph. This process is further simplified by
+	<p>
+	This process is further simplified by
 	keeping the top <em>reduced</em> number of nodes to
 	concatenate their features, where the order is
 	determined by an arbitrarily selected feature (in our
-	implementation: the last one, with the previous feature
-	being used to break ties, and so on).
+	implementation: the sorting is made on the last feature, with the previous feature
+	being used to break ties, and so on.
 	The idea is that the selected feature determines
 	<em>important</em> nodes whose information can be
 	adopted by others. To implement this scheme, JGNN
@@ -870,6 +911,40 @@ ModelBuilder builder = new LayeredBuilder()
 .layer("h{l+1}=h{l}@matrix(hiddenReduced, classes)")
 .layer("h{l+1}=softmax(h{l}, dim: 'row')")
 .out("h{l}");</code></pre>
+
+	<details><summary>Invariant vs equivariant tasks.</summary>
+	<p>Tasks like node classification consider
+	<b>equivariant</b> GNNs, whose outputs
+	follow any node permutations applied on their inputs.
+	In simple terms, if the order of node idenfitifiers is modified
+	(both in graph adjacency and in node feature matrices),
+	the order of rows will be similarly modified for outputs.
+	Most JGNN operations are equivariant, and therefore their
+	synthesis is also equivariant.
+	</p>
+	<p>
+	However, there
+	are cases where created GNNs should be <b>invariant</b>,
+	which means that they should create predictions that remain
+	the same despite any input permutations. Invariance is
+	the property to impose when classifying graphs, where
+	one prediction should be made for the whole graph.</p>
+
+	<p>Imposing invariance is simple enough; take an equivariant
+	architecture and then apply an invariant operation on top.
+	You may want to perform further transformations (e.g., some
+	dense layers) afterwards, but the general idea remains
+	the same. JGNN offers two types of invariant operations:
+	reductions and sort-based pooling covered above. Reductions
+	are straightforward to implement
+	by taking a dimensionality reduction mechanism (<code>min</code>,
+	<code>max</code>, <code>sum</code>, <code>mean</code>) and
+	applying it <i>column-wise</i> on the output feature matrix.
+	Recall that each row has the features of a different node,
+	so reduction yields an one-dimensional vector that,
+	for each feature dimension, aggregates feature values across all nodes.
+	</p>
+	</details>
 	
 
 	<h3 id="neuralang">3.3. Neuralang</h3>
@@ -880,6 +955,8 @@ ModelBuilder builder = new LayeredBuilder()
 	At their end lies a <code>return</code> statement, which expresses their
 	outcome. All arguments are passed by value, i.e., any assignments are
 	performed on fresh variable instances.
+	</p>
+	<p>
 	Before explaining how to use the <code class="language-java">Neuralang</code> model builder,
 	we present and analyse code that supports a fully functional architecture.
 	First, look at the <code>classify</code> 
@@ -888,7 +965,9 @@ ModelBuilder builder = new LayeredBuilder()
 	insicating which nodes should be classified (the output has a number of rows equal to the 
 	number of identifiers), and a node feature matrix <code>h</code>. 
 	It then computes and returns a softmax for the features of the specified nodes. 
-	Aside from main inputs, the function's 
+	</p>
+	<p>
+	Aside from main inputs, the function's
 	signature also has several configuration values, whose defaults 
 	are indicated by a colon <code>:</code> (only configurations have defaults and conversely).
 	The same notation is used to 
@@ -896,44 +975,47 @@ ModelBuilder builder = new LayeredBuilder()
 	to apply it row-wise. Think of configurations as keyword 
 	arguments of typical programming languages, with the difference that
 	they control hyperparameters, like dimension sizes or regularization.
-	Write exact values for configurations, as for now there no 
-	arithmetics take place for them. For example, a configuration 
-	<code>patience:2*50</code> creates an error.</p>
+	</p>
+
+	<p>Exclamation marks <code>!</code> before numbers broadcast values
+	to all subsequent function calls that have configurations with the same
+	name. The broadcasted defaults overwrite already existing defaults of configurations with the same
+	name anywhere in the code. All defaults are replaced by values explicitly set when calling functions.
+	For example, take advantage of this prioritization to force output layer dimensions match your data. Importantly,
+	broadcasted values are stored within JGNN's <code class="language-java">Neuralang</code> model
+	builder too; this is useful for Java integration, for example to retrieve learning training hyperparameters
+	from the model.</p>
+
 		
 	<pre><code class="language-rust">fn classify(nodes, h, epochs: !3000, patience: !100, lr: !0.01) {
 	return softmax(h[nodes], dim: "row");
 }</code></pre>
 
-	<p>Exclamation marks <code>!</code> before numbers broadcast values
-	to all subsequent function calls that have configurations with the same 
-	name. The broadcasted defaults overwrite already existing defaults of configurations with the same
-	name anywhere in the code. All defaults are replaced by values explicitly set when calling functions.
-	For example, take advantage of this prioritization to force output layer dimensions match your data. Importantly, 
-	broadcasted values are stored within JGNN's <code class="language-java">Neuralang</code> model 
-	builder too; this is useful for Java integration, for example to retrieve learning training hyperparameters
-	from the model. To sum up, configuration values have the following priority, from strongest to weakest:<br> 
-	1. Arguments set during the function's call.<br>
-	2. Broacasted configurations (the last broadcasted value, including configurations set by Java).<br>
-	3. Function signature defaults.<br>
+	<p class="alert alert-warning d-flex align-items-center" role="alert">
+		<i class="bi bi-exclamation-triangle-fill me-2 fs-3"></i>
+		Write exact values for configurations, as for now no
+		arithmetics can be used to compute them. For example,
+		setting
+		patience:2*50 creates an error.</p>
 	</p>
 
-	<p>Next, let us look at some functions creating the main body of an architecture.
-	First, <code>gcnlayer</code> accepts 
-	two parameters: an adjacency matrix <code>A</code> and input feature matrix <code>h</code>.
-	The configuration <code>hidden: 64</code> in the functions's signature 
-	specifies the deafult number of hidden units,
-	whereas <code>reg: 0.005</code> is the L2 regularization applied 
-	during machine learning. The questionmark <code>?</code> 
-	in matrix definitions lets the autosize feature of JGNN determine 
-	dimension sizes based on a test run - if possible. 
-	Finally, the function returns the activated output of a
-	GCN layer. Similarly, look at the <code>gcn</code> function. This declares
-	the GCN architecture and has as configuration the number of output classes. 
-	The function basically consists of two <code>gcnlayer</code> layers,
-	where the second's hidden units are set to the value of output classes. 
-	The number of classes is unknown as of writting the model, and thus is externally declared 
-	with the <code>extern</code> keyword to signify that this value should always by provided 
-	by Java's side of the implementation.</p>
+	<p class="alert alert-info d-flex align-items-center" role="alert">
+		<i class="bi bi-info-circle-fill me-2 fs-3"></i>
+		Configuration values have the following priority, from strongest to weakest:<br>
+		1. Arguments set during the function's call.<br>
+		2. Broacasts (the last broadcasted value, include configurations set in Java).<br>
+		3. Function signature defaults.
+	</p>
+
+
+	<p>
+	Next, let us look at some functions creating the main body of an architecture.
+	In that, the questionmark <code>?</code>
+	lets the autosize feature of JGNN determine dimension sizes based on a test run.
+	The number of classes is unknown as of writting the model, and thus is externally declared
+	with the <code>extern</code> keyword to signify that this value should always be provided
+	in Java.
+	</p>
 
 	<pre><code class="language-rust">fn gcnlayer(A, h, hidden: 64, reg: 0.005) {
 	return A@h@matrix(?, hidden, reg) + vector(hidden);
@@ -945,33 +1027,35 @@ fn gcn(A, h, classes: extern) {
 }
 </code></pre>
 
+	<details><summary>About the architecture.</summary>
+
+
+	<p>First, <code>gcnlayer</code> accepts
+	two parameters: an adjacency matrix <code>A</code> and input feature matrix <code>h</code>.
+	The configuration <code>hidden: 64</code> in the functions's signature
+	specifies the deafult number of hidden units,
+	whereas <code>reg: 0.005</code> is the L2 regularization applied
+	during machine learning.
+	Finally, the function returns the activated output of a
+	GCN layer.
+	</p>
+	<p>
+	Similarly, look at the <code>gcn</code> function. This declares
+	the GCN architecture and has as configuration the number of output classes.
+	The function basically consists of two <code>gcnlayer</code> layers,
+	where the second's hidden units are set to the value of output classes.</p>
+
+	</details>
+
 
 	<p>We now move to parsing our declarations with the <code class="language-java">Neuralang</code>
 	model builder and using them to create an architecture. To this end, save your code
-	to a file and get is as a path <code class="language-java">Path architecture = Paths.get("filename.nn");</code>,
-	or avoid external files by inlining the definition within Java code through 
+	to a file and get it as a path <code class="language-java">Path architecture = Paths.get("filename.nn");</code>.
+	Avoid external files by inlining the definition within Java code through
 	a multiline string per <code class="language-java">String architecture = """ ... """;</code>.
-	Below, this string is parsed within a functional programming chain, where
-	each method call returns the modelBuilder instance to continue calling more methods. 
+	Below, this string is parsed within a chain, where
+	each method call returns the model builder instance to continue calling more methods.
 	</p>
-
-
-	<p>For the model builder, the following snippet sets remaining hyperparameters 
-	and overwrites the default value
-	for <code class="language-java">"hidden"</code>. It also specifies
-	that certain variables are constants, namely the adjacency matrix <code>A</code> and node 
-	representation <code>h</code>, as well as that node identifiers is a variable that serves 
-	as the architecture's inpu. There could be multiple inputs, so this distinction of what 
-	is a constant and what is a variable depends mostly on which quantities change 
-	during training and is managed by onlt the Java-side of the code. 
-	In the case of node classification, both the adjacency matrix and
-	node features remain constant, as we work in one graph. Finally, the definition
-	sets an Neuralang expression as the architecture's output
-	by calling the <code class="language-java">.out(String)</code> method,
-	and applies the <code class="language-java">.autosize(Tensor...)</code> method to infer hyperparameter
-	values denoted with <code class="language-java">?</code> from an example input.
-	For faster completion of the model, provide a dataless list of node identifiers as input,
-	like below.</p>
 
 	<pre><code class="language-java">long numSamples = dataset.samples().getSlice().size();
 long numClasses = dataset.labels().getCols();
@@ -986,31 +1070,59 @@ ModelBuilder modelBuilder = new Neuralang()
 	.autosize(new EmptyTensor(numSamples));
 
 System.out.println("Preferred learning rate: "+modelBuilder.getConfig("lr"));</code></pre>
+
+	<details><summary>About the java side.</summary>
+	<p>The above snippet sets remaining hyperparameters
+	and overwrites the default value
+	for <code class="language-java">"hidden"</code>. It also specifies
+	that certain variables are constants, namely the adjacency matrix <code>A</code> and node
+	representation <code>h</code>, as well as that node identifiers is a variable that serves
+	as the architecture's inpu.
+	</p>
+	<p>
+	There could be multiple inputs, so the distinction of what
+	is a constant and what is a variable depends mostly on which quantities change
+	during training and is managed by only the Java side of the code.
+	In the case of node classification, both the adjacency matrix and
+	node features remain constant, as we work in one graph, but this is not
+	the same for graph classification where many graphs are encountered.
+	</p>
+	<p>
+	Finally, the definition
+	sets an Neuralang expression as the architecture's output
+	by calling the <code class="language-java">.out(String)</code> method,
+	and applies the <code class="language-java">.autosize(Tensor...)</code> method to infer hyperparameter
+	values denoted with <code class="language-java">?</code> from an example input.
+	For faster completion of the model, we provide a dataless list of node identifiers as input.</p>
+	</details>
 	
 	
 	<h3 id="debugging">3.4. Debugging</h3>
 	<p>JGNN offers high-level tools for debugging
 		architectures. Here we cover what diagnostics to run, and how to make
 		sense of error messages to fix erroneous
-		architectures. We already mentioned that model builder
+		architectures.
+	</p>
+	<p>
+		We already mentioned that model builder
 		symbols should be assigned to before
 		subsequent use. For example, consider a <code class="language-java">FastBuilder</code> that
 		tries to parse the expression <code class="language-java">.layer("h{l+1}=relu(hl@matrix(features, 32, reg)+vector(32))")</code>, 
 		where <code>hl</code> is a typographical error of
 		<code>h{l}</code>. In this case, an exception is thrown:
 		<code>Exception in thread "main" java.lang.RuntimeException: Symbol hl not defined.</code>
-
+	</p>
+	<p>
 		Internally, models are effectively directed acyclic graphs (DAGs)
 		that model builders create. DAGs should not be confused with the graphs
 		that GNNs architectures analyse; they are just an organization of data flow
 		between <code>NNComponent</code>s. During parsing, builders
 		may create temporary variables, which start with
 		the <code>_tmp</code> prefix and are followed by
-		a number. Temporary variables often link
+		a number. Those variables often link
 		components to others that use them.
 		The easiest way to understand execution DAGs is
-		to look at them. The library provides two tools
-		for this purpose: a <code class="language-java">.print()</code> method
+		to look at them textually or visually: a <code class="language-java">.print()</code> method
 		that prints built functional flows in the system
 		console, and a <code class="language-java">.getExecutionGraphDot()</code> 
 		method that returns a string holding the execution graph in
@@ -1038,65 +1150,67 @@ System.out.println("Preferred learning rate: "+modelBuilder.getConfig("lr"));</c
 at mklab.JGNN.nn.ModelBuilder.assertBackwardValidity(ModelBuilder.java:504)
 at nodeClassification.APPNP.main(APPNP.java:45)</code></pre>
 
-	
-			<p>Some tensor or matrix methods do not 
-			correspond to numerical operations but
-			are only responsible for naming dimensions.
-			Functionally, such methods are largely decorative,
-			but they cab improve debugging by throwing errors for
-			incompatible non-null names. For example,
-			adding two matrices with different dimension
-			names will result in an error. Likewise, the
-			inner dimension names during matrix
-			multiplication should agree. 
-			Arithmetic operations, <em>including</em>
-			matrix multiplication and copying,
-			automatically infer dimension names in the
-			result to ensure that only compatible data types
-			are compared. Dimension name changes 
-			do <em>not</em>
-			backtrack the changes, even for see-through
-			data types, such as the outcome of
-			<code class="language-java">asTransposed()</code>.
-			Matrices effectively have three
-			dimension names: for their rows, columns,
-			and inner data as long as they are treated
-			as tensors.</p>
+	<p>Some tensor or matrix methods do not
+	correspond to numerical operations but
+	are only responsible for naming dimensions.
+	Functionally, such methods are largely decorative,
+	but they cab improve debugging by throwing errors for
+	incompatible non-null names. For example,
+	adding two matrices with different dimension
+	names will result in an error. Likewise, the
+	inner dimension names during matrix
+	multiplication should agree.
+	Arithmetic operations, such as
+	matrix multiplication and copying,
+	automatically infer dimension names in the
+	result to ensure that only compatible data types
+	are compared. Dimension name changes
+	do <em>not</em>
+	backtrack the changes, even for see-through
+	data types, such as the outcome of
+	<code class="language-java">asTransposed()</code>.
+	Matrices effectively have three
+	dimension names: for their rows, columns,
+	and inner data as long as they are treated
+	as tensors.</p>
 
-			<table class="table table-bordered">
-				<thead>
-					<tr>
-						<th>Operation</th>
-						<th>Comments</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td><code class="language-java">Tensor setDimensionName(String name)</code></td>
-						<td>For naming tensor dimensions (of
-							the 1D space tensors lie
-							in).</td>
-					</tr>
-					<tr>
-						<td><code class="language-java">Tensor setRowName(String rowName)</code></td>
-						<td>For naming what kind of
-							information matrix rows hold
-							(e.g., "samples"). Defined only to matrices.</td>
-					</tr>
-					<tr>
-						<td><code class="language-java">Tensor setColName(String colName)</code></td>
-						<td>For naming what kind of
-							information matrix columns hold
-							(e.g., "features"). Defined only for matrices.</td>
-					</tr>
-					<tr>
-						<td><code class="language-java">Tensor setDimensionName(String rowName, String colName)</code></td>
-						<td>A shorthand of calling
-							<code class="language-java">setRowName(rowName).setColName(colName)</code>. Defined only for matrices.
-						</td>
-					</tr>
-				</tbody>
-			</table>
+	<details><summary>How to set dimension names.</summary>
+
+	<table class="table table-bordered">
+		<thead>
+			<tr>
+				<th>Operation</th>
+				<th>Comments</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td><code class="language-java">Tensor setDimensionName(String name)</code></td>
+				<td>For naming tensor dimensions (of
+					the 1D space tensors lie
+					in).</td>
+			</tr>
+			<tr>
+				<td><code class="language-java">Tensor setRowName(String rowName)</code></td>
+				<td>For naming what kind of
+					information matrix rows hold
+					(e.g., "samples"). Defined only to matrices.</td>
+			</tr>
+			<tr>
+				<td><code class="language-java">Tensor setColName(String colName)</code></td>
+				<td>For naming what kind of
+					information matrix columns hold
+					(e.g., "features"). Defined only for matrices.</td>
+			</tr>
+			<tr>
+				<td><code class="language-java">Tensor setDimensionName(String rowName, String colName)</code></td>
+				<td>A shorthand of calling
+					<code class="language-java">setRowName(rowName).setColName(colName)</code>. Defined only for matrices.
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	</details>
 
 	<p>There are two main mechanisms for identifying
 	logical errors within architectures: a) mismatched
@@ -1112,7 +1226,7 @@ at nodeClassification.APPNP.main(APPNP.java:45)</code></pre>
 	or layers, dimension names are copied from any
 	hyperparameters. Therefore, for easier
 	debugging, prefer using functional expressions
-	that declare hyperparameters, like below.</p>
+	that declare hyperparameters, similarly to the example.</p>
 
 	<pre><code class="language-java">new ModelBuilder()
 	.config("features", 7)
