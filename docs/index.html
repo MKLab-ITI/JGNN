@@ -495,16 +495,17 @@ Model model = modelBuilder.getModel();
 System.out.println(model.predict(Tensor.fromDouble(2)));
 </code></pre>
 
-	<details><summary>Equivalent Java implementation without the builder.</summary>
+	<details><summary>Equivalent implementation without the builder.</summary>
 		<p>Under the hood, JGNN models are collections of <code class="language-java">NNOperation</code> instances, each representing a numerical computation with
-		specified inputs and outputs of
-		JGNN's <code class="language-java">Tensor</code> type. This guidebook does not list operation classes, as they are rarely used directly and can be found the Javadoc, namely
+		specified inputs and outputs that are subclasses of
+		JGNN's base <code class="language-java">Tensor</code> type. Computations and the state of operations are thread-safe, so that the same model
+		can run and be trained in multiple threads simultaneously. This guidebook does not list operation subclasses, as they are rarely used directly and can be found
+		in the Javadoc under the modules
 		<a href="https://mklab-iti.github.io/JGNN/javadoc/mklab/JGNN/nn/inputs/package-summary.html" target="_blank">nn.inputs</a>,
 		<a href="https://mklab-iti.github.io/JGNN/javadoc/mklab/JGNN/nn/activations/package-summary.html" target="_blank">nn.activations</a>,
 		and
 		<a href="https://mklab-iti.github.io/JGNN/javadoc/mklab/JGNN/nn/pooling/package-summary.html" target="_blank">nn.pooling</a>.
-		Create models in pure Java like the example below, where the expression
-		<code class="language-rust">y=log(2*x+1)</code> does not have any trainable parameters.
+		Create models in pure Java like the example below, which does not have any trainable parameters.
 		</p>
 
 		<pre><code class="language-java">Variable x = new Variable();
@@ -531,18 +532,19 @@ System.out.println(model.predict(Tensor.fromDouble(2))); // one-element input
 	as assignments to symbols; the right-hand side of assignments accepts several operators and functions that 
 	are listed in the next table. Models allow multiple operations too, which are parsed through either multiple 
 	method calls or by being separated with a semicolon <code>;</code> within larger string expressions.
-	All methods need to use previously declared symbols.
 	</p>
 	<p>
-	For example, parsing <code class="language-java">.out("symbol")</code>
-	throws an exception if no operation previously assigned to the symbol or declared it as an input. For logic
-	safety, <b>symbols cannot be overwritten or set to updated values outside of Neuralang functions</b>.
+
+	All methods need to use previously declared symbols. For example, parsing <code class="language-java">.out("symbol")</code>
+	throws an exception if no operation previously assigned to the symbol or declared it as an input. As a safety
+	mechanism against consequenses of the parsing engine that conflict with typical programming logic
+	<b>symbols cannot be overwritten or set to updated values outside of Neuralang functions</b>.
 	</p>
 	<p>
-	Finally, the base model builder
-	class supports a roundabout declaration of Neuralang functions with expressions like this snippet taken from the Quickstart:
+	The base model builder
+	class does support a roundabout declaration of Neuralang functions with expressions like the following snippet taken from the Quickstart:
 	<code  class="language-java">.function("gcnlayer", "(A,h){return A@(h@matrix(?, hidden, reg))+vector(?);}")</code>.
-	In this, the first method argument is the declared function symbol's name, and the second should necessarily have the arguments enclosed in
+	The first method argument is the declared function symbol's name, and the second should necessarily have the arguments enclosed in
 	a parenthesis and the function's body enclosed in brackets. Learn more about Neuralang functions in the language's description
 	in the namesake section.
 	</p>
@@ -767,10 +769,9 @@ System.out.println(model.predict(Tensor.fromDouble(2))); // one-element input
 	<p>
 	Prefer the notation <code>h{l}</code> to refer to the node representation
 	matrix of the current layer; for the first layer, this is parsed as <code>h0</code>, which is the constant
-	set by the constructor.
-	<code class="language-java">FastBuilder</code> instances also offer a <code class="language-java">FastBuilder.layer(String)</code>
-	chain method to compute neural layer outputs. This is a a variation of operation parsing, where the
-	the symbol part <code>{l+1}</code> is substituted with the next layer's counter, 
+	set by the constructor. This builder also offers a <code class="language-java">.layer(String)</code>
+	method that is a variation of operation parsing where the
+	the symbol segment <code>{l+1}</code> is substituted with the next layer's counter,
 	the expression is parsed, and the layer counter is incremented by one. Example usage is shown below, where 
 	symbolic expressions read similarly to what you would find in a paper.
 	</p>
@@ -790,8 +791,8 @@ System.out.println(model.predict(Tensor.fromDouble(2))); // one-element input
 	</code></pre>
 
 	<details><summary>Improving representation diffusion at the cost of resources.</summary>
-	<p> Several improvements  of thre representation diffusion scheme have been proposed.
-	However, they tend to incur marginal accuracy improvements at the cost of compute or memory space.
+	<p> Several improvements  of the representation diffusion scheme demonstrated above have been proposed.
+	However, these tend to incur marginal accuracy improvements at the cost of a lot of compute and memory.
 	</p>
 	<p>
 	JGNN still supports the improvements listed below, since they could be used when
@@ -1192,7 +1193,7 @@ at nodeClassification.APPNP.main(APPNP.java:45)</code></pre>
 	and inner data as long as they are treated
 	as tensors.</p>
 
-	<details><summary>How to set dimension names.</summary>
+	<details><summary>How to manually set dimension names.</summary>
 
 	<table class="table table-bordered">
 		<thead>
@@ -1272,6 +1273,7 @@ at mklab.JGNN.nn.NNOperation.runPrediction(NNOperation.java:170)
 at mklab.JGNN.nn.NNOperation.runPrediction(NNOperation.java:170)
 	...</code></pre>
 
+	<details><summary>How to read the error message.</summary>
 	<p>This particular stack trace tells us that the architecture
 	encounters mismatched matrix sizes when trying
 	to multiply a 3327x32 SparseMatrix with a 64x6
@@ -1281,7 +1283,10 @@ at mklab.JGNN.nn.NNOperation.runPrediction(NNOperation.java:170)
 	find the error within our architecture to fix
 	it. To do this, the error message message states 
 	that the error occures.
-	<code>During the forward pass of class mklab.JGNN.nn.operations.MatMul: _tmp4 = null</code>. This tells us that the problem
+	<code>During the forward pass of class mklab.JGNN.nn.operations.MatMul: _tmp4 = null</code>.
+	</p>
+	<p>
+	This tells us that the problem
 	occurs when trying to calculate
 	<code>_tmp4</code>, which is currently assigned
 	a <code class="language-java">null</code> tensor as value. Some more
@@ -1293,7 +1298,9 @@ at mklab.JGNN.nn.NNOperation.runPrediction(NNOperation.java:170)
 	execution tree and see during which exact
 	operation this variable is defined. There, we
 	will undoubtedly find that some dimension had 64
-	instead of 32 elements or conversely.</p>
+	instead of 32 elements or conversely, and we
+	can fix the parsed expression responsible.</p>
+	</details>
 
 	<p>In addition to all other debugging mechanisms,
 	JGNN presents a way to show when forward and

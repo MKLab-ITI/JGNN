@@ -18,6 +18,7 @@ import mklab.JGNN.nn.optimizers.Adam;
  * This implementation covers code of the Learning tutorial.
  * 
  * @author Emmanouil Krasanakis
+ * @deprecated
  */
 public class Learning {
 	public static void main(String[] args) {
