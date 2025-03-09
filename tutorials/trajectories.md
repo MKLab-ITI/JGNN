@@ -10,6 +10,6 @@ For this tutorial, there are no additional dependencies.
 
 ## Arcitecture
 
-## Training schems
+## Training scheme
 
 ## Results

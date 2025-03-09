@@ -110,6 +110,10 @@ public class WrapCols extends Matrix {
 
 	/**
 	 * Sets a prototype matrix from which to borrow copying operations.
+	 * If not set, <code>this</code> is used for zero copying be default.
+	 * The default zero copying mechanism of WrapCols instances consist
+	 * of generating a WrapCols instance with {@link Tensor#zeroCopy(long)}
+	 * obtained from all columns.
 	 * 
 	 * @param zeroCopyType A {@link Matrix} instance from which to borrow
 	 *                     {@link #zeroCopy(long, long)}.
@@ -150,6 +154,21 @@ public class WrapCols extends Matrix {
 		long row = pos % getRows();
 		long col = pos / getRows();
 		return cols.get((int) col).get(row);
+	}
+	
+	@Override
+	public double get(long row, long col) {
+		if (row < 0 || col < 0 || row >= getRows() || col >= getCols())
+			throw new IllegalArgumentException("Element (" + row + "," + col + ") out of range for " + describe());
+		return cols.get((int)col).get(row);
+	}
+	
+	@Override
+	public Matrix put(long row, long col, double value) {
+		if (row < 0 || col < 0 || row >= getRows() || col >= getCols())
+			throw new IllegalArgumentException("Element (" + row + "," + col + ") out of range for " + describe());
+		cols.get((int)col).put(row, value);
+		return this;
 	}
 
 	@Override

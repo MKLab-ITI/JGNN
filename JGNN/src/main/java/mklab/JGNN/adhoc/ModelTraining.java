@@ -118,6 +118,7 @@ public abstract class ModelTraining {
 	 * @param numBatches The desired number of batches. Default is 1.
 	 * @return <code>this</code> model training instance.
 	 * @see #setParallelizedStochasticGradientDescent(boolean)
+	 * @see #setNumParallellBatches(int)
 	 */
 	public ModelTraining setNumBatches(int numBatches) {
 		this.numBatches = numBatches;
@@ -135,6 +136,7 @@ public abstract class ModelTraining {
 	 * @return <code>this</code> model training instance.
 	 * @see #setNumBatches(int)
 	 * @see #train(Model, Matrix, Matrix, Slice, Slice)
+	 * @see #setNumParallellBatches(int)
 	 */
 	public ModelTraining setParallelizedStochasticGradientDescent(boolean paralellization) {
 		this.paralellization = paralellization;
@@ -322,6 +324,24 @@ public abstract class ModelTraining {
 		setEpochs((int) modelBuilder.getConfigOrDefault("epochs", epochs));
 		numBatches = (int) modelBuilder.getConfigOrDefault("batches", numBatches);
 		setPatience((int) modelBuilder.getConfigOrDefault("patience", patience));
+		return this;
+	}
+	
+	/**
+	 * Sets the number of batches for each training epoch and sets the training
+	 * to either be executed in one thread if there is only one batch or in
+	 * multiple threads of the {@link ThreadPool} if there are multiple
+	 * batches. This is a shorthand for invoking related methods sequentially
+	 * and without forgetting to set batches when enabling parallelization.
+	 * @param numBatches The number of batches in each training epoch.
+	 * 
+	 * @return <code>this</code> model training instance.
+	 * @see #setNumBatches(int)
+	 * @see #setParallelizedStochasticGradientDescent(boolean)
+	 */
+	public ModelTraining setNumParallellBatches(int numBatches) {
+		setNumBatches(numBatches);
+		setParallelizedStochasticGradientDescent(numBatches!=1);
 		return this;
 	}
 }

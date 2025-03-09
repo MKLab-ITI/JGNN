@@ -52,11 +52,11 @@ public class MLP {
 				.setValidationSamples(nodes.range(0.6, 0.8))
 				.setOptimizer(new Adam(0.01))
 				.setEpochs(3000)
-				.setPatience(300)
+				.setPatience(100)
 				.setNumBatches(20)
 				.setParallelizedStochasticGradientDescent(true)
 				.setLoss(new BinaryCrossEntropy())
-				.setValidationLoss(new VerboseLoss(new Accuracy()));
+				.setValidationLoss(new VerboseLoss(new Accuracy()).setInterval(10));
 		
 		long tic = System.currentTimeMillis();
 		Model model = modelBuilder.getModel()

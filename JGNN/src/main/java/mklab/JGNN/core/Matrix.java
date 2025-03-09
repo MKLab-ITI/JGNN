@@ -36,11 +36,19 @@ public abstract class Matrix extends Tensor {
 		this.rows = rows;
 		this.cols = cols;
 	}
-
+	
+	/**
+	 * Retrieves the dimension name of matrix rows.
+	 * @return A dimension name string, <code>null</code> if nothing has been set.
+	 */
 	public String getRowName() {
 		return rowName;
 	}
 
+	/**
+	 * Retrieves the dimension name of matrix cols.
+	 * @return A dimension name string, <code>null</code> if nothing has been set.
+	 */
 	public String getColName() {
 		return colName;
 	}
@@ -106,6 +114,12 @@ public abstract class Matrix extends Tensor {
 	 */
 	public abstract Iterable<Entry<Long, Long>> getNonZeroEntries();
 
+	/**
+	 * Retrieves all dimension names from another prototype tensor.
+	 * 
+	 * @see #setDimensionName(String)
+	 * @see #setDimensionName(String, String)
+	 */
 	public Matrix setDimensionName(Tensor other) {
 		super.setDimensionName(other);
 		if (other.cast(Matrix.class).getRowName() != null)
@@ -147,7 +161,12 @@ public abstract class Matrix extends Tensor {
 
 	/**
 	 * Creates a tensor of the same class and all elements set to zero, but size and
-	 * dimension names are obtained from a prototype tensor.
+	 * dimension names are obtained from a prototype tensor. Knowing how to
+	 * construct this is often essential to create operation outcomes to be filled
+	 * with results. This method internally uses {@link #zeroCopy(long, long)}. For
+	 * matrices, this method only accepts matrix inputs.
+	 * 
+	 * @see #zeroCopy()
 	 */
 	public Tensor zeroCopy(Tensor prototype) {
 		Matrix prototypeMatrix = prototype.cast(Matrix.class);
@@ -157,12 +176,14 @@ public abstract class Matrix extends Tensor {
 
 	/**
 	 * Creates a matrix of the same class and all element set to zero, but with a
-	 * given number of rows and columns.
+	 * given number of rows and columns. Knowing how to construct this is often
+	 * essential to construct operation outcomes to be filled.
 	 * 
 	 * @param rows The number of rows of the matrix.
 	 * @param cols The number of columns of the matrix.
 	 * @return A Matrix of the same class.
 	 * @see #zeroCopy()
+	 * @see Matrix#zeroCopy(Tensor)
 	 */
 	public abstract Matrix zeroCopy(long rows, long cols);
 

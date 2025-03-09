@@ -37,7 +37,7 @@ public class BinaryCrossEntropy extends Loss {
 		Tensor desiredComplement = output.multiply(-1).selfAdd(1);
 		double ret =
 				-output.add(epsilon).selfLog().selfMultiply(desired).sum()
-			   -outputComplement.selfAdd(epsilon).selfLog().selfMultiply(desiredComplement).sum();
+			    -outputComplement.selfAdd(epsilon).selfLog().selfMultiply(desiredComplement).sum();
 		return ret / output.cast(Matrix.class).getRows();
 	}
 	

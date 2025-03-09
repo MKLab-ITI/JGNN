@@ -15,6 +15,7 @@ import mklab.JGNN.nn.initializers.XavierNormal;
 import mklab.JGNN.nn.loss.BinaryCrossEntropy;
 import mklab.JGNN.nn.loss.report.VerboseLoss;
 import mklab.JGNN.nn.optimizers.Adam;
+import mklab.JGNN.nn.optimizers.Regularization;
 
 /**
  * This implementation covers code of the Neural Networks tutorial.
@@ -37,7 +38,7 @@ public class NN {
 				.config("2hidden", 2*16)
 				.layer("h{l+1} = relu(h{l}@matrix(features, hidden)+vector(hidden))")
 				.layerRepeat("h{l+1} = relu(h{l}@matrix(hidden, hidden)+vector(hidden))", 2)
-				.concat(2) // TODO: this is very slow
+				.concat(2) // TODO: there's a chance this is very slow
 				.layer("yhat = softmax(h{l}@matrix(2hidden, classes)+vector(classes), dim: 'row')")
 				.out("yhat");
 		
@@ -47,11 +48,12 @@ public class NN {
 				.setOutputs(labels)
 				.setTrainingSamples(sampleIds.range(0, 0.7))
 				.setValidationSamples(sampleIds.range(0.7, 0.8))
-				.setOptimizer(new Adam(0.01))
+				.setOptimizer(new Regularization(new Adam(0.01), 0.0005))
 				.setEpochs(3000)
-				.setPatience(10)
+				.setPatience(100)
+				.setNumParallellBatches((int)(sampleIds.size()*0.7)/64)
 				.setLoss(new BinaryCrossEntropy())
-				.setValidationLoss(new VerboseLoss(new BinaryCrossEntropy()));
+				.setValidationLoss(new VerboseLoss(new BinaryCrossEntropy()).setInterval(10));
 
 		long tic = System.currentTimeMillis();
 		Model model = modelBuilder.getModel()
