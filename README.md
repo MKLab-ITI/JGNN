@@ -17,7 +17,7 @@ Feel free to contribute in any way, for example through the [issue tracker](http
 requests for features and clarifications are welcome.
 
 
-## :rocket: [Guidebook](https://jgnn.readthedocs.io/en/latest/)
+## :rocket: [Guidebook](https://mklab-iti.github.io/JGNN/)
 
 ## :dart: [Javadoc](https://mklab-iti.github.io/JGNN/javadoc/)
 
