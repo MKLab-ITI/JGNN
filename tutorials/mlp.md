@@ -13,7 +13,7 @@ is to classify papers into different categories. In the literature, citations be
 papers may be used to improve the classification, but here we show only how some given textual
 features can be used to create the classification. We obtain those data in matrix format like
 so and print some characteristics over the number of samples and label feature matrix sizes.
-For other tasks, construct similar matrices. Labels contain on-hot encodings for corresponding samples.
+For other tasks, construct similar matrices. Labels contain one-hot encodings for corresponding samples.
 
 ```java
 Dataset dataset = new Citeseer();

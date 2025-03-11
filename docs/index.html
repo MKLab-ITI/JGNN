@@ -224,6 +224,7 @@
 	<div class="text-center m-3">
 		<a href="https://mklab-iti.github.io/JGNN/javadoc/" target="_blank" class="btn btn-warning">Javadoc</a>
 		<a href="https://github.com/MKLab-ITI/JGNN" target="_blank" class="btn btn-warning">GitHub</a>
+		<a href="https://github.com/MKLab-ITI/JGNN/tree/main/tutorials" target="_blank" class="btn btn-warning">Tutorials</a>
 	</div>
 	<p class="text-center"><em>Resource efficient machine learning and graph neural networks in native Java.</em>
 	</p>
@@ -445,20 +446,11 @@ System.out.println("Acc\t "+acc/nodes.range(0.8, 1).size());</code></pre>
 	<h1>3. GNN Builders</h1>
 	<p>We already touched on the subject of model builders in the previous section,
 	where one of them was used to create a model. There exist different kinds of
-	builders that offer different conveniences.
-	<ul>
-		<li><b>ModelBuilder</b> - Parses strings of simple Neuralang expressions.</li>
-		<li><b>FastBuilder</b> - Extends the <code class="language-java">ModelBuilder</code> class with methods that inject
-		boilerplate code for the inputs, outputs, and layers of node classification tasks.
-		Prefer this builder to keep track
-		of the whole model definition in one place within Java code.</li>
-		<li><b>Neuralang</b> - Extends the <code class="language-java">ModelBuilder</code> class so that it can parse all aspects
-		of the Neuralang language, such as functional declarations of machine learning modules,
-		where parts of function signatures manage configuration hyperparameters.
-		Use this builder to maintain model definitions in one place (e.g., packed in one string
-		variable, or in one file) and avoid weaving symbolic expressions in Java code.</li>
-	</ul>
-	In this section we cover these three builder classes. We also summarize debugging mechanisms for
+	builders that offer different conveniences. First is a base class for parsing simple
+	Neuralang expressions. Second is a fast builder that contains GNN declation boilerplate.
+	Last is a full parser for Neuralang that maintains model definitions in a string
+	or file while interacting with Java code. Hwe three corresponding builder classes are covered.
+	We also summarize debugging mechanisms for
 	checking the integrity of constructed models, visualize their data flow, and monitor specific
 	data at runtime.</p>
 	
@@ -757,9 +749,11 @@ System.out.println(model.predict(Tensor.fromDouble(2))); // one-element input
 
 	<section id="fastbuilder">
 	<h3 id="fastbuilder">3.2. FastBuilder</h3>
-	<p>The <code class="language-java">FastBuilder</code> class for building GNN architectures extends the generic
-	<code class="language-java">ModelBuilder</code> with common graph neural network operations. The main difference 
-	is that it has two constuctor arguments, namely a square matrix <code class="language-java">A</code> that
+	<p>The <code class="language-java">FastBuilder</code> class
+	extends the base model builder with boilerplate methods for setting inputs, outputs, and layers tailored
+	to specifif downstream tasks. Prefer this builder to keep trackof the whole model definition in one place within Java code.
+	The main difference compared to the base <code class="language-java">ModelBuilder</code>
+	is that now we have two constuctor arguments, namely a square matrix <code class="language-java">A</code> that
 	is typically a normalization of the (sparse) adjacency matrix, 
 	and a feature matrix <code>h0</code>. 
 	This builder further supports the notation <code>symbol{l}</code>,
