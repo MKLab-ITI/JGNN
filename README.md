@@ -1,6 +1,6 @@
 # JGNN 
 
-[![Latest nightly release](https://jitpack.io/v/MKLab-ITI/JGNN.svg)](https://jitpack.io/#MKLab-ITI/JGNN) [![Latest stable release](https://img.shields.io/badge/JAR-1.2.0%20stable-red)](https://github.com/MKLab-ITI/JGNN/releases/latest) 
+[![Latest nightly release](https://jitpack.io/v/MKLab-ITI/JGNN.svg)](https://jitpack.io/#MKLab-ITI/JGNN) [![Latest stable release](https://img.shields.io/badge/JAR-1.3.40%20stable-red)](https://github.com/MKLab-ITI/JGNN/releases/latest) 
 
 *Resource efficient machine learning and graph neural networks in native Java.*
 
