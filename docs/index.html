@@ -199,6 +199,7 @@
 			<li class="nav-item ps-md-3"><a class="sidebar-link small p-1 subsection" href="#create-data">4.1. Create data</a></li>
             <li class="nav-item ps-md-3"><a class="sidebar-link small p-1 subsection" href="#node-classification">4.2. Node classification</a></li>
 			<li class="nav-item ps-md-3"><a class="sidebar-link small p-1 subsection" href="#graph-classification">4.3. Graph classification</a></li>
+			<li class="nav-item ps-md-3"><a class="sidebar-link small p-1 subsection" href="#losses-and-optimizers">4.4. Losses and optimizers</a></li>
         </ul>
     </nav>
 
@@ -955,6 +956,25 @@ ModelBuilder builder = new LayeredBuilder()
 	for each feature dimension, aggregates feature values across all nodes.
 	</p>
 	</details>
+
+	<details><summaty>Invariance based on mean pooling.</summary>
+		<p>One easy way to create invariant architectures is by averaging
+		representations across all nodes. This is inherently less powerful than
+		sorting, unless nodes are enriched with positional features.
+		An example architecture following
+		this principle follows</p>
+
+                <pre><code class="language-java">ModelBuilder builder = new LayeredBuilder()
+    .var("A")
+    .config("features", nodeLabelIds.size())
+    .config("classes", graphLabelIds.size())
+    .config("hidden", 16)
+    .layer("h{l+1}=relu(A@(h{l}@matrix(features, hidden)))")
+    .layer("h{l+1}=relu(A@(h{l}@matrix(hidden, classes)))")
+    .layer("h{l+1}=softmax(mean(h{l}, dim: 'row'))")
+    .out("h{l}");</code></pre>
+    </details>
+
 	</section>
 	
 	<section id="neuralang">
@@ -1133,6 +1153,8 @@ System.out.println("Preferred learning rate: "+modelBuilder.getConfig("lr"));</c
 		the <code>_tmp</code> prefix and are followed by
 		a number. Those variables often link
 		components to others that use them.
+	</p>
+	<p>
 		The easiest way to understand execution DAGs is
 		to look at them textually or visually: a <code class="language-java">.print()</code> method
 		that prints built functional flows in the system
@@ -1140,7 +1162,12 @@ System.out.println("Preferred learning rate: "+modelBuilder.getConfig("lr"));</c
 		method that returns a string holding the execution graph in
 		<em>.dot</em> format for visualization with
 		tools like <a href="https://dreampuf.github.io/GraphvizOnline" target="_blank">GraphViz</a>.
+		An example is shown below.
 	</p>
+
+	<img src="graphviz.png" alt="Graphviz Image" width="100%"/>
+	<br>
+	<br>
 
 	<p>Another error-checking procedure consists of
 		an assertion that all model operations eventually affect
@@ -1148,10 +1175,7 @@ System.out.println("Preferred learning rate: "+modelBuilder.getConfig("lr"));</c
 		DAG traversal during backpropagation and should be checked with the
 		method <code class="language-java">.assertBackwardValidity()</code>.
 		The latter throws an exception if an invalid model is found.
-		Performing this assertion early on in
-		model building will likely throw exceptions that
-		are not logical errors, given that independend
-		outputs may be combined later. Backward validity errors 
+		Backward validity errors
 		look like this the following example. This 
 		indicates that the component
 		<code class="language-java">_tmp102</code> does not lead to an output,
@@ -1162,15 +1186,24 @@ System.out.println("Preferred learning rate: "+modelBuilder.getConfig("lr"));</c
 at mklab.JGNN.nn.ModelBuilder.assertBackwardValidity(ModelBuilder.java:504)
 at nodeClassification.APPNP.main(APPNP.java:45)</code></pre>
 
+
+	<p class="alert alert-warning d-flex align-items-center" role="alert">
+		<i class="bi bi-exclamation-triangle-fill me-2 fs-3"></i>
+		Asserting backwards validity before fully declaring a model
+		will likely throw exceptions, as independend
+		outputs may be combined later.
+	</p>
+
+
 	<p>Some tensor or matrix methods do not
 	correspond to numerical operations but
 	are only responsible for naming dimensions.
 	</section>
 	Functionally, such methods are largely decorative,
-	but they cab improve debugging by throwing errors for
+	but they improve debugging by throwing errors for
 	incompatible non-null names. For example,
 	adding two matrices with different dimension
-	names will result in an error. Likewise, the
+	names throws an exception. Likewise, the
 	inner dimension names during matrix
 	multiplication should agree.
 	Arithmetic operations, such as
@@ -1316,17 +1349,19 @@ at mklab.JGNN.nn.NNOperation.runPrediction(NNOperation.java:170)
 
 	<section id="training">
 		<h1>4. Training</h1>
-		<p>Here we describe how to train a JGNN model created
+		<p>Here we describe how to train JGNN models created
 		with the previous section's builders.
 		Broadly, we need to load some reference data and employ an optimization scheme
 		to adjust trainable parameter values based on the differences between desired
-		and current outputs. To this end, we 
-		start by describing generic patterns for creating graph and node
-		feature data, and then move to specific data organizations
-		for the tasks of node classification and graph classification.
-		These tasks have helper classes that implement common training schemas
-		(reach out with requests for helper classes for other kinds of predictive tasks 
-		in the project's GitHub issues).</p>
+		and current outputs. We
+		desribe generic patterns before moving to specific tasks. For the latter,
+		helper classes that implement common training schemas.</p>
+
+
+		<p class="alert alert-info d-flex align-items-center" role="alert">
+			<i class="bi bi-info-circle-fill me-2 fs-3"></i>
+		Request more or improved helper classes in the project's GitHub issues.</p>
+
 
 		<section id="create-data">
 		<h3 id="create-data">4.1. Create data</h3>
@@ -1353,6 +1388,21 @@ for(long nodeId=0; nodeId&lt;numNodes; nodeId++)
 		features.put(nodeId, featureId, 1);</code></pre>
 		</section>
 
+		<p>All tensor operations can be viewed in the
+		<a href="https://mklab-iti.github.io/JGNN/javadoc/mklab/JGNN/core/Tensor.html" target="_blank">core.tensor</a>
+		and <a href="https://mklab-iti.github.io/JGNN/javadoc/mklab/JGNN/core/Matrix.html" target="_blank">core.matrix</a>
+		Javadoc. The <code class="language-java">Matrix</code> class extends the concept
+		of tensors with additional operations, like transposition, matrix multiplication,
+		and row and column access. Under the
+		hood, matrices linearly store elements and use
+		computations to transform the (row, col)
+		position of their elements to respective
+		positions. The outcome of some methods inherited
+		from tensors may need to be typecast back into a
+		matrix (e.g., for all in-place operations).
+		</p>
+
+		<details><summary>Constructing data tables line-by-line.</summary>
 		<p>Sometimes, it is easier to read node or sample features
 		line-by-line, for instance, when reading a <em>.csv</em>
 		file. In this case, store each line as a separate tensor.
@@ -1372,12 +1422,13 @@ try(BufferedReader reader = new BufferedReader(new FileReader(file))){
 	}
 }
 Matrix features = new WrapRows(rows).toSparse();</code></pre>
+		</details>
 
 		<details><summary>Which matrix type is appropriate for representing graphs?</summary>
 		<p>When in doubt, use the <b>sparse</b>
 		format for adjacency matrices, as the allocated memory of dense
 		counterparts scales qudratically to the number of nodes. Note that many GNNs
-		consider bidirectional (i.e., non-directed) edges, in which case	
+		consider bidirectional (i.e., non-directed) edges, in which case
 		both directions should be added to the adjacency. Use the following snippet as a
 		template. Recall that JGNN follows a function chain notation, so each modification
 		returns the <code class="language-java">matrix</code> instance.
@@ -1393,21 +1444,7 @@ for(Entry&lt;Long, Long&gt; edge : edges)
 		.put(edge.getValue(), edge.getKey(), 1);</code></pre>
 		</details>
 
-		<p>All tensor operations can be viewed in the
-		<a href="https://mklab-iti.github.io/JGNN/javadoc/mklab/JGNN/core/Tensor.html" target="_blank">core.tensor</a>
-		and <a href="https://mklab-iti.github.io/JGNN/javadoc/mklab/JGNN/core/Matrix.html" target="_blank">core.matrix</a>
-		Javadoc. The <code class="language-java">Matrix</code> class extends the concept
-		of tensors with additional operations, like transposition, matrix multiplication,
-		and row and column access. Under the
-		hood, matrices linearly store elements and use
-		computations to transform the (row, col)
-		position of their elements to respective
-		positions. The outcome of some methods inherited
-		from tensors may need to be typecast back into a
-		matrix (e.g., for all in-place operations).
-		</p>
-
-		<details><summary>About Java-side operations.</summary>
+		<details><summary>About Java-side tensor and matrix operations.</summary>
 		<o>
 		Operations can be split into arithmetics that combine the values
 		of two tensors to create a new one (e.g., <code class="language-java">Tensor add(Tensor)</code>),
@@ -1501,67 +1538,103 @@ Model model = modelBuilder()
 
 		<section id="graph-classification">
 		<h3 id="graph-classification">4.3. Graph classification</h3>
-		<p>Most neural network architectures are designed with the idea
-		of learning to classify nodes or samples. However, GNNs also
-		provide the capability to classify entire graphs based on
-		their structure. To define architectures for graph classification, we use
-		the generic <code class="language-java">LayeredBuilder</code> class. The main
-		difference compared to traditional neural networks is
-		that architecture inputs do not all exhibit the same
-		size (e.g., some graphs may have more nodes than others)
-		and therefore cannot be organized into tensors of common
-		dimensions. Instead, assume that training data are stored in the
-		following lists:</p>
 
-			<pre><code class="language-java">ArrayList<Matrix> adjacencyMatrices = new ArrayList<Matrix>();
-ArrayList<Matrix> nodeFeatures = new ArrayList<Matrix>();
-ArrayList<Tensor> graphLabels = new ArrayList<Tensor>();</code></pre>
 
-		<p>The <code class="language-java">LayeredBuilder</code> class introduces the
-		input variable <code class="language-java">h<sub>0</sub></code> for sample
-		features. We can use it to pass node features to the
-		architecture, so we only need to add a second input
-		storing the (sparse) adjacency matrix:</p>
+		<p>
+		We already saw that, for more general tasks attributed graph function (AGF) approximation
+		tasks, like graph classification, equivariant architecttures are needed.
+		A simple training mechanism that can train any kind of AGF is presented below.
+		In this, it is assumed that there are graph adjacency matrices,
+		corresponding node feature matrices,
+		and resulting ideal architectural output labels (or any other value set as the ground
+		truth of the loss function). These should be organized into lists with the same
+		number of elements. An example is shown below.
+		</p>
 
-		<pre><code class="language-java">.var("A")</code></pre>
+		<pre><code class="language-java">
+List&lt;Matrix&gt; graphs = ...;
+List&lt;Matrix&gt; features = ...;
+List&lt;Matrix&gt; labels = ...;
 
-		<p>We can then proceed to define a GNN architecture, for
-		instance as explained in previous tutorials. This time,
-		though, we aim to classify entire graphs rather than
-		individual nodes. For this reason, we need to pool top
-		layer node representations, for instance by averaging
-		them across all nodes:</p>
+Loss loss = new VerboseLoss(new CategoricalCrossEntropy(), new Accuracy())
+		.setPrintOnImprovement(true));
+ModelTraining trainer = new AGFTraining()
+		.setGraphs(graphs)
+		.setNodeFeatures(features)
+		.setGraphLabels(labels)
+		.setValidationSplit(0.2)
+		.setEpochs(300)
+		.setOptimizer(new Adam(0.01))
+		.setLoss(new CategoricalCrossEntropy())
+		.setNumParallellBatches(10)
+		.setValidationLoss(loss);
 
-		<pre><code class="language-java">.layer("h{l+1}=softmax(mean(h{l}, dim: 'row'))")</code></pre>
+Model model = builder.getModel()
+		.init(new XavierNormal())
+		.train(trainer);
 
-		<p>Finally, we need to set up the top layer as the built
-		model's output per: <code class="language-java">.out("h{l}")</code>
-		An example architecture following these principles follows:</p>
+double acc = 0.0;
+for(int graphId=0; graphId&lt; graphs.size(); graphId++) {
+	Matrix adjacency = graphs.get(graphId);
+	Matrix nodeFeatures = features.get(graphId);
+	Tensor graphLabel = labels.get(graphId);
+	if(model.predict(Arrays.asList(nodeFeatures, adjacency)).get(0).argmax()==graphLabel.argmax())
+		acc += 1;
+}
+System.out.println("Test accuracy " + acc/dtest.graphs.size());
+		</code></pre>
 
-                <pre><code class="language-java">ModelBuilder builder = new LayeredBuilder()
-    .var("A")  
-    .config("features", nodeLabelIds.size())
-    .config("classes", graphLabelIds.size())
-    .config("hidden", 16)
-    .layer("h{l+1}=relu(A@(h{l}@matrix(features, hidden)))") 
-    .layer("h{l+1}=relu(A@(h{l}@matrix(hidden, classes)))") 
-    .layer("h{l+1}=softmax(mean(h{l}, dim: 'row'))")
-    .out("h{l}");</code></pre>
 
-			<p>For the time being, training architectures like the above
-				on prepared data requires manually calling the
-				backpropagation for each epoch and each graph in the
-				training batch. To do this, first retrieve the model and
-				initialize its parameters:</p>
+		<details><summary>About parallelization.</summary>
+		<p>
+		To speed up graph classification, use JGNN's
+		parallelization capabilities to calculate gradients
+		across multiple threads. Parallelization for node
+		classification holds little meaning, as the same
+		propagation mechanism needs to run on the same graph without
+		reducing the number of computations.
+		However, executing gradient computations in parallel yields
+		substantial speedup for many other attributed graph function
+		approximation problems, such as graph classification.
+		</p>
+		<p>
+		In the above scheme, parallelization is
+		included by calling the method
+		<code  class="language-java">setNumParallellBatches(number)</code>,
+		which creates a number of batches equal to the number
+		of threads and then sets gradient calculations to be computed
+		in parallel across all batches. The optimizer accumulates those
+		gradients in a thread-safe manner and then applies them together
+		once all batch gradients are computed.
+		</p>
+		<p>
+		If you do not want any parallelization, this is disabled by
+		default, uses a number of threads equal to the number of batches
+		(so set one batch to disable it), and is not toggled if you use
+		<code  class="language-java">setNumBatches(number)</code>,
+		instead.
+		</p>
+		</details>
+
+
+		<details><summary>Custom implementation of training with JGNN'sthread pools.</summary>
+
+			<p>Many scenarios are covered by attributed graph function approximation,
+			but it may be more convenient to train architectures
+			with custom schemes. This requires manually calling the
+			backpropagation for each epoch and each graph in the
+			training batch. To do this, first retrieve the model and
+			initialize its parameters:</p>
 
 			<pre><code class="language-java">Model model = builder.getModel()
 	.init(new XavierNormal());</code></pre>
 
 			<p>Next, define a loss function and set up a batch
-				optimization strategy wrapping any base optimizer and
+				optimization strategy. Wrap any base optimizer and
 				accumulating parameter updates until
 				<code class="language-java">BatchOptimizer.updateAll()</code> is called later
-				on:
+				on. This is done automatically by training schemas if the provided optimizer
+				does not already support batching.
 			</p>
 
 			<pre><code class="language-java">Loss loss = new CategoricalCrossEntropy();
@@ -1580,59 +1653,86 @@ BatchOptimizer optimizer = new BatchOptimizer(new Adam(0.01));</code></pre>
 
 			<pre><code class="language-java">for(int epoch=0; epoch&lt;300; epoch++) {
 	for(int graphId=0; graphId&lt;graphLabels.size(); graphId++) {
-		 Matrix adjacency = adjacencyMatrices.get(graphId);
-		 Matrix features = nodeFeatures.get(graphId);
-		 Tensor label = graphLabels.get(graphId);
+		 Matrix adjacency = graphs.get(graphId);
+		 Matrix nodeFeatures = features.get(graphId);
+		 Tensor graphLabel = graphLabels.get(graphId);
 		 model.train(loss, optimizer, 
-			  Arrays.asList(features, adjacency), 
-			  Arrays.asList(label));
+			  Arrays.asList(nodeFeatures, adjacency),
+			  Arrays.asList(graphLabel));
 	}
 	optimizer.updateAll();
 }</code></pre>
 
-		<p>To speed up graph classification, use JGNN's
-		parallelization capabilities to calculate gradients
-		across multiple threads. Parallelization for node
-		classification holds little meaning, as the same
-		propagation mechanism needs to be run on the same graph
-		in parallel. However, this process yields substantial
-		speedup for the <em>graph</em> classification
-		problem. Parallelization can use JGNN's thread pooling to
+		<p>A maual implementation of parallelization can use JGNN's thread pooling to
 		perform gradients, wait for the conclusion of submitted
 		tasks, and then apply the accumulated gradient updates. 
 		This is achieved through a batch optimizer that accumulates
-		gradients in the following example:</p>
+		gradients.</p>
 
                 <pre><code class="language-java">for(int epoch=0; epoch&lt;500; epoch++) {
     // gradient update
-    for(int graphId=0; graphId&lt;dtrain.adjucency.size(); graphId++) {
+    for(int graphId=0; graphId&lt;graphs.size(); graphId++) {
         int graphIdentifier = graphId;
         ThreadPool.getInstance().submit(new Runnable() {
             @Override
             public void run() {
-                Matrix adjacency = dtrain.adjucency.get(graphIdentifier);
-                Matrix features= dtrain.features.get(graphIdentifier);
-                Tensor graphLabel = dtrain.labels.get(graphIdentifier).asRow();  
+                Matrix adjacency = graphs.get(graphIdentifier);
+                Matrix nodeFeatures = features.get(graphIdentifier);
+                Tensor graphLabel = labels.get(graphIdentifier).asRow();
                 model.train(loss, optimizer, 
-		            Arrays.asList(features, adjacency), 
+		            Arrays.asList(nodeFeatures, adjacency),
 		            Arrays.asList(graphLabel));
             }
         });
     }
-    ThreadPool.getInstance().waitForConclusion();  // waits for all gradients to finish calculating
+
+	// wait for all gradients before parameter updates
+    ThreadPool.getInstance().waitForConclusion();
     optimizer.updateAll();
 
     double acc = 0.0;
-    for(int graphId=0; graphId&lt;dtest.adjucency.size(); graphId++) {
-        Matrix adjacency = dtest.adjucency.get(graphId);
-        Matrix features= dtest.features.get(graphId);
-        Tensor graphLabel = dtest.labels.get(graphId);
-        if(model.predict(Arrays.asList(features, adjacency)).get(0).argmax()==graphLabel.argmax())
+    for(int graphId=0; graphId&lt;adjacency.size(); graphId++) {
+        Matrix adjacency = graphs.get(graphId);
+        Matrix nodeFeatures = features.get(graphId);
+        Tensor graphLabel = labels.get(graphId);
+        if(model.predict(Arrays.asList(nodeFeatures, adjacency)).get(0).argmax()==graphLabel.argmax())
            acc += 1;
-        System.out.println("iter = " + epoch + "  " + acc/dtest.adjucency.size());
+        System.out.println("iter = " + epoch + "  " + acc/graphs.size());
     }
 }</code></pre>
+	</details>
+
+
     </section>
+
+
+
+	<section id="losses-and-optimizers">
+	<h3 id="losses-and-optimizers">4.4. Losses and optimizers</h3>
+
+	<p>Training strategies use various loss functions to determine what training objectives
+	are and optimizers that determine how trainable model parameters should be updated given
+	their current state and computed gradients. You can define both choices with custom classes,
+	or use existing ones.
+	</p>
+
+	<p>
+	A pattern that JGNN provides is to wrap some base loss or optimizer
+	with an augmentation that improves its core behavior. For example, you can find
+	losses that report on progress either regularly or on epochs where their
+	value decreases. Note that training and validation losses can be set differently.
+	</p>
+
+
+	<p class="alert alert-info d-flex align-items-center" role="alert">
+		<i class="bi bi-info-circle-fill me-2 fs-3"></i>
+		The preferred GNN optimizer in the literature is Adam with 0.01 learning rate.
+	</p>
+
+
+    </section>
+
+
     </section>
 
     </div>
