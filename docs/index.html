@@ -1012,9 +1012,9 @@ ModelBuilder builder = new LayeredBuilder()
 
 	<p class="alert alert-info d-flex align-items-center" role="alert">
 		<i class="bi bi-info-circle-fill me-2 fs-3"></i>
-		Configuration values have the following priority, from strongest to weakest:<br>
+		Conflicting values have the following priority, from strongest to weakest:<br>
 		1. Arguments set during the function's call.<br>
-		2. Broacasts (the last broadcasted value, include configurations set in Java).<br>
+		2. The last broadcasted value (include configurations set in Java).<br>
 		3. Function signature defaults.
 	</p>
 
@@ -1334,14 +1334,18 @@ at mklab.JGNN.nn.NNOperation.runPrediction(NNOperation.java:170)
 		datasets for out-of-the-box experimentation. These datasets can be found
 		in the <a href="https://mklab-iti.github.io/JGNN/javadoc/mklab/JGNN/adhoc/datasets/package-summary.html" target="_blank">
 		adhoc.datasets</a> Javadoc, and we already covered their usage patterns. 
+		</p>
+		<p>
 		In practice, though, you will want to 
 		use your own data. In the simplest case, both the number of nodes or data samples, and
 		the number of feature dimensions are known beforehand. If so, create
-		dense feature matrices with the following code. This uses the 
+		dense feature matrices with the following code. The example below uses the
 		minimum memory necessary to construct the feature matrix. If
-		features are dense (do not have a lot of zeros),
+		features are dense (do not have many zeros),
 		consider using the <code class="language-java">DenseMatrix</code> class
-		instead of initializing a sparse matrix, like below.</p>
+		instead of initializing a sparse matrix. Creating adjacency matrices is
+		similar to creating preallocated feature matrices - just make sure that they are square,
+		that is, have the same number of rows and columns. </p>
 
 			<pre><code class="language-java">Matrix features = new SparseMatrix(numNodes, numFeatures);
 for(long nodeId=0; nodeId&lt;numNodes; nodeId++)
@@ -1369,16 +1373,15 @@ try(BufferedReader reader = new BufferedReader(new FileReader(file))){
 }
 Matrix features = new WrapRows(rows).toSparse();</code></pre>
 
-			
-		<p>Creating adjacency matrices is similar to creating
-		preallocated feature matrices. When in doubt, use the <b>sparse</b>
+		<details><summary>Which matrix type is appropriate for representing graphs?</summary>
+		<p>When in doubt, use the <b>sparse</b>
 		format for adjacency matrices, as the allocated memory of dense
 		counterparts scales qudratically to the number of nodes. Note that many GNNs
 		consider bidirectional (i.e., non-directed) edges, in which case	
 		both directions should be added to the adjacency. Use the following snippet as a
 		template. Recall that JGNN follows a function chain notation, so each modification
 		returns the <code class="language-java">matrix</code> instance.
-		Don't forget to normalize or apply the renormalization trick (self-edges) on matrices if these
+		Do not forget to normalize or apply the renormalization trick (self-edges) on matrices if these
 		are needed by your architecture, for instance by calling
 		<code class="language-java">adjacency.setMainDiagonal(1).setToSymmetricNormalization();</code>
 		after matrix creation.</p>
@@ -1388,9 +1391,9 @@ for(Entry&lt;Long, Long&gt; edge : edges)
 	matrix
 		.put(edge.getKey(), edge.getValue(), 1)
 		.put(edge.getValue(), edge.getKey(), 1);</code></pre>
-		
-	
-		<p>All tensor operations can be viewed in the 
+		</details>
+
+		<p>All tensor operations can be viewed in the
 		<a href="https://mklab-iti.github.io/JGNN/javadoc/mklab/JGNN/core/Tensor.html" target="_blank">core.tensor</a>
 		and <a href="https://mklab-iti.github.io/JGNN/javadoc/mklab/JGNN/core/Matrix.html" target="_blank">core.matrix</a>
 		Javadoc. The <code class="language-java">Matrix</code> class extends the concept
@@ -1402,13 +1405,18 @@ for(Entry&lt;Long, Long&gt; edge : edges)
 		positions. The outcome of some methods inherited
 		from tensors may need to be typecast back into a
 		matrix (e.g., for all in-place operations).
-		
+		</p>
+
+		<details><summary>About Java-side operations.</summary>
+		<o>
 		Operations can be split into arithmetics that combine the values
 		of two tensors to create a new one (e.g., <code class="language-java">Tensor add(Tensor)</code>),
 		in-place arithmetics that alter a tensor without creating
 		a new one (e.g., <code class="language-java">Tensor selfAdd(Tensor)</code>),
 		summary statistics that output simple numeric values (e.g., <code class="language-java">double Tensor.sum()</code>),
 		and element getters and setters.
+		</p>
+		<p>
 		In-place arithmetics follow the same naming
 		conventions of base arithmetics but their method names begin with a "self"
 		prefix for pairwise operations and a "setTo" prefix
@@ -1434,7 +1442,7 @@ for(Entry&lt;Long, Long&gt; edge : edges)
 		<pre><code class="language-java">int classId = 1;
 int numClasses = 5;
 Tensor oneHotEncoding = new mklab.JGNN.tensor.DenseTensor(numClasses).set(classId, 1); // creates the tensor [0,1,0,0,0]</code></pre>
-			
+		</details>
 
 		<p>The above snippets all make use of numerical node identifiers. To
 		manage these, JGNN provides an <code class="language-java">IdConverter</code> class; 

@@ -256,8 +256,8 @@ public class Model {
 	}
 
 	/**
-	 * Performs the training of {@link #train(Optimizer, List, List, List)} for unit
-	 * weights.
+	 * Performs the training of {@link #train(Loss, Optimizer, List, List, List)} for unit
+	 * weights. This is just one parameter adjustment step.
 	 * 
 	 * @param loss           The loss to minimize.
 	 * @param optimizer      The provided optimizer with which to adjust values.
@@ -336,7 +336,7 @@ public class Model {
 	/**
 	 * Is equivalent to calling {@link #train(Loss, Optimizer, List, List)} for new
 	 * Zero() loss. Use this to train towards optimizing an explicitly defined loss
-	 * function.
+	 * function. It is just one parameter adjustment step.
 	 * 
 	 * @param optimizer The provided optimizer with which to adjust values.
 	 * @param inputs    A list of input tensors that would be passed to a
